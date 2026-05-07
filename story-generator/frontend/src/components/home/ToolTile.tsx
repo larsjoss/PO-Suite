@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { ToolDef } from '../../constants/tools';
+import { CATEGORY_CHIP_LABELS, type ToolDef } from '../../constants/tools';
 
 interface Props {
   tool: ToolDef;
@@ -12,16 +12,26 @@ export function ToolTile({ tool }: Props) {
     <button
       type="button"
       onClick={() => navigate(tool.path)}
-      className="flex-shrink-0 w-[200px] text-left bg-surface border border-edge rounded-xl p-5 snap-start
-                 hover:border-brand hover:shadow-sm transition-all group
+      className="group relative flex flex-col h-full text-left bg-surface border border-edge rounded-xl p-5
+                 hover:border-brand hover:shadow-sm transition-all
                  focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
     >
+      <span
+        className="inline-flex items-center self-start px-2 py-0.5 mb-4
+                   text-[10px] font-semibold uppercase tracking-wider
+                   text-ink-secondary bg-edge-2 rounded-full"
+      >
+        {CATEGORY_CHIP_LABELS[tool.category]}
+      </span>
+
       <div className="text-brand mb-3 group-hover:scale-105 transition-transform w-fit" aria-hidden="true">
         <tool.Icon className="w-10 h-10" />
       </div>
-      <h3 className="font-serif text-sm font-semibold text-ink mb-1">{tool.title}</h3>
-      <p className="text-xs text-ink-secondary leading-relaxed line-clamp-2">{tool.description}</p>
-      <div className="mt-3 flex items-center gap-1 text-xs font-medium text-brand" aria-hidden="true">
+
+      <h3 className="font-serif text-base font-semibold text-ink mb-1.5">{tool.title}</h3>
+      <p className="text-xs text-ink-secondary leading-relaxed flex-1">{tool.description}</p>
+
+      <div className="mt-4 flex items-center gap-1 text-xs font-medium text-brand" aria-hidden="true">
         <span>Öffnen</span>
         <svg
           className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
