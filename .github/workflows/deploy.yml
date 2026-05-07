@@ -5,7 +5,6 @@ on:
     branches: [main, claude/improve-accessibility-responsive-I5fjq, claude/story-generator-app-B8a8C]
     paths:
       - 'story-generator/frontend/**'
-      - 'story-generator/frontend-static/**'
   workflow_dispatch:
 
 permissions:
@@ -31,11 +30,6 @@ jobs:
         run: |
           npm ci
           npm run build
-
-      - name: Copy static frontend
-        run: |
-          mkdir -p story-generator/frontend/dist/story-generator/frontend-static
-          cp story-generator/frontend-static/index.html story-generator/frontend/dist/story-generator/frontend-static/index.html
 
       - name: Copy index.html to 404.html for SPA routing
         run: cp story-generator/frontend/dist/index.html story-generator/frontend/dist/404.html
