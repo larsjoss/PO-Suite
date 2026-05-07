@@ -1,13 +1,46 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import { AuthPage } from './pages/AuthPage';
-import { ToolSelectionPage } from './pages/ToolSelectionPage';
-import { WorkspacePage } from './pages/WorkspacePage';
-import { TextPolisherPage } from './pages/TextPolisherPage';
-import { TestCaseGeneratorPage } from './pages/TestCaseGeneratorPage';
-import { DocGeneratorPage } from './pages/DocGeneratorPage';
-import { GoalGeneratorPage } from './pages/GoalGeneratorPage';
 import { TopNav } from './components/layout/TopNav';
+
+const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })));
+const ToolSelectionPage = lazy(() =>
+  import('./pages/ToolSelectionPage').then((m) => ({ default: m.ToolSelectionPage })),
+);
+const WorkspacePage = lazy(() =>
+  import('./pages/WorkspacePage').then((m) => ({ default: m.WorkspacePage })),
+);
+const TextPolisherPage = lazy(() =>
+  import('./pages/TextPolisherPage').then((m) => ({ default: m.TextPolisherPage })),
+);
+const TestCaseGeneratorPage = lazy(() =>
+  import('./pages/TestCaseGeneratorPage').then((m) => ({ default: m.TestCaseGeneratorPage })),
+);
+const DocGeneratorPage = lazy(() =>
+  import('./pages/DocGeneratorPage').then((m) => ({ default: m.DocGeneratorPage })),
+);
+const GoalGeneratorPage = lazy(() =>
+  import('./pages/GoalGeneratorPage').then((m) => ({ default: m.GoalGeneratorPage })),
+);
+
+function PageLoader() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label="Seite wird geladen"
+      className="flex-1 flex items-center justify-center bg-canvas"
+    >
+      <div className="flex items-center gap-3 text-ink-secondary">
+        <span
+          className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin"
+          aria-hidden="true"
+        />
+        <span className="text-sm">Lädt …</span>
+      </div>
+    </div>
+  );
+}
 
 /*
  * ProtectedLayout: gemeinsamer Shell für alle authentifizierten Seiten.
@@ -20,7 +53,9 @@ function ProtectedLayout() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <TopNav />
-      <Outlet />
+      <Suspense fallback={<PageLoader />}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }
@@ -49,7 +84,14 @@ export default function App() {
       </a>
 
       <Routes>
-        <Route path="/auth" element={<AuthPage />} />
+        <Route
+          path="/auth"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <AuthPage />
+            </Suspense>
+          }
+        />
 
         <Route element={<ProtectedLayout />}>
           <Route index element={<Navigate to="/tools" replace />} />
