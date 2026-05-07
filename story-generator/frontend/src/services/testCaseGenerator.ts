@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient } from '../shared/services/apiClient';
+import { withTimeout } from '../shared/services/withTimeout';
 import type { TestPlan, TestCase, TestCaseType, TestLevel, AkCoverage } from '../types';
 
 export interface GenerateTestCasesParams {
@@ -135,21 +136,14 @@ export async function generateTestCases(params: GenerateTestCasesParams): Promis
     });
   }
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(
-      () => reject(new Error('Zeitüberschreitung nach 60 Sekunden. Bitte erneut versuchen.')),
-      60_000,
-    ),
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 4000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: contentBlocks }],
+    }),
   );
-
-  const apiCall = client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 4000,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: contentBlocks }],
-  });
-
-  const response = await Promise.race([apiCall, timeoutPromise]);
 
   const rawText = response.content
     .filter((b): b is Anthropic.Messages.TextBlock => b.type === 'text')

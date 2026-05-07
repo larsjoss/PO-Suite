@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
+import { withTimeout } from '../shared/services/withTimeout';
 import type { GenerateDocParams, StoryDocInput, FeatureDocInput } from '../types';
 
 // ─── System Prompts ───────────────────────────────────────────────────────────
@@ -151,21 +152,14 @@ export async function generateDoc(params: GenerateDocParams): Promise<string> {
     });
   }
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(
-      () => reject(new Error('Zeitüberschreitung nach 60 Sekunden. Bitte erneut versuchen.')),
-      60_000,
-    ),
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: contentBlocks }],
+    }),
   );
-
-  const apiCall = client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: contentBlocks }],
-  });
-
-  const response = await Promise.race([apiCall, timeoutPromise]);
 
   const markdown = extractTextContent(response.content);
 

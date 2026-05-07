@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
+import { withTimeout } from '../shared/services/withTimeout';
 import type {
   GoalVariant,
   GenerateGoalParams,
@@ -180,21 +181,14 @@ export async function generateGoals(params: GenerateGoalParams): Promise<Generat
     params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT;
   const maxTokens = params.mode === 'sprint-goal' ? 2000 : 6000;
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(
-      () => reject(new Error('Zeitüberschreitung nach 60 Sekunden. Bitte erneut versuchen.')),
-      60_000,
-    ),
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: buildOriginalContentBlocks(params) }],
+    }),
   );
-
-  const apiCall = client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: buildOriginalContentBlocks(params) }],
-  });
-
-  const response = await Promise.race([apiCall, timeoutPromise]);
   const rawText = extractTextContent(response.content);
 
   if (!rawText.trim()) {
@@ -224,21 +218,14 @@ export async function refineGoal(params: RefineGoalParams): Promise<RefineGoalRe
     { role: 'user', content: userMessage },
   ];
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(
-      () => reject(new Error('Zeitüberschreitung nach 60 Sekunden. Bitte erneut versuchen.')),
-      60_000,
-    ),
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages,
+    }),
   );
-
-  const apiCall = client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: maxTokens,
-    system: systemPrompt,
-    messages,
-  });
-
-  const response = await Promise.race([apiCall, timeoutPromise]);
   const rawText = extractTextContent(response.content);
 
   if (!rawText.trim()) {
