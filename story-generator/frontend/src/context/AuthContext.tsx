@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { User } from '../types';
-
-const API_KEY_SESSION_KEY = 'anthropic_api_key';
-const SESSION_USER_KEY = 'session_user';
+import { API_KEY_SESSION_KEY, SESSION_USER_KEY } from '../shared/services/storageKeys';
 
 const ALLOWED_EMAIL = import.meta.env.VITE_AUTH_EMAIL;
 const ALLOWED_PASSWORD = import.meta.env.VITE_AUTH_PASSWORD;

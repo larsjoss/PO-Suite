@@ -1,7 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { TextBlock } from '@anthropic-ai/sdk/resources/messages';
-
-const API_KEY_SESSION_KEY = 'anthropic_api_key';
+import { API_KEY_SESSION_KEY } from './storageKeys';
 
 export function getApiClient(): Anthropic {
   const apiKey = sessionStorage.getItem(API_KEY_SESSION_KEY);
