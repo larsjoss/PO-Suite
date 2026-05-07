@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
+import { buildImageBlock } from '../shared/services/imageBlocks';
 import type { TestPlan, TestCase, TestCaseType, TestLevel, AkCoverage } from '../types';
 
 export interface GenerateTestCasesParams {
@@ -130,10 +131,7 @@ export async function generateTestCases(params: GenerateTestCasesParams): Promis
   contentBlocks.push({ type: 'text', text });
 
   for (const s of params.screenshots) {
-    contentBlocks.push({
-      type: 'image',
-      source: { type: 'base64', media_type: s.mediaType, data: s.base64 },
-    });
+    contentBlocks.push(buildImageBlock(s.base64, s.mediaType));
   }
 
   const response = await withTimeout(

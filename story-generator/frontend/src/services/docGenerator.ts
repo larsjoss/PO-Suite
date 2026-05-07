@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
+import { buildImageBlocks } from '../shared/services/imageBlocks';
 import type { GenerateDocParams, StoryDocInput, FeatureDocInput } from '../types';
 
 // ─── System Prompts ───────────────────────────────────────────────────────────
@@ -142,15 +143,8 @@ export async function generateDoc(params: GenerateDocParams): Promise<string> {
 
   const contentBlocks: Anthropic.Messages.ContentBlockParam[] = [
     { type: 'text', text: textWithScreenshotHint },
+    ...buildImageBlocks(params.screenshots),
   ];
-
-  for (const s of params.screenshots) {
-    const mediaType = s.file.type as 'image/png' | 'image/jpeg' | 'image/webp';
-    contentBlocks.push({
-      type: 'image',
-      source: { type: 'base64', media_type: mediaType, data: s.base64 },
-    });
-  }
 
   const response = await withTimeout(
     client.messages.create({

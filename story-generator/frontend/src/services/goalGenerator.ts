@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
+import { uploadedFileToImageBlock } from '../shared/services/imageBlocks';
 import type {
   GoalVariant,
   GenerateGoalParams,
@@ -162,11 +163,7 @@ function buildOriginalContentBlocks(
   const blocks: Anthropic.Messages.ContentBlockParam[] = [{ type: 'text', text: userText }];
 
   if (params.mode === 'sprint-goal' && params.screenshot) {
-    const mediaType = params.screenshot.file.type as 'image/png' | 'image/jpeg' | 'image/webp';
-    blocks.push({
-      type: 'image',
-      source: { type: 'base64', media_type: mediaType, data: params.screenshot.base64 },
-    });
+    blocks.push(uploadedFileToImageBlock(params.screenshot));
   }
 
   return blocks;
