@@ -2,7 +2,7 @@ name: Deploy Story Generator
 
 on:
   push:
-    branches: [main, claude/improve-accessibility-responsive-I5fjq, claude/story-generator-app-B8a8C]
+    branches: [main]
     paths:
       - 'story-generator/frontend/**'
   workflow_dispatch:
