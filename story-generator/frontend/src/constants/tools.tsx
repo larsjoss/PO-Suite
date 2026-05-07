@@ -9,6 +9,13 @@ export const CATEGORY_LABELS: Record<ToolCategory, string> = {
   polish: 'Sprache & Form',
 };
 
+export const CATEGORY_CHIP_LABELS: Record<ToolCategory, string> = {
+  concept: 'Konzept',
+  quality: 'Qualität',
+  docs: 'Doku',
+  polish: 'Form',
+};
+
 export const CATEGORY_ORDER: ToolCategory[] = ['concept', 'quality', 'docs', 'polish'];
 
 export interface ToolDef {
