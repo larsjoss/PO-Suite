@@ -25,7 +25,7 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 cd story-generator/frontend
 npm ci
 npm run dev      # http://localhost:5173
-npm run test:run # 189 Tests, alle grün
+npm run test:run # 260 Tests, alle grün
 npm run build    # Production-Build (tsc + Vite)
 ```
 
