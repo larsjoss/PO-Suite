@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react';
-import type { UseCase, Tone } from '../../hooks/useTextPolisher';
+import type { UseCase, Tone } from '../../types';
 import { Button, TextArea, InlineError, PanelHeader } from '../../shared/components';
 import { UseCaseSelector } from './UseCaseSelector';
 import { ToneSelector } from './ToneSelector';

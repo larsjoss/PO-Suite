@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import type { UseCase } from '../../hooks/useTextPolisher';
+import type { UseCase } from '../../types';
 import { Button, LoadingSkeleton, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 

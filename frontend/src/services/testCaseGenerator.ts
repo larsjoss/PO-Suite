@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildImageBlock } from '../shared/services/imageBlocks';
@@ -29,9 +29,7 @@ export async function generateTestCases(params: GenerateTestCasesParams): Promis
 
   contentBlocks.push({ type: 'text', text });
 
-  for (const s of params.screenshots) {
-    contentBlocks.push(buildImageBlock(s.base64, s.mediaType));
-  }
+  contentBlocks.push(...params.screenshots.map((s) => buildImageBlock(s.base64, s.mediaType)));
 
   const response = await withTimeout(
     client.messages.create({

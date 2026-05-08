@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UseCaseSelector } from './UseCaseSelector';
-import type { UseCase } from '../../hooks/useTextPolisher';
+import type { UseCase } from '../../types';
 
 function setup(value: UseCase = 'email', onChange = vi.fn()) {
   render(<UseCaseSelector value={value} onChange={onChange} />);

@@ -6,7 +6,7 @@ React 18 + TypeScript + Vite Single-Page-Application. Fünf Tools: **Story Gener
 
 **Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`
 
-**Alle fünf Module vollständig implementiert und getestet.** 352 Vitest-Tests + 3 Playwright-Smoke-Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
+**Alle fünf Module vollständig implementiert und getestet.** 402 Vitest-Tests + 3 Playwright-Smoke-Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
 
 **GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — `vite.config.ts` hat `base: '/PO-Suite/'` (muss immer dem GitHub-Repo-Namen entsprechen). Deploy via GitHub Actions auf Push zu `main` (mit Änderung unter `frontend/**`) oder manuell via `workflow_dispatch`.
 
@@ -268,25 +268,53 @@ npm run test:coverage # Coverage-Report
 |---|---|
 | `claude.test.ts` | `parseOutput` — Story/Hints-Trennung |
 | `storage.test.ts` | localStorage CRUD für Stories + Refinements |
+| `textPolisher.test.ts` | `polishText` — 3 Use Cases, E-Mail-Format-Validierung, API-Fehler |
 | `testCaseGenerator.test.ts` | `buildJiraMarkdown`, `buildSingleTcMarkdown`, `getAvailableTypes/Levels` |
 | `docGenerator.test.ts` | Mode-Routing (story=4000/feature=6000), User-Message-Mapping, Multimodal, Empty-Response-Errors |
 | `goalGenerator.test.ts` | `parseVariants` (Sprint + PI), `parseRefinedVariant`, `generateGoals` Mode-Routing, `refineGoal` Conversation-History |
+| `useTextPolisher.test.ts` | `usePolishText` Mutation — Aufruf, Fehler |
+| `useTestCaseGenerator.test.ts` | `useGenerateTestCases` Mutation — Aufruf, Fehler |
+| `useDocGenerator.test.ts` | `useGenerateDoc` Mutation — Aufruf, Fehler |
+| `useGoalGenerator.test.ts` | `useGenerateGoals` + `useRefineGoal` Mutations |
 | `useCopyToClipboard.test.ts` | copied-State, Timeout, Clipboard-API |
+| `AuthContext.test.tsx` | login/logout/setApiKey, sessionStorage-Persistenz |
+| `LoginForm.test.tsx` | Formular-Rendering, Passwort/API-Key-Reveal, Submit, Fehleranzeige |
+| `Button.test.tsx` | Varianten, Loading-State, Disabled |
+| `InlineError.test.tsx` | ARIA role="alert", Nachricht |
+| `CopyButton.test.tsx` | Copy-Flow, copied-Feedback |
+| `RevealButton.test.tsx` | Toggle-Sichtbarkeit, ARIA |
+| `SettingsDialog.test.tsx` | Dialog Open/Close, API-Key-Speicherung |
+| `ScreenshotUpload.test.tsx` | Upload, Validierung, Remove, ARIA |
+| `AppShell.test.tsx` | 3-Panel-Layout, Mobile-Tabs, Keyboard-Navigation |
+| `TopNav.test.tsx` | Sticky-Nav, Tool-Links, aria-current, Settings-Dialog |
 | `UseCaseSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation |
 | `ToneSelector.test.tsx` | Radio-Gruppe, ARIA, Keyboard-Navigation |
-| `ScreenshotUpload.test.tsx` | Upload, Validierung, Remove, ARIA |
+| `TextPolisherInputPanel.test.tsx` | Felder, Submit-Disabled, Use-Case- und Ton-Übergabe |
+| `TextPolisherOutputPanel.test.tsx` | Loading-/Output-Zustand, Copy-Button, A11y |
+| `StoryOutputPanel.test.tsx` | Loading-/Output-Zustand, Refinement-Hints, Copy |
 | `TestCaseCard.test.tsx` | Stammdaten, Flags, Copy |
 | `TestCaseFilterBar.test.tsx` | Typ-Filter, Level-Filter, Ergebnis-Zähler |
 | `DocModeSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation (ArrowLeft/Right/Home/End) |
 | `DocGeneratorInputPanel.test.tsx` | Pflichtfelder Story/Feature, Ladezustand, Fehleranzeige, Moduswechsel |
 | `DocGeneratorOutputPanel.test.tsx` | Loading-/Output-/Error-Zustand, Buttons, A11y (aria-live, aria-busy, tabIndex) |
 | `GoalGeneratorOutputPanel.test.tsx` | Variants-View, Refining-View, mode-spez. Rendering, Copy, A11y |
+| `AuthPage.test.tsx` | Login-Form-Rendering, Redirect bei eingeloggtem User |
+| `ToolSelectionPage.test.tsx` | Alle Tools gerendert, Navigation per Klick |
+| `WorkspacePage.test.tsx` | AppShell mit 3 Panels gerendert |
+| `TextPolisherPage.test.tsx` | Submit, Output, UseCase-Wechsel, Persistenz, Clear |
+| `DocGeneratorPage.test.tsx` | Submit, Output, Reset, Mode-Wechsel |
+| `TestCaseGeneratorPage.test.tsx` | Submit → Output, Fehler, Reset |
+| `GoalGeneratorPage.test.tsx` | Submit → Output, Tab-Wechsel, Fehler, Reset |
 
 **Service-Tests** mocken `getApiClient` via `vi.mock('shared/services/apiClient')` mit gemeinsamem `messagesCreateMock`.
 
+**Page-Tests** mocken den Service direkt (`vi.mock('../services/...')`) und benötigen einen `QueryClientProvider`-Wrapper.
+
+**Auth-Tests** (AuthContext): Credentials werden via `vitest.config.ts` → `test.env` gesetzt; kein vi.stubEnv nötig.
+
 **Output-Panel-Tests** für Copy-Funktionalität: `Object.defineProperty(navigator, 'clipboard', ...)` + `fireEvent.click` (umgeht userEvents Clipboard-Override).
 
-**Gesamt: 260 Tests in 18 Test-Dateien**
+**Gesamt: 402 Tests in 39 Test-Dateien**
 
 ## Claude Code Konfiguration
 

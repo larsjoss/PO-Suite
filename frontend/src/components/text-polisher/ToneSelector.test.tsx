@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToneSelector } from './ToneSelector';
-import type { Tone } from '../../hooks/useTextPolisher';
+import type { Tone } from '../../types';
 
 function setup(value: Tone = 'formell', onChange = vi.fn()) {
   render(<ToneSelector value={value} onChange={onChange} />);

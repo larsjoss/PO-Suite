@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextPolisherOutputPanel } from './TextPolisherOutputPanel';
-import type { UseCase } from '../../hooks/useTextPolisher';
+import type { UseCase } from '../../types';
 
 // Clipboard API mocken (jsdom hat keine echte Implementierung)
 beforeEach(() => {

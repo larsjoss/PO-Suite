@@ -7,6 +7,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    env: {
+      VITE_AUTH_EMAIL: 'test@example.com',
+      VITE_AUTH_PASSWORD: 'testpass123',
+    },
     exclude: ['node_modules', 'dist', 'e2e/**', 'playwright-report/**'],
     coverage: {
       provider: 'v8',
