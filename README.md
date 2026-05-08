@@ -29,7 +29,7 @@ KI-gestützte Browser-App für Product Owner in agilen Teams (Scrum/SAFe). Fünf
 | KI | @anthropic-ai/sdk, Modell `claude-sonnet-4-5` |
 | Persistenz | localStorage (Stories), sessionStorage (Auth + API-Key) |
 | Markdown | react-markdown + rehype-sanitize |
-| Tests | Vitest + @testing-library/react (189 Tests, 14 Dateien) |
+| Tests | Vitest + @testing-library/react (352 Unit/Integration-Tests, 33 Dateien) + Playwright (Smoke-Tests) |
 
 ---
 
@@ -40,8 +40,14 @@ cd story-generator/frontend
 npm ci
 npm run dev        # Dev-Server auf http://localhost:5173
 npm run build      # Production-Build
-npm run test:run   # Tests einmalig ausführen
+npm run test:run   # Vitest einmalig ausführen
+npm run e2e        # Playwright Smoke-Tests (einmalig: npx playwright install chromium)
 ```
+
+Vor dem ersten Login: `.env`-Datei mit `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD` anlegen
+(siehe [`story-generator/frontend/.env.example`](story-generator/frontend/.env.example)).
+Den Anthropic API-Key (`sk-ant-…`) einmalig im Login-Formular oder über die TopNav-Einstellungen
+hinterlegen — gehalten in `sessionStorage`, beim Tab-Schliessen verworfen.
 
 ---
 
@@ -59,5 +65,6 @@ GitHub Actions → `peaceiris/actions-gh-pages` → Branch `gh-pages`
 
 ## Dokumentation
 
+- [Architecture](ARCHITECTURE.md) — High-Level-Diagramm, Schichten, Datenfluss, Tool-Kontrakt, Roadmap
 - [UI/UX Design Reference](UI-UX-Design.md) — Farbpalette, Design-Tokens, Komponenten, WCAG
 - [Developer Guide](story-generator/frontend/CLAUDE.md) — Ordnerstruktur, Konventionen, API-Details, Tests

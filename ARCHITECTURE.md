@@ -29,7 +29,8 @@ Die App ist auf GitHub Pages deployed (`https://larsjoss.github.io/PO-Suite/`) u
 | Styling | Tailwind CSS | 3 | Eigene Design-Tokens, keine UI-Library |
 | KI | @anthropic-ai/sdk | 0.90 | Browser-fähig (`dangerouslyAllowBrowser: true`) |
 | Markdown | react-markdown + rehype-sanitize | 9 / 6 | Default-Schema blockt `<script>`/`<iframe>` |
-| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 189 Tests, 14 Dateien |
+| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 352 Tests, 33 Dateien |
+| E2E | Playwright | 1.59 | Smoke-Tests, Chromium-only |
 
 **Modell:** Alle Services nutzen `claude-sonnet-4-5`. `max_tokens` ist tool-spezifisch:
 
@@ -92,7 +93,7 @@ Beispiel: Story Generator generiert eine User Story.
 | Tool-Typ | Besonderheit |
 |---|---|
 | Text-only (Story, Polisher, Goal-Sprint) | Direkter `messages.create()`-Call mit System + User-Prompt |
-| Multimodal (TCG, DocGen, Goal-PI) | Screenshots als Base64-`ImageBlockParam[]` zusätzlich, `Promise.race` mit 60-s-Timeout |
+| Multimodal (TCG, DocGen, Goal-PI) | Screenshots via `buildImageBlocks()` aus `shared/services/imageBlocks.ts`, 60-s-Timeout via `withTimeout()` |
 | Refinement-Loop (Story, Goal) | Conversation-History wird im State gehalten; weiterer `messages.create()`-Call mit erweiterten Messages |
 
 ---
@@ -113,7 +114,7 @@ Logout   ─→  sessionStorage.clear() (beide Keys)
 
 ### Bekannte Limitationen
 
-- **Prototyp-Auth:** Hardcodierte Single-User-Credentials via Environment-Variablen, kein Multi-User-Support, kein Passwort-Hashing.
+- **Prototyp-Auth:** Single-User-Credentials strikt aus `VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD`, kein Code-Fallback. Kein Multi-User-Support, kein Passwort-Hashing.
 - **`dangerouslyAllowBrowser: true`:** Anthropic SDK läuft direkt im Browser. Geeignet für persönliche Tools, **nicht** für Multi-User-Dienste — der API-Key ist im Browser-Memory zugänglich.
 - **sessionStorage:** API-Key wird beim Tab-Schliessen verworfen. XSS-Risiko in Theorie; aktuell kein bekannter Vektor (`rehype-sanitize` blockt `<script>`).
 
@@ -164,8 +165,9 @@ npm run build  =  tsc (Type-Check)  →  vite build
 ```
 
 - Vite `base: '/PO-Suite/'` muss immer dem GitHub-Repo-Namen entsprechen
-- Aktuelles Hauptbundle: ~537 kB ungzipped (Vite warnt bei > 500 kB)
-- Geplant: Code-Splitting via `React.lazy()` für die fünf Tool-Pages
+- Hauptbundle: 211 kB ungzipped (gzip 68 kB) dank Code-Splitting via `React.lazy()` aller Pages
+- Apiclient-Chunk (Anthropic SDK): 90 kB ungzipped (gzip 23 kB), separat
+- PanelHeader-Chunk (react-markdown + rehype-sanitize): 124 kB
 
 ### Deploy
 
@@ -187,25 +189,28 @@ Ergebnis: `https://larsjoss.github.io/PO-Suite/`
 
 | Ebene | Tool | Was wird getestet | Status |
 |---|---|---|---|
-| Unit | Vitest | Service-Funktionen, Utilities, Markdown-Builder | Teilweise — `claude.ts`, `storage.ts`, `testCaseGenerator.ts` haben Tests; `docGenerator.ts`, `goalGenerator.ts`, `textPolisher.ts` fehlen |
-| Unit | Vitest | Custom Hooks (mit `QueryClientProvider`-Wrapper) | Nur `useCopyToClipboard` getestet — alle Tool-Hooks fehlen |
-| Integration | @testing-library/react | Komponenten + ARIA-Verhalten | 14 Komponenten-Tests, fokus auf `getByRole` / `getByText` |
-| Integration | @testing-library/react | Page-Flows (Submit → Output) | Aktuell **keine** Page-Tests |
-| E2E | Playwright (geplant) | Login → Tool-Auswahl → Happy Path pro Tool | Aktuell **kein** E2E-Setup |
+| Unit | Vitest | Service-Funktionen, Utilities, Markdown-Builder | ✅ alle Services (`claude`, `storage`, `testCaseGenerator`, `docGenerator`, `goalGenerator`, `textPolisher`) |
+| Unit | Vitest | Custom Hooks (mit `QueryClientProvider`-Wrapper) | ✅ alle Tool-Mutation-Hooks (`useTextPolisher`, `useDocGenerator`, `useTestCaseGenerator`, `useGoalGenerator`) + `useCopyToClipboard` |
+| Integration | @testing-library/react | Komponenten + ARIA-Verhalten | ✅ Layout (`AppShell`, `TopNav`), Shell (`Button`, `InlineError`, `CopyButton`, `RevealButton`, `SettingsDialog`), Tool-Komponenten (Doc/Goal-Generator-OutputPanels, Selectoren) |
+| Integration | @testing-library/react | Page-Flows (Submit → Output) | ✅ `AuthPage`, `DocGeneratorPage`, `TextPolisherPage` |
+| E2E | Playwright | Smoke-Tests | ✅ Login-Page-Render, Form-Felder, Skip-Link |
 
-**Coverage-Ziele**
+**Stand:** 352 Vitest-Tests in 33 Dateien + 3 Playwright-Smoke-Tests.
 
-- Services: 100 % Branch-Coverage (jede Funktion mind. ein Happy- und ein Error-Test)
-- Hooks: alle Tool-Hooks mit Mock-Service
-- Komponenten: kritische ARIA-Pfade + User-Behavior
-- Pages: mind. 3 Szenarien (Happy Path, Validierung, API-Fehler)
+**Patterns:**
+- **Service-Tests** mocken `getApiClient` via `vi.mock('shared/services/apiClient')` mit gemeinsamem `messagesCreateMock`.
+- **Hook-Tests** wrappen `renderHook` mit `QueryClientProvider`. TanStack Query v5 ruft `mutationFn(variables, context)` — Asserts via `mock.calls[0][0]`, **nicht** `toHaveBeenCalledWith`.
+- **Output-Panel-Tests** für Copy: `Object.defineProperty(navigator, 'clipboard', ...)` + `fireEvent.click` (umgeht userEvents Clipboard-Override).
+- **Page-Tests** mocken den Service auf Modul-Ebene und `vi.spyOn(window, 'confirm')`.
 
 Testlauf:
 
 ```
-npm test          # einmaliger Vitest-Run
+npm test          # Single-Run (Alias: npm run test:run)
 npm run test:watch
 npm run test:coverage
+npm run e2e       # Playwright (einmalig: npx playwright install chromium)
+npm run e2e:ui    # Playwright UI mode
 ```
 
 ---
@@ -214,12 +219,14 @@ npm run test:coverage
 
 | Bereich | Status | Anmerkung |
 |---|---|---|
-| Echtes Auth (z. B. Supabase) | Geplant | Aktuell: hardcodierte Single-User-Credentials |
-| Code-Splitting via `React.lazy` | Geplant | Hauptbundle > 500 kB |
-| Tests für ungetestete Services / Hooks | Geplant | docGenerator, goalGenerator, textPolisher, alle Tool-Hooks |
-| E2E-Tests (Playwright) | Geplant | Smoke-Test für Login + Happy Path |
+| Code-Splitting via `React.lazy` | ✅ Erledigt | Hauptbundle 211 kB (vorher 537 kB) |
+| Tests für ungetestete Services / Hooks | ✅ Erledigt | Alle Services + Tool-Mutation-Hooks abgedeckt |
+| E2E-Tests (Playwright) | ✅ Foundation | Smoke-Tests vorhanden; Tool-Happy-Paths + Auth-Flow ausstehend |
+| Echtes Auth (z. B. Supabase) | Geplant | Aktuell: Env-Var-basierte Single-User-Credentials |
 | Backend-Migration | Optional | Nur falls Anthropic-Key serverseitig laufen muss (Multi-User) |
 | Internationalisierung | Nicht geplant | Aktuell DE-CH only |
+| Re-Render-Optimierung | Bedarf-getrieben | useMemo/useCallback nur nach konkretem Profiler-Befund |
+| Mono-Repo-Aufräumung | Optional | `story-generator/`-Wrapper-Ordner abschaffen (nur eine App) |
 
 ---
 

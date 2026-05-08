@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
-import { StoryInputPanel } from '../components/story/StoryInputPanel';
-import { StoryOutputPanel } from '../components/story/StoryOutputPanel';
-import { InsightsPanel } from '../components/story/InsightsPanel';
+import { StoryInputPanel } from '../components/story-generator/StoryInputPanel';
+import { StoryOutputPanel } from '../components/story-generator/StoryOutputPanel';
+import { InsightsPanel } from '../components/story-generator/InsightsPanel';
 import { useStory } from '../hooks/useStory';
 
 export function WorkspacePage() {
