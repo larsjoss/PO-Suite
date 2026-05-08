@@ -1,10 +1,10 @@
-name: Deploy Story Generator
+name: Deploy PO Suite
 
 on:
   push:
     branches: [main]
     paths:
-      - 'story-generator/frontend/**'
+      - 'frontend/**'
   workflow_dispatch:
 
 permissions:
@@ -23,19 +23,19 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: story-generator/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Build frontend
-        working-directory: story-generator/frontend
+        working-directory: frontend
         run: |
           npm ci
           npm run build
 
       - name: Copy index.html to 404.html for SPA routing
-        run: cp story-generator/frontend/dist/index.html story-generator/frontend/dist/404.html
+        run: cp frontend/dist/index.html frontend/dist/404.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: story-generator/frontend/dist
+          publish_dir: frontend/dist

@@ -36,7 +36,7 @@ KI-gestützte Browser-App für Product Owner in agilen Teams (Scrum/SAFe). Fünf
 ## Schnellstart
 
 ```bash
-cd story-generator/frontend
+cd frontend
 npm ci
 npm run dev        # Dev-Server auf http://localhost:5173
 npm run build      # Production-Build
@@ -45,7 +45,7 @@ npm run e2e        # Playwright Smoke-Tests (einmalig: npx playwright install ch
 ```
 
 Vor dem ersten Login: `.env`-Datei mit `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD` anlegen
-(siehe [`story-generator/frontend/.env.example`](story-generator/frontend/.env.example)).
+(siehe [`frontend/.env.example`](frontend/.env.example)).
 Den Anthropic API-Key (`sk-ant-…`) einmalig im Login-Formular oder über die TopNav-Einstellungen
 hinterlegen — gehalten in `sessionStorage`, beim Tab-Schliessen verworfen.
 
@@ -55,7 +55,7 @@ hinterlegen — gehalten in `sessionStorage`, beim Tab-Schliessen verworfen.
 
 GitHub Actions → `peaceiris/actions-gh-pages` → Branch `gh-pages`
 
-**Trigger:** Push auf `main` mit Änderungen in `story-generator/frontend/**` oder manuell via `workflow_dispatch`.
+**Trigger:** Push auf `main` mit Änderungen in `frontend/**` oder manuell via `workflow_dispatch`.
 
 **Vite-Konfiguration:** `base: '/PO-Suite/'` in `vite.config.ts` — muss immer dem GitHub-Repo-Namen entsprechen.
 
@@ -67,4 +67,4 @@ GitHub Actions → `peaceiris/actions-gh-pages` → Branch `gh-pages`
 
 - [Architecture](ARCHITECTURE.md) — High-Level-Diagramm, Schichten, Datenfluss, Tool-Kontrakt, Roadmap
 - [UI/UX Design Reference](UI-UX-Design.md) — Farbpalette, Design-Tokens, Komponenten, WCAG
-- [Developer Guide](story-generator/frontend/CLAUDE.md) — Ordnerstruktur, Konventionen, API-Details, Tests
+- [Developer Guide](frontend/CLAUDE.md) — Ordnerstruktur, Konventionen, API-Details, Tests

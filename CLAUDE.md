@@ -2,11 +2,11 @@
 
 ## Repository-Übersicht
 
-Mono-Repo mit einer einzigen App: `story-generator/frontend/` (React 18 + TypeScript + Vite).
+Mono-Repo mit einer einzigen App: `frontend/` (React 18 + TypeScript + Vite).
 
 Die vollständige Entwickler-Dokumentation liegt hier:
 
-→ **[story-generator/frontend/CLAUDE.md](story-generator/frontend/CLAUDE.md)**
+→ **[frontend/CLAUDE.md](frontend/CLAUDE.md)**
 
 ---
 
@@ -16,13 +16,13 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 
 - **Aktiver Branch:** `main`
 - **GitHub Pages:** `https://larsjoss.github.io/PO-Suite/`
-- **Deploy-Trigger:** Push auf `main` mit Änderungen in `story-generator/frontend/**` oder `workflow_dispatch`
+- **Deploy-Trigger:** Push auf `main` mit Änderungen in `frontend/**` oder `workflow_dispatch`
 - **Vite base:** `/PO-Suite/` — muss immer dem GitHub-Repo-Namen entsprechen
 
 ### Entwicklung starten
 
 ```bash
-cd story-generator/frontend
+cd frontend
 npm ci
 npm run dev      # http://localhost:5173
 npm run test:run # 352 Tests, alle grün

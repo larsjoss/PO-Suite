@@ -6,9 +6,9 @@ React 18 + TypeScript + Vite Single-Page-Application. Fünf Tools: **Story Gener
 
 **Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`
 
-**Alle fünf Module vollständig implementiert und getestet.** 260 Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
+**Alle fünf Module vollständig implementiert und getestet.** 352 Vitest-Tests + 3 Playwright-Smoke-Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
 
-**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — `vite.config.ts` hat `base: '/PO-Suite/'` (muss immer dem GitHub-Repo-Namen entsprechen). Deploy via GitHub Actions auf Push zu `main` (mit Änderung unter `story-generator/frontend/**`) oder manuell via `workflow_dispatch`.
+**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — `vite.config.ts` hat `base: '/PO-Suite/'` (muss immer dem GitHub-Repo-Namen entsprechen). Deploy via GitHub Actions auf Push zu `main` (mit Änderung unter `frontend/**`) oder manuell via `workflow_dispatch`.
 
 **Wichtige Konventionen:**
 - Modell überall: `claude-sonnet-4-5` — `max_tokens` tool-spezifisch (siehe pro-Tool-Sektionen unten)

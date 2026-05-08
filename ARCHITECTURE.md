@@ -67,7 +67,7 @@ Pages          ─→  Hooks      ─→  Services   ─→  apiClient  ─→  
 | **Context** | Auth-State, API-Key-Setzen | `src/context/AuthContext.tsx` |
 | **Constants** | Tool-Definitionen, Kategorie-Labels | `src/constants/tools.tsx` |
 
-Detaillierter Datei-Baum: siehe [`story-generator/frontend/CLAUDE.md`](story-generator/frontend/CLAUDE.md).
+Detaillierter Datei-Baum: siehe [`frontend/CLAUDE.md`](frontend/CLAUDE.md).
 
 ---
 
@@ -174,7 +174,7 @@ npm run build  =  tsc (Type-Check)  →  vite build
 GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
 
 ```
-push → main (story-generator/frontend/** geändert)
+push → main (frontend/** geändert)
   ├── checkout, setup-node
   ├── npm ci + npm run build
   ├── cp dist/index.html dist/404.html  (SPA-Routing, Deep-Links)
@@ -226,12 +226,12 @@ npm run e2e:ui    # Playwright UI mode
 | Backend-Migration | Optional | Nur falls Anthropic-Key serverseitig laufen muss (Multi-User) |
 | Internationalisierung | Nicht geplant | Aktuell DE-CH only |
 | Re-Render-Optimierung | Bedarf-getrieben | useMemo/useCallback nur nach konkretem Profiler-Befund |
-| Mono-Repo-Aufräumung | Optional | `story-generator/`-Wrapper-Ordner abschaffen (nur eine App) |
+| Mono-Repo-Aufräumung | ✅ Erledigt | `story-generator/`-Wrapper entfernt; Frontend-App liegt direkt unter `frontend/` |
 
 ---
 
 ## Verwandte Dokumente
 
 - [README.md](README.md) — Projektübersicht, Tech Stack, Schnellstart
-- [story-generator/frontend/CLAUDE.md](story-generator/frontend/CLAUDE.md) — Detaillierte Entwicklerdoku, Datei-Baum
+- [frontend/CLAUDE.md](frontend/CLAUDE.md) — Detaillierte Entwicklerdoku, Datei-Baum
 - [UI-UX-Design.md](UI-UX-Design.md) — Design-Tokens, Komponentenbibliothek, WCAG
