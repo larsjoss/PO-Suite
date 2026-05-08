@@ -17,7 +17,7 @@
           {
             "type": "command",
             "if": "Bash(git commit*)",
-            "command": "result=$(cd \"$CLAUDE_PROJECT_DIR/story-generator/frontend\" && npm test 2>&1 | tail -8); printf '%s' \"$result\" | jq -Rs '{\"systemMessage\": (\"Testergebnisse nach Commit:\\n\" + .)}'",
+            "command": "result=$(cd \"$CLAUDE_PROJECT_DIR/frontend\" && npm test 2>&1 | tail -8); printf '%s' \"$result\" | jq -Rs '{\"systemMessage\": (\"Testergebnisse nach Commit:\\n\" + .)}'",
             "async": true,
             "statusMessage": "Tests laufen...",
             "timeout": 60

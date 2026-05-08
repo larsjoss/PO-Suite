@@ -2,7 +2,7 @@
 
 ## Farbpalette & Design-Tokens
 
-Definiert in `story-generator/frontend/tailwind.config.ts` und als Tailwind-Klassen verwendbar.
+Definiert in `frontend/tailwind.config.ts` und als Tailwind-Klassen verwendbar.
 
 | Token | Hex | Tailwind-Klasse | Verwendung |
 |---|---|---|---|
