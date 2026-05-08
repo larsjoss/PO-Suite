@@ -6,8 +6,6 @@ import {
 } from './prompts';
 import type { UseCase, Tone } from '../types';
 
-export type { UseCase, Tone };
-
 // ─── API call ─────────────────────────────────────────────────────────────────
 
 export async function polishText(

@@ -1,4 +1,4 @@
-import type { Tone } from '../../hooks/useTextPolisher';
+import type { Tone } from '../../types';
 
 interface Option {
   id: Tone;

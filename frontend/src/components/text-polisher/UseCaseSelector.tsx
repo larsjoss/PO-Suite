@@ -1,4 +1,4 @@
-import type { UseCase } from '../../hooks/useTextPolisher';
+import type { UseCase } from '../../types';
 
 interface Tab {
   id: UseCase;

@@ -1,7 +1,7 @@
 import { useEffect, useRef, type FormEvent } from 'react';
 import { usePolishText } from '../hooks/useTextPolisher';
 import { useSessionState } from '../hooks/useSessionState';
-import type { UseCase, Tone } from '../hooks/useTextPolisher';
+import type { UseCase, Tone } from '../types';
 import { TextPolisherInputPanel } from '../components/text-polisher/TextPolisherInputPanel';
 import { TextPolisherOutputPanel } from '../components/text-polisher/TextPolisherOutputPanel';
 

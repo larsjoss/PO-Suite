@@ -25,7 +25,7 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 cd frontend
 npm ci
 npm run dev      # http://localhost:5173
-npm run test:run # 352 Tests, alle grün
+npm run test:run # 402 Tests, alle grün
 npm run build    # Production-Build (tsc + Vite)
 npm run e2e      # Playwright Smoke-Tests
 ```

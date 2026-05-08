@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextPolisherInputPanel } from './TextPolisherInputPanel';
-import type { UseCase, Tone } from '../../hooks/useTextPolisher';
+import type { UseCase, Tone } from '../../types';
 
 interface SetupOptions {
   useCase?: UseCase;
