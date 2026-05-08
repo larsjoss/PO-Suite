@@ -166,6 +166,17 @@ Alle Komponenten in `src/shared/components/`, Barrel-Export via `index.ts`.
 - `min-h-[44px] min-w-[44px]` (Touch-Target)
 - Ersetzt native Browser-Controls (`-ms-reveal` / `-ms-clear` in CSS ausgeblendet)
 
+### SettingsDialog
+
+```tsx
+<SettingsDialog open={isOpen} onClose={handleClose} />
+```
+
+- Native `<dialog>` mit `showModal()` → automatischer Fokus-Trap, Escape-Handler
+- `aria-labelledby` auf Heading; Backdrop-Klick schliesst Dialog
+- Ändert `anthropic_api_key` in sessionStorage über `useAuth().setApiKey`
+- Trimmt Whitespace beim Speichern, Submit auch via Enter
+
 ---
 
 ## Fokus & Interaktionsmuster

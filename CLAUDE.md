@@ -25,16 +25,19 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 cd story-generator/frontend
 npm ci
 npm run dev      # http://localhost:5173
-npm run test:run # 260 Tests, alle grün
+npm run test:run # 352 Tests, alle grün
 npm run build    # Production-Build (tsc + Vite)
+npm run e2e      # Playwright Smoke-Tests
 ```
 
 ### Konventionen (Kurzfassung)
 
 - Modell überall: `claude-sonnet-4-5`, max_tokens je nach Tool (2048 / 4000 / 6000)
-- Neues Tool: Service → Hook → Komponenten → Page → `App.tsx` Route → `constants/tools.tsx`
+- System-Prompts zentral in `src/services/prompts.ts`
+- Neues Tool: Prompt → Service → Hook → Komponenten → Page → `App.tsx` Route (lazy) → `constants/tools.tsx`
 - State-Machine-Pattern: `'input' | 'output'`
-- API-Calls: nur via `getApiClient()` aus `src/shared/services/apiClient.ts`
+- API-Calls: nur via `getApiClient()` aus `src/shared/services/apiClient.ts`; Timeout via `withTimeout()`; Bilder via `buildImageBlocks()`
+- sessionStorage-Keys: zentral in `src/shared/services/storageKeys.ts`
 - Keine direkten `sessionStorage`-Zugriffe in Komponenten
 - Validierung: Submit-Button `disabled`, kein Toast/Alert
 
@@ -57,4 +60,5 @@ npm run build    # Production-Build (tsc + Vite)
 ## Weitere Dokumentation
 
 - [README.md](README.md) — Projektüberblick, Tech Stack, Schnellstart
+- [ARCHITECTURE.md](ARCHITECTURE.md) — High-Level-Architektur, Datenfluss, Tool-Kontrakt, Roadmap
 - [UI-UX-Design.md](UI-UX-Design.md) — Farbpalette, Design-Tokens, Komponenten-Bibliothek, WCAG
