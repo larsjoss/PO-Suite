@@ -32,6 +32,11 @@ export interface StoryDetailResponse {
   refinements: RefinementLog[];
 }
 
+// ─── Text Polisher ───────────────────────────────────────────────────────────
+
+export type UseCase = 'email' | 'meeting' | 'freetext';
+export type Tone = 'formell' | 'neutral' | 'informell';
+
 // ─── Test Case Generator ─────────────────────────────────────────────────────
 
 export type TestCaseType =
