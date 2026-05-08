@@ -112,7 +112,7 @@ src/
     ├── home/ToolTile.tsx       snap-start Tile (w-200px), hover:border-brand
     ├── home/TileStrip.tsx      snap-x Strip, ResizeObserver, Arrow-Buttons mit Gradient-Fade
     ├── sidebar/                Sidebar, SearchBox, StoryListItem
-    ├── story/                  StoryInputPanel, StoryOutputPanel, InsightsPanel
+    ├── story-generator/        StoryInputPanel, StoryOutputPanel, InsightsPanel
     ├── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
     │                           UseCaseSelector, ToneSelector
     ├── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
