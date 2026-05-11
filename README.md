@@ -31,7 +31,7 @@ Zwei Deployment-Varianten aus derselben Codebasis: **GitHub Pages** (browser-onl
 | Routing | React Router v6 |
 | Server-State | TanStack Query v5 |
 | KI | @anthropic-ai/sdk, Modell `claude-sonnet-4-5` |
-| Tests | Vitest + @testing-library/react (402 Unit/Integration-Tests, 39 Dateien) + Playwright |
+| Tests | Vitest + @testing-library/react (448 Unit/Integration-Tests, 42 Dateien) + Playwright (10 E2E-Tests) |
 
 ### Backend (Enterprise-Variante)
 
@@ -54,7 +54,7 @@ cd frontend
 npm ci
 npm run dev        # Dev-Server auf http://localhost:5173
 npm run build      # Production-Build (VITE_TARGET=github ist Default)
-npm run test:run   # 402 Vitest-Tests
+npm run test:run   # 448 Vitest-Tests
 npm run e2e        # Playwright Smoke-Tests (einmalig: npx playwright install chromium)
 ```
 
