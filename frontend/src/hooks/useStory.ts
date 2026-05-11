@@ -2,12 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import * as storage from '../services/storage';
 import * as claude from '../services/claude';
-import type { StoryDetailResponse } from '../types';
+import { fetchApi, fetchApiGet } from '../shared/services/httpClient';
+import type { Story, StoryDetailResponse } from '../types';
+
+const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
 
 export function useStory(id: string | undefined) {
   return useQuery({
     queryKey: ['story', id],
-    queryFn: () => storage.getStory(id!),
+    queryFn: () => {
+      if (IS_ENTERPRISE) {
+        return fetchApiGet<StoryDetailResponse>(`/api/stories/${id!}`);
+      }
+      return storage.getStory(id!);
+    },
     enabled: !!id,
   });
 }
@@ -18,6 +26,10 @@ export function useGenerateStory() {
 
   return useMutation({
     mutationFn: async (rawInput: string) => {
+      if (IS_ENTERPRISE) {
+        // Backend generates + persists atomically — returns full Story object
+        return fetchApi<Story>('/api/tools/story/generate', { rawInput });
+      }
       const { generatedStory, refinementHints } = await claude.generateStory(rawInput);
       const title = claude.extractTitle(generatedStory, rawInput);
       return storage.createStory(title, rawInput, generatedStory, refinementHints);
@@ -38,6 +50,14 @@ export function useRefineStoryWithHints(id: string) {
       hintAnswers: claude.HintAnswer[];
       currentTitle: string;
     }) => {
+      if (IS_ENTERPRISE) {
+        const cached = queryClient.getQueryData<StoryDetailResponse>(['story', id]);
+        return fetchApi<Story>('/api/tools/story/refine-hints', {
+          currentStory: params.currentStory,
+          hintAnswers: params.hintAnswers,
+          storyId: cached?.story.id ?? id,
+        });
+      }
       const { generatedStory, refinementHints } = await claude.refineStoryWithHints(
         params.currentStory,
         params.hintAnswers,
@@ -60,6 +80,35 @@ export function useRefineStory(id: string) {
 
   return useMutation({
     mutationFn: async (instruction: string) => {
+      if (IS_ENTERPRISE) {
+        const cached = queryClient.getQueryData<StoryDetailResponse>(['story', id]);
+        const story = cached?.story;
+        const refinements = cached?.refinements ?? [];
+
+        const conversationHistory: claude.ConversationMessage[] = story
+          ? [
+              { role: 'user', content: story.rawInput },
+              {
+                role: 'assistant',
+                content:
+                  story.generatedStory +
+                  (story.refinementHints ? '\n\n**Refinement Hinweise**\n' + story.refinementHints : ''),
+              },
+              ...refinements.flatMap((r) => [
+                { role: 'user' as const, content: r.instruction },
+                { role: 'assistant' as const, content: r.resultStory },
+              ]),
+              { role: 'user', content: instruction },
+            ]
+          : [{ role: 'user', content: instruction }];
+
+        return fetchApi<Story>('/api/tools/story/refine', {
+          conversationHistory,
+          storyId: id,
+          instruction,
+        });
+      }
+
       const { story, refinements } = storage.getStory(id);
       const conversationHistory: claude.ConversationMessage[] = [
         { role: 'user', content: story.rawInput },

@@ -2,6 +2,8 @@ import { useState, FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Button, InlineError, RevealButton } from '../../shared/components';
 
+const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+
 export function LoginForm() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -66,40 +68,42 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="login-apikey" className="block text-sm font-medium text-ink mb-1.5">
-          Anthropic API-Key{' '}
-          <span className="text-xs font-normal text-ink-tertiary">(optional)</span>
-        </label>
-        <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
-          <input
-            id="login-apikey"
-            type={showApiKey ? 'text' : 'password'}
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
-            placeholder="sk-ant-…"
-            autoComplete="off"
-            aria-describedby="login-apikey-hint"
-          />
-          <RevealButton
-            show={showApiKey}
-            onToggle={() => setShowApiKey((v) => !v)}
-            label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
-          />
+      {!IS_ENTERPRISE && (
+        <div>
+          <label htmlFor="login-apikey" className="block text-sm font-medium text-ink mb-1.5">
+            Anthropic API-Key{' '}
+            <span className="text-xs font-normal text-ink-tertiary">(optional)</span>
+          </label>
+          <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
+            <input
+              id="login-apikey"
+              type={showApiKey ? 'text' : 'password'}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
+              placeholder="sk-ant-…"
+              autoComplete="off"
+              aria-describedby="login-apikey-hint"
+            />
+            <RevealButton
+              show={showApiKey}
+              onToggle={() => setShowApiKey((v) => !v)}
+              label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-ink-tertiary" id="login-apikey-hint">
+            Beginnt mit «sk-ant-». Findest du unter{' '}
+            <a
+              href="https://console.anthropic.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand hover:underline"
+            >
+              console.anthropic.com
+            </a>
+          </p>
         </div>
-        <p className="mt-1.5 text-xs text-ink-tertiary" id="login-apikey-hint">
-          Beginnt mit «sk-ant-». Findest du unter{' '}
-          <a
-            href="https://console.anthropic.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-brand hover:underline"
-          >
-            console.anthropic.com
-          </a>
-        </p>
-      </div>
+      )}
 
       {error && <InlineError message={error} />}
 
