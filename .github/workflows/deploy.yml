@@ -7,6 +7,12 @@ on:
       - 'frontend/**'
       - 'backend/**'
   workflow_dispatch:
+    inputs:
+      build_docker:
+        description: 'Docker-Images bauen und zu GHCR pushen'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -42,7 +48,7 @@ jobs:
           npx tsc --noEmit
 
 # ─── Job 2: Deploy GitHub Pages ───────────────────────────────────────────────
-# Runs only when frontend/** changed and tests pass.
+# Runs only on push to main (frontend/** changed) after tests pass.
   deploy-gh-pages:
     name: Deploy GitHub Pages
     needs: test
@@ -77,16 +83,14 @@ jobs:
           publish_dir: frontend/dist
 
 # ─── Job 3: Build & Push Docker Images ───────────────────────────────────────
-# Runs only when backend/** or frontend/** changed and tests pass.
+# Runs ONLY on manual workflow_dispatch with build_docker=true.
 # Requires secrets: REGISTRY_URL (optional, defaults to ghcr.io),
 #   REGISTRY_USERNAME, REGISTRY_PASSWORD, OC_SERVER, OC_TOKEN (optional).
   build-and-push:
     name: Build & Push Images
     needs: test
     runs-on: ubuntu-latest
-    if: >
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_docker == 'true'
 
     env:
       REGISTRY: ${{ secrets.REGISTRY_URL || 'ghcr.io' }}
