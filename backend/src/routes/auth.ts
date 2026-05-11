@@ -2,10 +2,9 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../shared/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 const LoginBody = z.object({
   email: z.string().email(),

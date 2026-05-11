@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
 import { authenticate } from '../middleware/authenticate';
 import { logger } from '../shared/logger';
+import { prisma } from '../shared/prisma';
 import { generateStory, refineStoryWithHints, refineStory, extractTitle } from '../services/claude';
 import { polishText } from '../services/textPolisher';
 import { generateTestCases } from '../services/testCaseGenerator';
@@ -10,7 +10,6 @@ import { generateDoc } from '../services/docGenerator';
 import { generateGoals, refineGoal } from '../services/goalGenerator';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 router.use(authenticate);
 
