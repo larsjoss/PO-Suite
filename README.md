@@ -1,6 +1,8 @@
 # PO Suite
 
-KI-gestützte Browser-App für Product Owner in agilen Teams (Scrum/SAFe). Fünf Tools automatisieren die häufigsten Schreibaufgaben im PO-Alltag — kein Backend, kein Daten-Upload, der Anthropic API-Key bleibt beim User im Browser.
+KI-gestützte App für Product Owner in agilen Teams (Scrum/SAFe). Fünf Tools automatisieren die häufigsten Schreibaufgaben im PO-Alltag.
+
+Zwei Deployment-Varianten aus derselben Codebasis: **GitHub Pages** (browser-only, kein Backend) und **Enterprise** (Express-Backend, PostgreSQL, OpenShift-fähig).
 
 **Live:** [https://larsjoss.github.io/PO-Suite/](https://larsjoss.github.io/PO-Suite/)
 
@@ -10,15 +12,17 @@ KI-gestützte Browser-App für Product Owner in agilen Teams (Scrum/SAFe). Fünf
 
 | Tool | Aufgabe |
 |---|---|
-| **Story Generator** | Anforderung → User Story mit Akzeptanzkriterien + Refinement-Hinweisen (localStorage-Persistenz) |
+| **Story Generator** | Anforderung → User Story mit Akzeptanzkriterien + Refinement-Hinweisen |
 | **Goal Generator** | Kontext → Sprint Goal oder PI Objective mit Qualitätsbegründung + Verfeinerungsloop |
 | **Test Case Generator** | User Story + Screenshots → strukturierter Testplan (Jira-Markdown-Export) |
 | **Doc Generator** | Story / Feature + Screenshots → Confluence-Dokumentation |
-| **Text Polisher** | Rohtext / Notizen / E-Mail → sprachlich aufbereiteter Output (3 Use Cases: E-Mail, Meeting-Protokoll, Freitext) |
+| **Text Polisher** | Rohtext / Notizen / E-Mail → sprachlich aufbereiteter Output (E-Mail, Meeting-Protokoll, Freitext) |
 
 ---
 
 ## Tech Stack
+
+### Frontend (beide Varianten)
 
 | Layer | Technologie |
 |---|---|
@@ -27,44 +31,76 @@ KI-gestützte Browser-App für Product Owner in agilen Teams (Scrum/SAFe). Fünf
 | Routing | React Router v6 |
 | Server-State | TanStack Query v5 |
 | KI | @anthropic-ai/sdk, Modell `claude-sonnet-4-5` |
-| Persistenz | localStorage (Stories), sessionStorage (Auth + API-Key) |
-| Markdown | react-markdown + rehype-sanitize |
-| Tests | Vitest + @testing-library/react (352 Unit/Integration-Tests, 33 Dateien) + Playwright (Smoke-Tests) |
+| Tests | Vitest + @testing-library/react (402 Unit/Integration-Tests, 39 Dateien) + Playwright |
+
+### Backend (Enterprise-Variante)
+
+| Layer | Technologie |
+|---|---|
+| Server | Express.js + TypeScript |
+| ORM | Prisma + PostgreSQL |
+| Auth | JWT (HS256) + bcrypt |
+| Validierung | Zod |
+| Logging | pino |
 
 ---
 
 ## Schnellstart
 
+### GitHub-Pages-Variante (browser-only)
+
 ```bash
 cd frontend
 npm ci
 npm run dev        # Dev-Server auf http://localhost:5173
-npm run build      # Production-Build
-npm run test:run   # Vitest einmalig ausführen
+npm run build      # Production-Build (VITE_TARGET=github ist Default)
+npm run test:run   # 402 Vitest-Tests
 npm run e2e        # Playwright Smoke-Tests (einmalig: npx playwright install chromium)
 ```
 
 Vor dem ersten Login: `.env`-Datei mit `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD` anlegen
-(siehe [`frontend/.env.example`](frontend/.env.example)).
-Den Anthropic API-Key (`sk-ant-…`) einmalig im Login-Formular oder über die TopNav-Einstellungen
-hinterlegen — gehalten in `sessionStorage`, beim Tab-Schliessen verworfen.
+(siehe [`frontend/.env.example`](frontend/.env.example)). Den Anthropic API-Key (`sk-ant-…`) im Login-Formular hinterlegen.
+
+### Enterprise-Variante (Backend + PostgreSQL)
+
+```bash
+# Alle Services starten (Backend + PostgreSQL)
+docker compose up
+
+# Benutzer anlegen
+cd backend
+npx ts-node scripts/create-user.ts --email po@firma.ch --password sicher123
+```
+
+Backend läuft auf `http://localhost:3000`, Frontend-Dev-Server auf `http://localhost:5173` (mit `VITE_TARGET=enterprise`).
 
 ---
 
 ## Deployment
 
+### GitHub Pages
+
 GitHub Actions → `peaceiris/actions-gh-pages` → Branch `gh-pages`
 
 **Trigger:** Push auf `main` mit Änderungen in `frontend/**` oder manuell via `workflow_dispatch`.
 
-**Vite-Konfiguration:** `base: '/PO-Suite/'` in `vite.config.ts` — muss immer dem GitHub-Repo-Namen entsprechen.
+### Enterprise (OpenShift / Docker)
 
-**SPA-Routing:** `404.html` wird beim Deploy als Kopie von `index.html` abgelegt, damit Deep-Links korrekt auflösen.
+```bash
+# Images bauen und pushen (via CI)
+docker build -t ghcr.io/larsjoss/po-suite-backend:latest ./backend
+docker build -f frontend/Dockerfile.production -t ghcr.io/larsjoss/po-suite-frontend:latest ./frontend
+
+# OpenShift-Deploy
+kubectl apply -f openshift/
+```
+
+Secrets (`ANTHROPIC_API_KEY`, `JWT_SECRET`, `DATABASE_URL`) werden via `oc create secret generic` bereitgestellt — nie committet.
 
 ---
 
 ## Dokumentation
 
-- [Architecture](ARCHITECTURE.md) — High-Level-Diagramm, Schichten, Datenfluss, Tool-Kontrakt, Roadmap
+- [Architecture](ARCHITECTURE.md) — Dual-Build-Diagramm, Schichten, Datenfluss, Tool-Kontrakt, Roadmap
 - [UI/UX Design Reference](UI-UX-Design.md) — Farbpalette, Design-Tokens, Komponenten, WCAG
 - [Developer Guide](frontend/CLAUDE.md) — Ordnerstruktur, Konventionen, API-Details, Tests

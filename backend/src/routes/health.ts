@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../shared/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 const startTime = Date.now();
 
 router.get('/', async (_req, res) => {
