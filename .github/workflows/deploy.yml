@@ -96,6 +96,7 @@ jobs:
       REGISTRY: ${{ secrets.REGISTRY_URL || 'ghcr.io' }}
       IMAGE_BACKEND: ${{ secrets.REGISTRY_URL || 'ghcr.io' }}/${{ github.repository_owner }}/posuite-backend
       IMAGE_FRONTEND: ${{ secrets.REGISTRY_URL || 'ghcr.io' }}/${{ github.repository_owner }}/posuite-frontend
+      OC_SERVER: ${{ secrets.OC_SERVER }}
 
     steps:
       - uses: actions/checkout@v4
@@ -141,7 +142,7 @@ jobs:
       # Requires secrets: OC_SERVER, OC_TOKEN, OC_NAMESPACE.
       # Remove this step if you use ArgoCD or another GitOps tool instead.
       - name: Rollout on OpenShift
-        if: ${{ secrets.OC_SERVER != '' }}
+        if: ${{ env.OC_SERVER != '' }}
         run: |
           curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz"
           tar xzf openshift-client-linux.tar.gz oc
