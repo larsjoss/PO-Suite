@@ -2,10 +2,16 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { TextBlock } from '@anthropic-ai/sdk/resources/messages';
 import { API_KEY_SESSION_KEY } from './storageKeys';
 
+let _client: Anthropic | null = null;
+let _clientKey: string | null = null;
+
 export function getApiClient(): Anthropic {
   const apiKey = sessionStorage.getItem(API_KEY_SESSION_KEY);
   if (!apiKey) throw new Error('Kein API-Key konfiguriert. Bitte einloggen und API-Key eingeben.');
-  return new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  if (_client && _clientKey === apiKey) return _client;
+  _client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  _clientKey = apiKey;
+  return _client;
 }
 
 export function extractTextContent(content: Anthropic.Messages.ContentBlock[]): string {

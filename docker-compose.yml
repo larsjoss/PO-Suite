@@ -29,7 +29,7 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c "npx prisma migrate deploy && node dist/server.js"
+      sh -c "npx prisma migrate deploy && node dist/src/server.js"
 
   # Run with: docker compose --profile frontend up
   frontend:
@@ -37,9 +37,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.production
-    environment:
-      VITE_TARGET: enterprise
-      VITE_API_URL: http://localhost:3000
+      args:
+        VITE_TARGET: enterprise
+        VITE_API_URL: http://localhost:3000
     ports:
       - "8080:8080"
     depends_on:
