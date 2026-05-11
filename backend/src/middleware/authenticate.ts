@@ -23,11 +23,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
   }
 
   const token = header.slice(7);
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    res.status(500).json({ error: 'Server-Konfigurationsfehler' });
-    return;
-  }
+  const secret = process.env.JWT_SECRET!;
 
   try {
     const payload = jwt.verify(token, secret) as AuthenticatedUser;

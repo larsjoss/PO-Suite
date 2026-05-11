@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: posuite
       POSTGRES_USER: posuite
@@ -19,6 +20,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    restart: unless-stopped
     env_file: ./backend/.env
     environment:
       DATABASE_URL: postgresql://posuite:posuite@db:5432/posuite
@@ -28,12 +30,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     command: >
       sh -c "npx prisma migrate deploy && node dist/src/server.js"
 
   # Run with: docker compose --profile frontend up
   frontend:
     profiles: ["frontend"]
+    restart: unless-stopped
     build:
       context: ./frontend
       dockerfile: Dockerfile.production
@@ -43,7 +52,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   db_data:

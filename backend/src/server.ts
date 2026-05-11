@@ -78,6 +78,25 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Interner Serverfehler' });
 });
 
+// ─── Process-level Error Handlers ────────────────────────────────────────────
+
+process.on('unhandledRejection', (reason) => {
+  logger.error({ reason }, 'Unhandled promise rejection');
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error({ err }, 'Uncaught exception');
+  process.exit(1);
+});
+
+// ─── Startup Validation ───────────────────────────────────────────────────────
+
+if (!process.env.JWT_SECRET) {
+  logger.error('JWT_SECRET ist nicht gesetzt — Server wird nicht gestartet');
+  process.exit(1);
+}
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 
 app.listen(PORT, () => {

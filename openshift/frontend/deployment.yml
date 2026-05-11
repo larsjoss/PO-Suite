@@ -17,6 +17,7 @@ spec:
         app: posuite
         component: frontend
     spec:
+      terminationGracePeriodSeconds: 15
       containers:
         - name: frontend
           image: ghcr.io/larsjoss/posuite-frontend:latest
