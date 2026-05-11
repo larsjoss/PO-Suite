@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: posuite-config
+  labels:
+    app: posuite
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  # Comma-separated list of allowed browser origins.
+  # Adjust to match the frontend Route hostname before deployment.
+  ALLOWED_ORIGINS: "https://posuite.apps.cluster.example.com"
+  LOG_LEVEL: "info"

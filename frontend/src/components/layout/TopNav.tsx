@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { SettingsDialog } from '../../shared/components/SettingsDialog';
 import { TOOLS } from '../../constants/tools';
 
+const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+
 function KeyIcon() {
   return (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -109,27 +111,31 @@ export function TopNav() {
 
           {/* Rechte Seite: API-Key-Status + Einstellungen + Logout */}
           <div className="flex items-center gap-1 shrink-0 pl-3">
-            <span
-              aria-label={apiKey ? 'Anthropic API-Key aktiv' : 'Kein API-Key konfiguriert'}
-              className={`flex items-center gap-1.5 text-xs mr-1 select-none ${
-                apiKey ? 'text-green-700' : 'text-ink-tertiary'
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${apiKey ? 'bg-green-500' : 'bg-edge'}`}
-                aria-hidden="true"
-              />
-              <span className="hidden sm:inline">API</span>
-            </span>
+            {!IS_ENTERPRISE && (
+              <>
+                <span
+                  aria-label={apiKey ? 'Anthropic API-Key aktiv' : 'Kein API-Key konfiguriert'}
+                  className={`flex items-center gap-1.5 text-xs mr-1 select-none ${
+                    apiKey ? 'text-green-700' : 'text-ink-tertiary'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${apiKey ? 'bg-green-500' : 'bg-edge'}`}
+                    aria-hidden="true"
+                  />
+                  <span className="hidden sm:inline">API</span>
+                </span>
 
-            <button
-              onClick={() => setSettingsOpen(true)}
-              aria-label="API-Key-Einstellungen öffnen"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-ink-secondary hover:text-ink hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
-            >
-              <KeyIcon />
-              <span className="hidden sm:inline">Einstellungen</span>
-            </button>
+                <button
+                  onClick={() => setSettingsOpen(true)}
+                  aria-label="API-Key-Einstellungen öffnen"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs text-ink-secondary hover:text-ink hover:bg-edge-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand"
+                >
+                  <KeyIcon />
+                  <span className="hidden sm:inline">Einstellungen</span>
+                </button>
+              </>
+            )}
 
             <button
               onClick={handleLogout}
@@ -143,7 +149,9 @@ export function TopNav() {
         </div>
       </header>
 
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {!IS_ENTERPRISE && (
+        <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      )}
     </>
   );
 }
