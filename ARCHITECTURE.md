@@ -42,8 +42,8 @@ Enterprise-Variante:
 | Styling | Tailwind CSS | 3 | Eigene Design-Tokens, keine UI-Library |
 | KI | @anthropic-ai/sdk | 0.90 | GitHub-Variante: Browser-fähig (`dangerouslyAllowBrowser: true`) |
 | Markdown | react-markdown + rehype-sanitize | 9 / 6 | Default-Schema blockt `<script>`/`<iframe>` |
-| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 402 Tests, 39 Dateien |
-| E2E | Playwright | 1.59 | Smoke-Tests, Chromium-only |
+| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 448 Tests, 42 Dateien |
+| E2E | Playwright | 1.59 | Smoke + Auth + Tool-Happy-Paths, Chromium-only |
 
 ### Backend (Enterprise-Variante)
 
@@ -309,9 +309,9 @@ push → main
 | Unit | Vitest | `httpClient` (fetchApi, fetchApiGet, fetchApiDelete, Timeout, 401) | ✅ |
 | Integration | @testing-library/react | Komponenten + ARIA-Verhalten | ✅ Layout, Shell, Tool-Komponenten |
 | Integration | @testing-library/react | Page-Flows (Submit → Output) | ✅ Auth, DocGen, TextPolisher, TCG, GoalGen |
-| E2E | Playwright | Smoke-Tests | ✅ Login, Form-Felder, Skip-Link |
+| E2E | Playwright | Smoke + Auth + Tool-Flows | ✅ Login-Flow, Logout, Story Generator-Routing, Form-Validation |
 
-**Stand:** 402 Vitest-Tests in 39 Dateien + 3 Playwright-Smoke-Tests.
+**Stand:** 448 Vitest-Tests in 42 Dateien + 18 Backend-Tests + 10 Playwright-E2E-Tests.
 
 **Enterprise-Tests:** `vitest.enterprise.config.ts` setzt `VITE_TARGET=enterprise`, damit `IS_ENTERPRISE`-Branches abgedeckt sind.
 
@@ -336,12 +336,12 @@ npm run e2e
 | Bereich | Status | Anmerkung |
 |---|---|---|
 | Code-Splitting via `React.lazy` | ✅ Erledigt | Hauptbundle ~211 kB |
-| Tests für alle Services / Hooks | ✅ Erledigt | 402 Tests, 39 Dateien |
+| Tests für alle Services / Hooks | ✅ Erledigt | 448 Tests, 42 Dateien |
 | Enterprise-Backend (Express + Prisma) | ✅ Erledigt | Alle 5 Tools + Story-CRUD + Auth |
 | Docker / OpenShift-Manifeste | ✅ Erledigt | Non-root, SCC-konform, Init-Container |
 | Dual-Build (`VITE_TARGET`) | ✅ Erledigt | GitHub-Build unverändert, Enterprise-Build via Adapter |
-| E2E-Tests (Playwright) | Foundation | Smoke-Tests vorhanden; Tool-Happy-Paths ausstehend |
-| Backend-Tests (Vitest + Supertest) | Ausstehend | Aktuell kein Test-Setup im Backend |
+| E2E-Tests (Playwright) | ✅ Erledigt | 10 Tests: Smoke, Auth-Flow, Story Generator |
+| Backend-Tests (Vitest + Supertest) | ✅ Erledigt | health (4) + auth (14) — Tool/Story-Routen ausstehend |
 | Keycloak/OIDC | Optional | JWT-Middleware v2-Upgrade-Pfad |
 | Internationalisierung | Nicht geplant | Aktuell DE-CH only |
 | Re-Render-Optimierung | Bedarf-getrieben | useMemo/useCallback nur nach Profiler-Befund |
