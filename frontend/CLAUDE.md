@@ -6,7 +6,7 @@ React 18 + TypeScript + Vite Single-Page-Application. Fünf Tools: **Story Gener
 
 **Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`
 
-**Alle fünf Module vollständig implementiert und getestet.** 402 Vitest-Tests + 3 Playwright-Smoke-Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
+**Alle fünf Module vollständig implementiert und getestet.** 448 Vitest-Tests + 10 Playwright-E2E-Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
 
 **GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — `vite.config.ts` hat `base: '/PO-Suite/'` (muss immer dem GitHub-Repo-Namen entsprechen). Deploy via GitHub Actions auf Push zu `main` (mit Änderung unter `frontend/**`) oder manuell via `workflow_dispatch`.
 
@@ -314,7 +314,7 @@ npm run test:coverage # Coverage-Report
 
 **Output-Panel-Tests** für Copy-Funktionalität: `Object.defineProperty(navigator, 'clipboard', ...)` + `fireEvent.click` (umgeht userEvents Clipboard-Override).
 
-**Gesamt: 402 Tests in 39 Test-Dateien**
+**Gesamt: 448 Tests in 42 Test-Dateien**
 
 ## Claude Code Konfiguration
 
