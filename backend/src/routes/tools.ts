@@ -8,6 +8,7 @@ import { polishText } from '../services/textPolisher';
 import { generateTestCases } from '../services/testCaseGenerator';
 import { generateDoc } from '../services/docGenerator';
 import { generateGoals, refineGoal } from '../services/goalGenerator';
+import { internalError } from '../shared/errors';
 
 const router = Router();
 
@@ -70,7 +71,7 @@ router.post('/story/generate', async (req, res) => {
     res.status(201).json(story);
   } catch (err) {
     logger.error({ userId, tool: 'story/generate', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -119,7 +120,7 @@ router.post('/story/refine-hints', async (req, res) => {
     res.json(result);
   } catch (err) {
     logger.error({ userId, tool: 'story/refine-hints', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -173,7 +174,7 @@ router.post('/story/refine', async (req, res) => {
     res.json(result);
   } catch (err) {
     logger.error({ userId, tool: 'story/refine', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -205,7 +206,7 @@ router.post('/text-polisher/polish', async (req, res) => {
     res.json({ result });
   } catch (err) {
     logger.error({ userId, tool: 'text-polisher/polish', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -237,7 +238,7 @@ router.post('/test-case-generator/generate', async (req, res) => {
     res.json(result);
   } catch (err) {
     logger.error({ userId, tool: 'test-case-generator/generate', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -287,7 +288,7 @@ router.post('/doc-generator/generate', async (req, res) => {
     res.json({ result });
   } catch (err) {
     logger.error({ userId, tool: 'doc-generator/generate', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -328,7 +329,7 @@ router.post('/goal-generator/generate', async (req, res) => {
     res.json(result);
   } catch (err) {
     logger.error({ userId, tool: 'goal-generator/generate', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 
@@ -371,7 +372,7 @@ router.post('/goal-generator/refine', async (req, res) => {
     res.json(result);
   } catch (err) {
     logger.error({ userId, tool: 'goal-generator/refine', err });
-    res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler' });
+    res.status(500).json({ error: internalError(err) });
   }
 });
 

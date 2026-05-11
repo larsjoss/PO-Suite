@@ -21,13 +21,14 @@ export function ScreenshotUpload({ files, onChange, disabled, maxFiles = 3 }: Pr
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const filesRef = useRef(files);
+  filesRef.current = files;
 
-  // Revoke alle preview-URLs beim Unmount (Memory-Leak-Prevention)
   useEffect(() => {
     return () => {
-      files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+      filesRef.current.forEach((f) => URL.revokeObjectURL(f.previewUrl));
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleFiles(incoming: FileList | File[]) {
     setError(null);
