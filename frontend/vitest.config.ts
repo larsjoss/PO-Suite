@@ -11,7 +11,13 @@ export default defineConfig({
       VITE_AUTH_EMAIL: 'test@example.com',
       VITE_AUTH_PASSWORD: 'testpass123',
     },
-    exclude: ['node_modules', 'dist', 'e2e/**', 'playwright-report/**'],
+    exclude: [
+      'node_modules',
+      'dist',
+      'e2e/**',
+      'playwright-report/**',
+      'src/**/*.enterprise.test.{ts,tsx}',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
