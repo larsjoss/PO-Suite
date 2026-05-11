@@ -1,0 +1,85 @@
+# NOTE: For production workloads on OpenShift, prefer the Crunchy Data
+# PostgreSQL Operator (PGO) over a standalone Deployment. This file is
+# provided for staging / PoC environments without the operator installed.
+#
+# CrunchyData PGO quickstart:
+#   https://access.crunchydata.com/documentation/postgres-operator/latest/quickstart/
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posuite-db
+  labels:
+    app: posuite
+    component: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posuite
+      component: db
+  strategy:
+    type: Recreate   # Required for ReadWriteOnce volumes
+  template:
+    metadata:
+      labels:
+        app: posuite
+        component: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_DB
+              value: posuite
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: posuite-db-credentials
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: posuite-db-credentials
+                  key: password
+            # Write temp files to /tmp — required for restricted-v2 SCC
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "posuite"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "posuite"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: posuite-db-data

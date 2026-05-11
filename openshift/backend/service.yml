@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: posuite-backend
+  labels:
+    app: posuite
+    component: backend
+spec:
+  selector:
+    app: posuite
+    component: backend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      protocol: TCP

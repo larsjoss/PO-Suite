@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: posuite-backend
+  labels:
+    app: posuite
+    component: backend
+spec:
+  # Replace with your cluster's app domain
+  host: posuite-api.apps.cluster.example.com
+  to:
+    kind: Service
+    name: posuite-backend
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
