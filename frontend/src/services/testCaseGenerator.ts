@@ -3,7 +3,7 @@ import { getApiClient } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildImageBlock } from '../shared/services/imageBlocks';
 import { TEST_CASE_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts';
-import type { TestPlan, TestCase, TestCaseType, TestLevel, AkCoverage } from '../types';
+import type { TestPlan, TestCase, TestCaseType, TestLevel } from '../types';
 
 export interface GenerateTestCasesParams {
   storyText: string;

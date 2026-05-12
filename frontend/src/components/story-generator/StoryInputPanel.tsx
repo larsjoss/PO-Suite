@@ -1,4 +1,5 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { useGenerateStory } from '../../hooks/useStory';
 import { Button, TextArea, InlineError, PanelHeader } from '../../shared/components';
 

@@ -6,7 +6,6 @@ import {
   fetchApiGet,
   fetchApiDelete,
   setJwt,
-  clearJwt,
   setOn401Handler,
 } from './httpClient';
 

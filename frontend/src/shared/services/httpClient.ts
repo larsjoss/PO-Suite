@@ -20,6 +20,7 @@ async function fetchWithTimeout(
     if (err instanceof Error && err.name === 'AbortError') {
       throw new Error(
         `Zeitüberschreitung nach ${Math.round(ms / 1000)} Sekunden. Bitte erneut versuchen.`,
+        { cause: err },
       );
     }
     throw err;

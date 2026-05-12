@@ -6,7 +6,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', '*.config.js'] },
+  { ignores: ['dist', 'coverage', '*.config.js', '*.config.cjs'] },
 
   // Basis: JS-Empfehlungen
   js.configs.recommended,

@@ -30,6 +30,7 @@ export interface ToolDef {
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components
 function StoryIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -38,6 +39,7 @@ function StoryIcon({ className }: { className?: string }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function TextPolisherIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -46,6 +48,7 @@ function TextPolisherIcon({ className }: { className?: string }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function TestCaseIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -54,6 +57,7 @@ function TestCaseIcon({ className }: { className?: string }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function DocIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -62,6 +66,7 @@ function DocIcon({ className }: { className?: string }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function GoalIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

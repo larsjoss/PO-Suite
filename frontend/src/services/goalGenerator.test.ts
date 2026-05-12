@@ -5,6 +5,7 @@ const messagesCreateMock = vi.fn();
 
 vi.mock('../shared/services/apiClient', async () => {
   const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     await vi.importActual<typeof import('../shared/services/apiClient')>(
       '../shared/services/apiClient',
     );
