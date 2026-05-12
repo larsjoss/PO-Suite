@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 const generateTestCasesMock = vi.fn();
 
 vi.mock('../services/testCaseGenerator', async () => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await vi.importActual<typeof import('../services/testCaseGenerator')>(
     '../services/testCaseGenerator',
   );

@@ -30,7 +30,7 @@ export function TestCaseFilterBar({
   filteredCount,
 }: Props) {
   const handleLevelKeyDown = (e: React.KeyboardEvent, idx: number) => {
-    let next = idx;
+    let next: number;
     if (e.key === 'ArrowRight') next = (idx + 1) % LEVEL_OPTIONS.length;
     else if (e.key === 'ArrowLeft') next = (idx - 1 + LEVEL_OPTIONS.length) % LEVEL_OPTIONS.length;
     else return;

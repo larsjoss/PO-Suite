@@ -8,6 +8,7 @@ const generateGoalsMock = vi.fn();
 const refineGoalMock = vi.fn();
 
 vi.mock('../services/goalGenerator', async () => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await vi.importActual<typeof import('../services/goalGenerator')>(
     '../services/goalGenerator',
   );

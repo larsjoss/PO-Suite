@@ -19,7 +19,7 @@ interface Props {
 
 export function GoalTabSelector({ value, onChange, disabled }: Props) {
   const handleKeyDown = (e: KeyboardEvent, idx: number) => {
-    let next = idx;
+    let next: number;
     if (e.key === 'ArrowRight') next = (idx + 1) % TABS.length;
     else if (e.key === 'ArrowLeft') next = (idx - 1 + TABS.length) % TABS.length;
     else if (e.key === 'Home') next = 0;
