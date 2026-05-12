@@ -1,4 +1,4 @@
-import{j as e,B as k,r as x}from"./index-BPc55Fgq.js";import{g as T,c as w,u as _,T as j,a as v}from"./prompts-CnCXaH2H.js";import{b as S,w as C,S as E}from"./imageBlocks-CDweuwEr.js";import{I as L}from"./InlineError-MqYJlYOA.js";async function $(s){var p;const n=T(),o=[];let l=`STORY:
+import{j as e,B as k,r as x}from"./index-CmtO38rW.js";import{g as T,c as w,u as _,T as j,a as v}from"./prompts-B-TMMWnU.js";import{b as S,w as C,S as E}from"./imageBlocks-IMvqNuan.js";import{I as L}from"./InlineError-DMidv7Ef.js";async function $(s){var p;const n=T(),o=[];let l=`STORY:
 ${s.storyText}`;(p=s.testContext)!=null&&p.trim()&&(l+=`
 
 ---
