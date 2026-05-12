@@ -18,6 +18,8 @@ on:
 permissions:
   contents: write
   packages: write   # required for GHCR push
+  pages: write      # required for GitHub Pages deployment
+  id-token: write   # required for OIDC token (actions/deploy-pages)
 
 # ─── Job 1: Test ─────────────────────────────────────────────────────────────
 # Runs on every push to main (frontend/** or backend/**).
@@ -49,12 +51,15 @@ jobs:
           npx tsc --noEmit
 
 # ─── Job 2: Deploy GitHub Pages ───────────────────────────────────────────────
-# Runs only on push to main (frontend/** changed) after tests pass.
+# Runs on push to main or manual workflow_dispatch after tests pass.
   deploy-gh-pages:
     name: Deploy GitHub Pages
     needs: test
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -77,11 +82,17 @@ jobs:
       - name: Copy index.html → 404.html for SPA routing
         run: cp frontend/dist/index.html frontend/dist/404.html
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: frontend/dist
+          path: frontend/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
 # ─── Job 3: Build & Push Docker Images ───────────────────────────────────────
 # Runs ONLY on manual workflow_dispatch with build_docker=true.
