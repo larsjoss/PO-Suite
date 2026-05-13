@@ -4,8 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - 'frontend/**'
-      - 'backend/**'
+      - 'apps/po-suite/**'
+      - 'apps/backend/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/**'
   workflow_dispatch:
     inputs:
@@ -22,7 +24,6 @@ permissions:
   id-token: write   # required for OIDC token (actions/deploy-pages)
 
 # ─── Job 1: Test ─────────────────────────────────────────────────────────────
-# Runs on every push to main (frontend/** or backend/**).
 jobs:
   test:
     name: Test
@@ -34,24 +35,20 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install frontend deps
-        working-directory: frontend
+      - name: Install all deps (workspace)
         run: npm ci
 
       - name: Frontend tests
-        working-directory: frontend
+        working-directory: apps/po-suite
         run: npm run test:run
 
       - name: Backend TypeScript check
-        working-directory: backend
-        run: |
-          npm ci
-          npx tsc --noEmit
+        working-directory: apps/backend
+        run: npx tsc --noEmit
 
 # ─── Job 2: Deploy GitHub Pages ───────────────────────────────────────────────
-# Runs on push to main or manual workflow_dispatch after tests pass.
   deploy-gh-pages:
     name: Deploy GitHub Pages
     needs: test
@@ -68,19 +65,20 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
+
+      - name: Install all deps (workspace)
+        run: npm ci
 
       - name: Build frontend (GitHub Pages)
-        working-directory: frontend
-        run: |
-          npm ci
-          npm run build
+        working-directory: apps/po-suite
+        run: npm run build
         env:
           VITE_AUTH_EMAIL: ${{ secrets.VITE_AUTH_EMAIL }}
           VITE_AUTH_PASSWORD: ${{ secrets.VITE_AUTH_PASSWORD }}
 
       - name: Copy index.html → 404.html for SPA routing
-        run: cp frontend/dist/index.html frontend/dist/404.html
+        run: cp apps/po-suite/dist/index.html apps/po-suite/dist/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -88,7 +86,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/dist
+          path: apps/po-suite/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -96,8 +94,6 @@ jobs:
 
 # ─── Job 3: Build & Push Docker Images ───────────────────────────────────────
 # Runs ONLY on manual workflow_dispatch with build_docker=true.
-# Requires secrets: REGISTRY_URL (optional, defaults to ghcr.io),
-#   REGISTRY_USERNAME, REGISTRY_PASSWORD, OC_SERVER, OC_TOKEN (optional).
   build-and-push:
     name: Build & Push Images
     needs: test
@@ -126,8 +122,8 @@ jobs:
       - name: Build & push backend image
         uses: docker/build-push-action@v6
         with:
-          context: backend
-          file: backend/Dockerfile
+          context: apps/backend
+          file: apps/backend/Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
@@ -138,8 +134,8 @@ jobs:
       - name: Build & push frontend image (enterprise)
         uses: docker/build-push-action@v6
         with:
-          context: frontend
-          file: frontend/Dockerfile.production
+          context: apps/po-suite
+          file: apps/po-suite/Dockerfile.production
           push: true
           build-args: |
             VITE_TARGET=enterprise
@@ -150,9 +146,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Optional: trigger OpenShift rollout via oc CLI.
-      # Requires secrets: OC_SERVER, OC_TOKEN, OC_NAMESPACE.
-      # Remove this step if you use ArgoCD or another GitOps tool instead.
       - name: Rollout on OpenShift
         if: ${{ env.OC_SERVER != '' }}
         run: |

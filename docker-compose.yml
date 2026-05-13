@@ -18,10 +18,10 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./apps/backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: ./backend/.env
+    env_file: ./apps/backend/.env
     environment:
       DATABASE_URL: postgresql://posuite:posuite@db:5432/posuite
       NODE_ENV: development
@@ -44,7 +44,7 @@ services:
     profiles: ["frontend"]
     restart: unless-stopped
     build:
-      context: ./frontend
+      context: ./apps/po-suite
       dockerfile: Dockerfile.production
       args:
         VITE_TARGET: enterprise

@@ -4,18 +4,21 @@ import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import { sharedRules } from '../../eslint.config.js';
 
 export default tseslint.config(
   { ignores: ['dist', 'coverage', '*.config.js', '*.config.cjs'] },
 
-  // Basis: JS-Empfehlungen
   js.configs.recommended,
-
-  // TypeScript: strenge Typisierung
   ...tseslint.configs.recommended,
 
   {
     files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     plugins: {
       react: reactPlugin,
       'react-hooks': reactHooks,
@@ -26,11 +29,7 @@ export default tseslint.config(
       react: { version: 'detect' },
     },
     rules: {
-      // TypeScript
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/consistent-type-imports': 'error',
+      ...sharedRules,
 
       // React
       'react/react-in-jsx-scope': 'off',
@@ -48,11 +47,6 @@ export default tseslint.config(
       'jsx-a11y/alt-text': 'error',
       'jsx-a11y/aria-props': 'error',
       'jsx-a11y/role-has-required-aria-props': 'error',
-
-      // Allgemeine Code-Qualität
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'prefer-const': 'error',
-      'no-var': 'error',
     },
   }
 );
