@@ -2,13 +2,17 @@
 
 ## Repository-Übersicht
 
-Mono-Repo mit zwei Apps:
-- `frontend/` (React 18 + TypeScript + Vite) — wird als **GitHub Pages** Single-User-Build *und* als **Enterprise**-Build (gegen Backend) ausgeliefert
-- `backend/` (Express + TypeScript + Prisma + PostgreSQL) — nur für Enterprise-Variante
+npm-Workspaces-Monorepo mit zwei Apps unter `apps/`:
+- `apps/po-suite/` (React 18 + TypeScript + Vite) — wird als **GitHub Pages** Single-User-Build *und* als **Enterprise**-Build (gegen Backend) ausgeliefert
+- `apps/backend/` (Express + TypeScript + Prisma + PostgreSQL) — nur für Enterprise-Variante
+
+Geteilte Konfiguration auf Root-Ebene:
+- `tsconfig.base.json` — gemeinsame TypeScript-Basis (extended von beiden Apps)
+- `eslint.config.js` — gemeinsame ESLint-Regeln (`sharedRules`-Export, von `apps/po-suite` importiert)
 
 Die vollständige Entwickler-Dokumentation liegt hier:
 
-→ **[frontend/CLAUDE.md](frontend/CLAUDE.md)**
+→ **[apps/po-suite/CLAUDE.md](apps/po-suite/CLAUDE.md)**
 → **[ARCHITECTURE.md](ARCHITECTURE.md)** — Dual-Build-Diagramm, Backend-Struktur, Deployment
 
 ---
@@ -24,33 +28,35 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 
 - **Aktiver Branch:** `main`
 - **GitHub Pages:** `https://larsjoss.github.io/PO-Suite/`
-- **Deploy-Trigger:** Push auf `main` mit Änderungen in `frontend/**` oder `workflow_dispatch`
+- **Deploy-Trigger:** Push auf `main` mit Änderungen in `apps/po-suite/**` oder `workflow_dispatch`
 - **Vite base:** `/PO-Suite/` für GitHub-Build, `/` für Enterprise
 
 ### Entwicklung starten
 
 **Nur Frontend (GitHub-Variante):**
 ```bash
-cd frontend
-npm ci
-npm run dev      # http://localhost:5173
-npm run test:run # 448 Tests, alle grün
-npm run build    # Production-Build (tsc + Vite)
-npm run e2e      # Playwright E2E-Tests (10 Tests)
+npm install                              # Root-Install (alle Workspaces)
+npm run dev                              # http://localhost:5173
+npm run test                             # 448 Tests, alle grün
+npm run build                            # Production-Build (tsc + Vite)
+# oder direkt im Workspace:
+cd apps/po-suite
+npm run test:run
+npm run e2e                              # Playwright E2E-Tests (10 Tests)
 ```
 
 **Mit Backend (Enterprise-Variante):**
 ```bash
 docker compose up                          # db + backend
-cd backend && npm test                     # 18 Backend-Tests
-cd frontend && npm run test:enterprise     # 15 Enterprise-Pfad-Tests
+cd apps/backend && npm test               # 18 Backend-Tests
+cd apps/po-suite && npm run test:enterprise  # 15 Enterprise-Pfad-Tests
 ```
 
 ### Konventionen (Kurzfassung)
 
 - Modell überall: `claude-sonnet-4-5`, max_tokens je nach Tool (2048 / 4000 / 6000)
-- System-Prompts zentral in `src/services/prompts.ts` (Frontend) bzw. `backend/src/services/prompts.ts` (Backend, derzeit Kopie)
-- Neues Tool: Prompt → Service → Hook → Komponenten → Page → `App.tsx` Route (lazy) → `constants/tools.tsx` → Backend-Endpunkt in `backend/src/routes/tools.ts`
+- System-Prompts zentral in `src/services/prompts.ts` (Frontend) bzw. `apps/backend/src/services/prompts.ts` (Backend)
+- Neues Tool: Prompt → Service → Hook → Komponenten → Page → `App.tsx` Route (lazy) → `constants/tools.tsx` → Backend-Endpunkt in `apps/backend/src/routes/tools.ts`
 - State-Machine-Pattern: `'input' | 'output'`
 - API-Calls Frontend: nur via `getApiClient()` aus `src/shared/services/apiClient.ts` (GitHub-Pfad) bzw. `fetchApi()` aus `src/shared/services/httpClient.ts` (Enterprise-Pfad)
 - Timeout via `withTimeout()` (GitHub) bzw. `fetchWithTimeout()` (Enterprise, 60 s AbortController)

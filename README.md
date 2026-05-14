@@ -45,21 +45,36 @@ Zwei Deployment-Varianten aus derselben Codebasis: **GitHub Pages** (browser-onl
 
 ---
 
+## Monorepo-Struktur
+
+```
+/
+├── package.json          # npm workspaces root
+├── tsconfig.base.json    # geteilte TypeScript-Basis
+├── eslint.config.js      # geteilte ESLint-Regeln
+└── apps/
+    ├── po-suite/         # React-Frontend (GitHub Pages + Enterprise)
+    └── backend/          # Express-Backend (Enterprise-Variante)
+```
+
+---
+
 ## Schnellstart
 
 ### GitHub-Pages-Variante (browser-only)
 
 ```bash
-cd frontend
-npm ci
-npm run dev        # Dev-Server auf http://localhost:5173
-npm run build      # Production-Build (VITE_TARGET=github ist Default)
-npm run test:run   # 448 Vitest-Tests
-npm run e2e        # Playwright Smoke-Tests (einmalig: npx playwright install chromium)
+npm install                # Root-Install (alle Workspaces)
+npm run dev                # Dev-Server auf http://localhost:5173
+npm run test               # 448 Vitest-Tests
+# oder direkt im Workspace:
+cd apps/po-suite
+npm run build              # Production-Build (VITE_TARGET=github ist Default)
+npm run e2e                # Playwright Smoke-Tests (einmalig: npx playwright install chromium)
 ```
 
 Vor dem ersten Login: `.env`-Datei mit `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD` anlegen
-(siehe [`frontend/.env.example`](frontend/.env.example)). Den Anthropic API-Key (`sk-ant-…`) im Login-Formular hinterlegen.
+(siehe [`apps/po-suite/.env.example`](apps/po-suite/.env.example)). Den Anthropic API-Key (`sk-ant-…`) im Login-Formular hinterlegen.
 
 ### Enterprise-Variante (Backend + PostgreSQL)
 
@@ -68,7 +83,7 @@ Vor dem ersten Login: `.env`-Datei mit `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD
 docker compose up
 
 # Benutzer anlegen
-cd backend
+cd apps/backend
 npx ts-node scripts/create-user.ts --email po@firma.ch --password sicher123
 ```
 
@@ -80,16 +95,14 @@ Backend läuft auf `http://localhost:3000`, Frontend-Dev-Server auf `http://loca
 
 ### GitHub Pages
 
-GitHub Actions → `peaceiris/actions-gh-pages` → Branch `gh-pages`
-
-**Trigger:** Push auf `main` mit Änderungen in `frontend/**` oder manuell via `workflow_dispatch`.
+GitHub Actions → `actions/deploy-pages` — automatisch auf Push zu `main` mit Änderungen in `apps/po-suite/**` oder manuell via `workflow_dispatch`.
 
 ### Enterprise (OpenShift / Docker)
 
 ```bash
 # Images bauen und pushen (via CI)
-docker build -t ghcr.io/larsjoss/po-suite-backend:latest ./backend
-docker build -f frontend/Dockerfile.production -t ghcr.io/larsjoss/po-suite-frontend:latest ./frontend
+docker build -t ghcr.io/larsjoss/po-suite-backend:latest ./apps/backend
+docker build -f apps/po-suite/Dockerfile.production -t ghcr.io/larsjoss/po-suite-frontend:latest ./apps/po-suite
 
 # OpenShift-Deploy
 kubectl apply -f openshift/
@@ -103,4 +116,4 @@ Secrets (`ANTHROPIC_API_KEY`, `JWT_SECRET`, `DATABASE_URL`) werden via `oc creat
 
 - [Architecture](ARCHITECTURE.md) — Dual-Build-Diagramm, Schichten, Datenfluss, Tool-Kontrakt, Roadmap
 - [UI/UX Design Reference](UI-UX-Design.md) — Farbpalette, Design-Tokens, Komponenten, WCAG
-- [Developer Guide](frontend/CLAUDE.md) — Ordnerstruktur, Konventionen, API-Details, Tests
+- [Developer Guide](apps/po-suite/CLAUDE.md) — Ordnerstruktur, Konventionen, API-Details, Tests

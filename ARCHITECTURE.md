@@ -107,7 +107,7 @@ backend/src/
 │   ├── tools.ts            10 Tool-Endpunkte (Proxy zu Anthropic)
 │   ├── stories.ts          CRUD /api/stories
 │   └── health.ts           GET /health
-├── services/               Anthropic-Service-Logik (analog frontend/src/services/)
+├── services/               Anthropic-Service-Logik (analog apps/po-suite/src/services/)
 │   ├── claude.ts
 │   ├── textPolisher.ts
 │   ├── testCaseGenerator.ts
@@ -121,7 +121,7 @@ backend/src/
     └── imageBlocks.ts      Base64→ImageBlockParam-Builder
 ```
 
-Detaillierter Datei-Baum: siehe [`frontend/CLAUDE.md`](frontend/CLAUDE.md).
+Detaillierter Datei-Baum: siehe [`apps/po-suite/CLAUDE.md`](apps/po-suite/CLAUDE.md).
 
 ---
 
@@ -264,7 +264,7 @@ VITE_TARGET=github npm run build  # oder ohne Flag (Default)
 GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
 
 ```
-push → main (frontend/** geändert)
+push → main (apps/po-suite/** geändert)
   ├── npm ci + VITE_TARGET=github npm run build
   ├── cp dist/index.html dist/404.html
   └── peaceiris/actions-gh-pages → publish dist/ to gh-pages
@@ -277,13 +277,13 @@ push → main (frontend/** geändert)
 docker compose up
 
 # Einzelne Images bauen
-docker build -t po-suite-backend ./backend
-docker build -f frontend/Dockerfile.production -t po-suite-frontend ./frontend
+docker build -t po-suite-backend ./apps/backend
+docker build -f apps/po-suite/Dockerfile.production -t po-suite-frontend ./frontend
 ```
 
 **Docker-Images:**
 - `backend/Dockerfile` — Multi-Stage: `node:20-alpine` Builder + Runtime (non-root `USER node`, Port 3000)
-- `frontend/Dockerfile.production` — Multi-Stage: `node:20-alpine` Builder (`VITE_TARGET=enterprise`) + `nginx:1.27-alpine` Runtime (Port 8080, non-root)
+- `apps/po-suite/Dockerfile.production` — Multi-Stage: `node:20-alpine` Builder (`VITE_TARGET=enterprise`) + `nginx:1.27-alpine` Runtime (Port 8080, non-root)
 
 **Prisma-Migrationen** laufen als Init-Container via `npx prisma migrate deploy` vor dem Backend-Start.
 
@@ -351,5 +351,5 @@ npm run e2e
 ## Verwandte Dokumente
 
 - [README.md](README.md) — Projektübersicht, Tech Stack, Schnellstart
-- [frontend/CLAUDE.md](frontend/CLAUDE.md) — Detaillierte Entwicklerdoku, Datei-Baum
+- [apps/po-suite/CLAUDE.md](apps/po-suite/CLAUDE.md) — Detaillierte Entwicklerdoku, Datei-Baum
 - [UI-UX-Design.md](UI-UX-Design.md) — Design-Tokens, Komponentenbibliothek, WCAG
