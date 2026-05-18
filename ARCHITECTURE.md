@@ -264,10 +264,10 @@ VITE_TARGET=github npm run build  # oder ohne Flag (Default)
 GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)):
 
 ```
-push → main (apps/po-suite/** geändert)
-  ├── npm ci + VITE_TARGET=github npm run build
+push → main (apps/po-suite/** geändert) oder workflow_dispatch
+  ├── npm ci (Root-Workspace) + tsc + vite build
   ├── cp dist/index.html dist/404.html
-  └── peaceiris/actions-gh-pages → publish dist/ to gh-pages
+  └── actions/upload-pages-artifact + actions/deploy-pages@v4 → GitHub Pages
 ```
 
 ### Enterprise-Build
@@ -327,7 +327,7 @@ npm run e2e
 - **Service-Tests** mocken `getApiClient` via `vi.mock('shared/services/apiClient')` mit `messagesCreateMock`.
 - **httpClient-Tests** mocken `fetch` via `vi.stubGlobal('fetch', ...)`.
 - **Hook-Tests** wrappen `renderHook` mit `QueryClientProvider`.
-- **Page-Tests** mocken den Service auf Modul-Ebene und `vi.spyOn(window, 'confirm')`.
+- **Page-Tests** mocken den Service auf Modul-Ebene; DocGeneratorPage-Tests interagieren mit `ConfirmDialog` via `role="alertdialog"`.
 
 ---
 
@@ -345,6 +345,22 @@ npm run e2e
 | Keycloak/OIDC | Optional | JWT-Middleware v2-Upgrade-Pfad |
 | Internationalisierung | Nicht geplant | Aktuell DE-CH only |
 | Re-Render-Optimierung | Bedarf-getrieben | useMemo/useCallback nur nach Profiler-Befund |
+
+---
+
+## 11. Architektur-Entscheide (ADR)
+
+### ADR-001: Story Generator behält 3-Panel-AppShell-Layout
+
+**Status:** Entschieden — 2026-05-18
+
+**Kontext:** Vier Tools (Text Polisher, TCG, DocGen, Goal Generator) nutzen das 2-Screen-State-Machine-Pattern (`'input' | 'output'`). Der Story Generator (WorkspacePage) weicht ab: er verwendet AppShell mit Sidebar-Storyiste, persistentem 3-Panel-Desktop-Layout und mobilen Tabs.
+
+**Entscheidung:** WorkspacePage bleibt beim 3-Panel-AppShell-Layout. Eine Migration auf 2-Screen wird nicht durchgeführt.
+
+**Begründung:** Der Story-Workflow ist iterativ und asynchron — POs generieren eine Story, speichern sie, öffnen eine ältere, verfeinern sie mehrfach über mehrere Sitzungen. Die Sidebar-Storyiste (Suche, History, Quick-Access) ist inhärenter Teil dieses Workflows und kann im 2-Screen-Pattern nicht sinnvoll untergebracht werden, ohne den Tool-Mehrwert wesentlich zu reduzieren.
+
+**Konsequenz:** Story Generator gilt als bewusster Sonderfall. Alle neuen Tools folgen dem 2-Screen-State-Machine-Pattern in `src/pages/<Name>Page.tsx`.
 
 ---
 

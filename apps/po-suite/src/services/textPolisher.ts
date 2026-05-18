@@ -1,9 +1,10 @@
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
+import { withTimeout } from '../shared/services/withTimeout';
 import {
   buildEmailPolishPrompt,
   MEETING_POLISH_PROMPT,
   FREETEXT_POLISH_PROMPT,
-} from './prompts';
+} from './prompts/textPolisher';
 import type { UseCase, Tone } from '../types';
 
 // ─── API call ─────────────────────────────────────────────────────────────────
@@ -22,12 +23,14 @@ export async function polishText(
         ? MEETING_POLISH_PROMPT
         : FREETEXT_POLISH_PROMPT;
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 2048,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: input }],
-  });
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: input }],
+    }),
+  );
 
   const text = extractTextContent(response.content);
 

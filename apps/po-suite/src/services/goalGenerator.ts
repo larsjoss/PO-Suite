@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { uploadedFileToImageBlock } from '../shared/services/imageBlocks';
-import { SPRINT_GOAL_SYSTEM_PROMPT, PI_OBJECTIVE_SYSTEM_PROMPT } from './prompts';
+import { SPRINT_GOAL_SYSTEM_PROMPT, PI_OBJECTIVE_SYSTEM_PROMPT } from './prompts/goalGenerator';
 import type {
   GoalVariant,
   GenerateGoalParams,

@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildImageBlocks } from '../shared/services/imageBlocks';
-import { STORY_DOC_SYSTEM_PROMPT, FEATURE_DOC_SYSTEM_PROMPT } from './prompts';
+import { STORY_DOC_SYSTEM_PROMPT, FEATURE_DOC_SYSTEM_PROMPT } from './prompts/docGenerator';
 import type { GenerateDocParams, StoryDocInput, FeatureDocInput } from '../types';
 
 // ─── User-Message Builder ─────────────────────────────────────────────────────

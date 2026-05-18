@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildImageBlock } from '../shared/services/imageBlocks';
-import { TEST_CASE_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts';
+import { TEST_CASE_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts/testCaseGenerator';
 import type { TestPlan, TestCase, TestCaseType, TestLevel } from '../types';
 
 export interface GenerateTestCasesParams {
