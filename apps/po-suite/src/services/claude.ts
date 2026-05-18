@@ -1,4 +1,5 @@
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
+import { withTimeout } from '../shared/services/withTimeout';
 import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts';
 
 export interface ConversationMessage {
@@ -43,12 +44,14 @@ export async function generateStory(
   rawInput: string,
 ): Promise<{ generatedStory: string; refinementHints: string }> {
   const client = getApiClient();
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 2048,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: rawInput }],
-  });
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2048,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: rawInput }],
+    }),
+  );
   return parseOutput(extractTextContent(response.content));
 }
 
@@ -64,12 +67,14 @@ export async function refineStoryWithHints(
     `Hier ist die aktuelle Story:\n\n${currentStory}\n\n` +
     `Bitte überarbeite die Story auf Basis der folgenden beantworteten Refinement-Hinweise. ` +
     `Behalte das bestehende Output-Template exakt bei.\n\nBeantwortete Hinweise:\n${pairs}`;
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 2048,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userMessage }],
-  });
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2048,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userMessage }],
+    }),
+  );
   return parseOutput(extractTextContent(response.content));
 }
 
@@ -77,11 +82,13 @@ export async function refineStory(
   conversationHistory: ConversationMessage[],
 ): Promise<{ generatedStory: string; refinementHints: string }> {
   const client = getApiClient();
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 2048,
-    system: SYSTEM_PROMPT,
-    messages: conversationHistory,
-  });
+  const response = await withTimeout(
+    client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2048,
+      system: SYSTEM_PROMPT,
+      messages: conversationHistory,
+    }),
+  );
   return parseOutput(extractTextContent(response.content));
 }

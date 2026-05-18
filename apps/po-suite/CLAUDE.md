@@ -1,340 +1,133 @@
 # AI Tools — Frontend (PO Suite)
 
-React 18 + TypeScript + Vite Single-Page-Application. Fünf Tools: **Story Generator** (User-Stories aus Anforderungen), **Goal Generator** (Sprint Goals & PI Objectives), **Text Polisher** (Rohtexte aufbereiten), **Test Case Generator** (Testpläne aus User Stories + Screenshots) und **Doc Generator** (fachtechnische Dokumentation für Confluence). Build läuft vollständig im Browser; kein Backend ausser der Anthropic API.
+React 18 + TypeScript + Vite SPA. Fünf Tools: Story Generator, Goal Generator, Text Polisher, Test Case Generator, Doc Generator. Build läuft vollständig im Browser gegen die Anthropic API (GitHub-Pages-Variante) oder via Express-Backend (Enterprise-Variante).
 
 ## Aktueller Stand
 
 **Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`
 
-**Alle fünf Module vollständig implementiert und getestet.** 448 Vitest-Tests + 10 Playwright-E2E-Tests grün, Build sauber. Hauptbundle 211 kB durch Code-Splitting.
+Alle fünf Module vollständig implementiert. **448 Vitest-Tests + 10 Playwright-E2E-Tests grün, Build sauber** (211 kB Hauptbundle, Code-Splitting via lazy-loaded Pages).
 
-**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — `vite.config.ts` hat `base: '/PO-Suite/'` (muss immer dem GitHub-Repo-Namen entsprechen). Deploy via GitHub Actions auf Push zu `main` (mit Änderung unter `apps/po-suite/**`) oder manuell via `workflow_dispatch`.
+**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — Deploy automatisch auf Push zu `main` mit Änderungen unter `apps/po-suite/**` oder manuell via `workflow_dispatch`.
 
-**Wichtige Konventionen:**
-- Modell überall: `claude-sonnet-4-5` — `max_tokens` tool-spezifisch (siehe pro-Tool-Sektionen unten)
-- System-Prompts leben zentral in `services/prompts.ts` (Single source für Prompt-Engineering)
-- API-Calls: ausschliesslich via `getApiClient()` aus `shared/services/apiClient.ts`
-- Timeout: alle API-Calls via `withTimeout()` aus `shared/services/withTimeout.ts` (60 s default)
-- Multimodale Bild-Blöcke: über `buildImageBlock()` / `buildImageBlocks()` / `uploadedFileToImageBlock()` aus `shared/services/imageBlocks.ts`
-- sessionStorage-Keys: zentral in `shared/services/storageKeys.ts` exportiert (kein Hardcoding)
-- Neues Tool anlegen: Prompt in `prompts.ts` → Service → Hook → Komponenten → Page → `App.tsx` Route (lazy) → `constants/tools.tsx` Eintrag
-- `constants/tools.tsx` ist Single-Source-of-Truth für alle Tool-Definitionen (TopNav + ToolSelectionPage)
-- State-Machine-Pattern für neue Tools: `'input' | 'output'` wie TCG/DocGenerator
-- Pflichtfeld-Validierung: Submit-Button `disabled`, kein Toast/Alert
-- Fehlerbehandlung: `InlineError` im Formular (Input-Screen) und im Output-Panel (bei Regenerierung)
-- Keine direkten sessionStorage-Zugriffe in Komponenten — nur via `getApiClient()`, `AuthContext` oder `useSessionState`
-- Routing: alle Pages lazy-loaded via `React.lazy()` in `App.tsx`, mit `Suspense`-Fallback
-- WCAG 2.1 AA: `focus-visible:ring-2 ring-brand`, `aria-live="polite"` auf `<span>` im Button, `tabIndex={-1}` + `useEffect` für Output-Fokus
+## Letzte Änderungen (Session 2026-05-18)
+
+- **Monorepo-Migration**: `frontend/` → `apps/po-suite/`, `backend/` → `apps/backend/`, Root-`package.json` mit npm Workspaces, geteilte `tsconfig.base.json` + `eslint.config.js`
+- **ESLint** hinzugefügt (TypeScript, React, A11y-Plugins) — 0 Errors, 0 Warnings
+- **`.env`-Setup**: Root-`.env.example` mit Dokumentation; Vite liest via `envDir: '../../'` vom Monorepo-Root
+- **`withTimeout` in allen Services**: Story Generator (`claude.ts`) und Text Polisher (`textPolisher.ts`) nachgezogen — alle fünf Services nutzen nun konsistent `withTimeout()`
+
+## Nächster Schritt
+
+**P1 — `window.confirm()` in DocGeneratorPage ersetzen** (`src/pages/DocGeneratorPage.tsx:52`): Synchrones Dialog für Mode-Wechsel durch eine wiederverwendbare `ConfirmDialog`-Komponente in `src/shared/components/` ersetzen. Muster: controlled Dialog, `open`/`onConfirm`/`onCancel`-Props, `role="alertdialog"`, ARIA-Beschriftung.
+
+## Konventionen
+
+| Was | Wie |
+|---|---|
+| Modell | `claude-sonnet-4-5`, `max_tokens` tool-spezifisch (2048 / 4000 / 6000) |
+| API-Calls | nur via `getApiClient()` aus `shared/services/apiClient.ts` |
+| Timeout | **alle** API-Calls via `withTimeout()` aus `shared/services/withTimeout.ts` (60 s) |
+| System-Prompts | zentral in `services/prompts.ts` — kein Prompt im Service oder Hook |
+| Storage-Keys | zentral in `shared/services/storageKeys.ts` — kein Hardcoding |
+| Neues Tool | Prompt → Service → Hook → Komponenten → Page → `App.tsx` (lazy) → `constants/tools.tsx` |
+| State-Pattern | `'input' | 'output'` State-Machine (Vorbild TCG/DocGen) |
+| Validierung | Submit-Button `disabled`, kein Toast/Alert |
+| Fehler | `InlineError` im Input-Screen und im Output-Panel bei Regenerierung |
+| sessionStorage | kein Direktzugriff in Komponenten — nur via `getApiClient()`, `AuthContext`, `useSessionState` |
 
 ## Entwicklung
 
 ```bash
-npm install
-npm run dev      # Vite Dev-Server auf http://localhost:5173
-npm run build    # tsc + Vite Production Build
-npm run preview  # Build lokal vorschauen
+npm install                    # Root-Install (alle Workspaces)
+npm run dev                    # http://localhost:5173
+npm run test                   # 448 Tests
+npm run build                  # tsc + Vite, muss 0 Warnings haben
+cd apps/po-suite && npm run e2e  # 10 Playwright-Tests
 ```
-
-## Stack
-
-| Layer | Technologie |
-|---|---|
-| UI | React 18, TypeScript, JSX |
-| Styling | Tailwind CSS v3 (eigene Design-Tokens) |
-| Routing | React Router v6 |
-| Server-State | TanStack Query v5 (Mutations + Query-Invalidierung) |
-| API | @anthropic-ai/sdk (`dangerouslyAllowBrowser: true`) |
-| Persistenz | localStorage (Stories), sessionStorage (Auth + API-Key) |
-| Markdown | react-markdown + rehype-sanitize |
-
-## Auth
-
-Single-User-Prototype: gültige Credentials werden aus den Env-Vars `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD` gelesen (siehe `.env.example`). Sind die Vars nicht gesetzt, wirft Login einen klaren Konfigurationsfehler — kein Code-Fallback.
-
-Login setzt `session_user` + optional `anthropic_api_key` in sessionStorage. Logout löscht beides. Der API-Key kann nachträglich über das Settings-Dialog in der TopNav geändert werden.
 
 ## Ordnerstruktur
 
 ```
 src/
-├── App.tsx                     Router + ProtectedLayout (TopNav + Outlet)
-├── index.css                   Global: focus-visible, tabpanel-fade, summary
-├── main.tsx                    ReactDOM root, QueryClient, Provider-Stack
-├── types/index.ts              Story, User, RefinementLog, Response-Typen
-│
-├── context/
-│   └── AuthContext.tsx         Auth-State, login/logout, setApiKey
-│
+├── App.tsx                   Router + ProtectedLayout (TopNav + Outlet)
+├── types/index.ts            Alle geteilten Typen
+├── context/AuthContext.tsx   Auth-State, login/logout, setApiKey
+├── constants/tools.tsx       Single-Source-of-Truth: alle 5 Tool-Definitionen
 ├── shared/
 │   ├── services/
-│   │   ├── apiClient.ts        getApiClient(), extractTextContent()
-│   │   ├── storageKeys.ts      API_KEY_SESSION_KEY, SESSION_USER_KEY (SDK-frei)
-│   │   ├── withTimeout.ts      withTimeout() — Promise-Race mit 60 s default
-│   │   └── imageBlocks.ts      buildImageBlock(), buildImageBlocks(), uploadedFileToImageBlock()
-│   └── components/             Shared Component Library (siehe unten)
-│
+│   │   ├── apiClient.ts      getApiClient(), extractTextContent()
+│   │   ├── storageKeys.ts    Zentrale sessionStorage-Keys (SDK-frei)
+│   │   ├── withTimeout.ts    withTimeout() — 60 s default
+│   │   └── imageBlocks.ts    buildImageBlock(), buildImageBlocks()
+│   └── components/           Button, TextArea, CopyButton, InlineError,
+│                             LoadingSkeleton, MarkdownOutput, PanelHeader,
+│                             RevealButton, ScreenshotUpload, SettingsDialog
 ├── services/
-│   ├── prompts.ts              Zentrale System-Prompts (alle 7 Prompts + buildEmailPolishPrompt)
-│   ├── claude.ts               Story Generator API (generate, refineWithHints, refine, formatStoryMarkdown, parseOutput)
-│   ├── textPolisher.ts         Text Polisher API (polishText, re-export von UseCase/Tone aus types)
-│   ├── testCaseGenerator.ts    Test Case Generator API (multimodal, buildJiraMarkdown, buildSingleTcMarkdown)
-│   ├── docGenerator.ts         Doc Generator API (multimodal, generateDoc)
-│   ├── goalGenerator.ts        Goal Generator API (generateGoals, refineGoal, parseVariants, parseRefinedVariant)
-│   └── storage.ts              localStorage CRUD für Stories + Refinements
-│
-├── hooks/
-│   ├── useStory.ts             useStory, useGenerateStory, useRefineStoryWithHints, useRefineStory
-│   ├── useStories.ts           useStories (Liste), useDeleteStory
-│   ├── useTextPolisher.ts      usePolishText Mutation
-│   ├── useTestCaseGenerator.ts useGenerateTestCases Mutation
-│   ├── useDocGenerator.ts      useGenerateDoc Mutation
-│   ├── useGoalGenerator.ts     useGenerateGoals, useRefineGoal Mutations
-│   ├── useCopyToClipboard.ts   copy(text), copied-State mit auto-reset
-│   ├── useDebounce.ts          useDebounce (debounced side-effect)
-│   └── useSessionState.ts      sessionStorage-backed useState
-│
-├── constants/
-│   └── tools.tsx               Single-Source-of-Truth: TOOLS[], ToolDef, CATEGORY_LABELS, CATEGORY_ORDER
-│
-├── pages/
-│   ├── AuthPage.tsx            Login-Seite → /tools
-│   ├── ToolSelectionPage.tsx   Kategorie-Sektionen + TileStrips (import aus constants/tools.tsx)
-│   ├── WorkspacePage.tsx       Story Generator (3-Panel via AppShell)
-│   ├── TextPolisherPage.tsx    Text Polisher (Split-View, Use-Case-Tabs)
-│   ├── TestCaseGeneratorPage.tsx  Test Case Generator (2-Screen: Input → Output)
-│   ├── DocGeneratorPage.tsx    Doc Generator (2-Screen: Input → Output)
-│   └── GoalGeneratorPage.tsx   Goal Generator (2-Screen, 2-Tab: Sprint Goal / PI Objective)
-│
-└── components/
-    ├── auth/LoginForm.tsx
-    ├── layout/AppShell.tsx     3-Spalten Desktop + Mobile Tabs (fade-animiert)
-    ├── layout/TopNav.tsx       Sticky, Underline-Tabs + Icons, Kontext-Label, aria-current
-    ├── home/ToolTile.tsx       snap-start Tile (w-200px), hover:border-brand
-    ├── home/TileStrip.tsx      snap-x Strip, ResizeObserver, Arrow-Buttons mit Gradient-Fade
-    ├── sidebar/                Sidebar, SearchBox, StoryListItem
-    ├── story-generator/        StoryInputPanel, StoryOutputPanel, InsightsPanel
-    ├── text-polisher/          TextPolisherInputPanel, TextPolisherOutputPanel,
-    │                           UseCaseSelector, ToneSelector
-    ├── test-case-generator/    TestCaseInputPanel, TestCaseOutputPanel,
-    │                           TestCaseCard, TestCaseSummaryBlock,
-    │                           TestCaseFilterBar, constants.ts
-    ├── doc-generator/          DocGeneratorInputPanel, DocGeneratorOutputPanel,
-    │                           DocModeSelector
-    └── goal-generator/         GoalTabSelector, SprintGoalInputPanel, PiObjectiveInputPanel,
-                                GoalGeneratorOutputPanel, GoalVariantCard
+│   ├── prompts.ts            Alle System-Prompts (Single Source)
+│   ├── claude.ts             Story Generator
+│   ├── textPolisher.ts       Text Polisher
+│   ├── testCaseGenerator.ts  Test Case Generator
+│   ├── docGenerator.ts       Doc Generator
+│   ├── goalGenerator.ts      Goal Generator
+│   └── storage.ts            localStorage CRUD (Stories)
+├── hooks/                    useStory, useStories, useTextPolisher,
+│                             useTestCaseGenerator, useDocGenerator,
+│                             useGoalGenerator, useCopyToClipboard,
+│                             useDebounce, useSessionState
+└── pages/                    AuthPage, ToolSelectionPage, WorkspacePage,
+                              TextPolisherPage, TestCaseGeneratorPage,
+                              DocGeneratorPage, GoalGeneratorPage
 ```
 
-## Shared Component Library
+## Tool-Details
 
-`src/shared/components/` — alle via Barrel-Export `index.ts` importierbar.
-
-| Komponente | Props (Auswahl) | Verwendung |
+| Tool | max_tokens | Besonderheiten |
 |---|---|---|
-| `Button` | `variant` (primary/secondary/outline/ghost), `size` (sm/md), `loading`, `disabled` | Überall |
-| `TextArea` | `rows`, `autoGrow` (auto-height via scrollHeight), `disabled` | Input-Panels |
-| `CopyButton` | `text`, `label` | StoryOutputPanel, TextPolisherOutputPanel (vollbreiter Primary-Button am Ende des Outputs) |
-| `LoadingSkeleton` | `lines` | Output- und Insights-Panel |
-| `InlineError` | `message` | Formulare, Output-Panels |
-| `SettingsDialog` | `open`, `onClose` | TopNav |
-| `MarkdownOutput` | `children: string` | Beide Output-Panels |
-| `PanelHeader` | `title`, `id?`, `action?` (ReactNode) | Alle 5 Panels |
-| `RevealButton` | `show`, `onToggle`, `label` | LoginForm, SettingsDialog |
-| `ScreenshotUpload` | `files`, `onChange`, `disabled`, `maxFiles` | TestCaseInputPanel, DocGeneratorInputPanel (max 3 Story / max 1 Feature) |
+| Story Generator | 2048 | AppShell (3-Panel), localStorage-Persist, Refinement-Loop mit Hint-Paaren |
+| Text Polisher | 2048 | 3 Use Cases (email/meeting/freetext), sessionStorage-Persist, Ton-Auswahl nur bei email |
+| Test Case Generator | 4000 | JSON-Output, Jira-Export, bis zu 3 Screenshots, ephemer (kein Persist) |
+| Doc Generator | 4000/6000 | 2 Modi (story/feature), Markdown-Output, Screenshots, `window.confirm()` bei Mode-Wechsel ⚠ |
+| Goal Generator | 2000/1000, 6000/2000 | 2 Tabs (sprint-goal/pi-objective), 2–3 Varianten + Refinement-Loop |
+
+## Auth
+
+Env-Var-Credentials (`VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD`) aus `.env.local` am Monorepo-Root (Vite `envDir: '../../'`). Bei fehlenden Vars wirft Login einen klaren Konfigurationsfehler. API-Key wird nur im Login-Formular eingegeben und in sessionStorage gehalten — nie in `.env`.
 
 ## Design-Tokens (Tailwind)
 
 ```
-brand        #1C2B1E  (dark green) / brand-dark / brand-light #E8EFE9
-canvas       #F5F0E8  (Hintergrund Seiten)
-surface      #FAFAF8  (Karten, Panels, Inputs)
-ink          #1C2420  / ink-secondary #5C5852 / ink-tertiary #6B6860
-edge         #DDD8CF  (Rahmen) / edge-2 #EBE6DA (hover-Flächen)
-font-serif   Playfair Display (Überschriften)
-font-sans    Inter (Fliesstext)
+brand      #1C2B1E  / brand-light #E8EFE9
+canvas     #F5F0E8  (Seiten-Hintergrund)
+surface    #FAFAF8  (Karten, Panels)
+ink        #1C2420  / ink-secondary #5C5852
+edge       #DDD8CF  / edge-2 #EBE6DA
+font-serif Playfair Display  /  font-sans Inter
 ```
-
-## API-Klient & Shared Service-Helpers
-
-`src/shared/services/`:
-- **`apiClient.ts`** — `getApiClient()` (liest `anthropic_api_key` aus sessionStorage, wirft bei fehlendem Key), `extractTextContent(content)` (filtert TextBlocks aus der Anthropic-Response)
-- **`storageKeys.ts`** — `API_KEY_SESSION_KEY` und `SESSION_USER_KEY` als zentrale Konstanten (SDK-frei → kein Bundle-Pull-In bei Imports aus eager-loaded Code wie `AuthContext`)
-- **`withTimeout.ts`** — `withTimeout(promise, ms = 60_000)` für alle API-Calls; wirft Fehlermeldung mit dynamischer Sekundenanzeige
-- **`imageBlocks.ts`** — `buildImageBlock(base64, mediaType)`, `buildImageBlocks(uploads)`, `uploadedFileToImageBlock(uf)` — typisierte Anthropic-`ImageBlockParam`-Erzeugung für multimodale Calls
-
-Alle Services importieren ausschliesslich `getApiClient()` für API-Zugriff — kein direkter sessionStorage-Zugriff in Komponenten oder Services.
-
-## Story Generator
-
-**Modell:** `claude-sonnet-4-5`, `max_tokens: 2048`
-
-**Output-Format:** Markdown-Template mit fixen Sektionen (`**Titel**`, `**Ausgangslage**`, `**Akzeptanzkriterien**`, `**Weitere Informationen**`, `**Refinement Hinweise**`). Die Sektion `**Refinement Hinweise**` wird beim Parsen (`claude.ts: parseOutput`) vom Haupt-Story-Text abgetrennt und separat in `Story.refinementHints` gespeichert.
-
-**Refinement-Flow:**
-1. `useRefineStoryWithHints` — übergibt beantwortete Hint-Paare (Frage + Antwort)
-2. `useRefineStory` — freie Instruktion, baut vollständige Conversation-History auf
-
-**Persistenz:** localStorage (`sg_stories`, `sg_refinements`). Keys sind `crypto.randomUUID()`.
-
-## Text Polisher
-
-**Modell:** `claude-sonnet-4-5`, `max_tokens: 2048`
-
-**Use Cases:** `email` (dynamischer System-Prompt mit Ton-Parameter), `meeting` (Protokoll-Format), `freetext` (Lektor-Modus). Die drei System-Prompts verbieten explizit das Erfinden von Inhalten; unklare Stellen werden mit `[Prüfen]` markiert.
-
-**Ton-Auswahl** (`formell` / `neutral` / `informell`) ist nur beim `email` Use-Case sichtbar.
-
-**Output-Formate:**
-- `email`: `Betreff: [Zeile]` (Zeile 1), Leerzeile, dann Fliesstext-Body (Anrede + Haupttext + Grussformel + `[Absender]`). Kein Markdown, keine Labels.
-- `meeting`: Markdown-Protokoll mit Abschnitten `**Datum**`, `**Teilnehmer**`, `**Kernpunkte**`, `**Beschlüsse**`, `**Next Steps**` — nur Abschnitte mit vorhandenen Infos.
-- `freetext`: Bullet Points (`•`), jeder auf eigener Zeile mit nachfolgender Leerzeile.
-
-## Test Case Generator
-
-**Modell:** `claude-sonnet-4-5`, `max_tokens: 4000`
-
-**Multimodal:** Akzeptiert bis zu 3 Screenshots (PNG/JPG/WebP, max. 5 MB) via `buildImageBlock()` aus `shared/services/imageBlocks.ts`.
-
-**Timeout:** 60 Sekunden via `withTimeout()` aus `shared/services/withTimeout.ts`.
-
-**Output:** JSON-Objekt (`TestPlan`) — kein Markdown. Code-Fence-Stripping im Parser (`/^```json\s*/i`).
-
-**Input-Quellen:** `story_ak` (Pflichtfeld Story-Text), `screenshot` (optional), `test_context` (optionales Accordion).
-
-**Export:** `buildJiraMarkdown(plan)` (vollständiger Plan), `buildSingleTcMarkdown(tc)` (einzelner TC).
-
-**Filter:** Type-Chips + Level-Segmented-Control (interner State, kein Persist). "Alles kopieren" exportiert immer den ungefilterten Plan.
-
-## Doc Generator
-
-**Modell:** `claude-sonnet-4-5`, `max_tokens: 4000` (Story) / `6000` (Feature)
-
-**Modi:** `story` (Story-Dokumentation) und `feature` (Feature-Dokumentation). Moduswahl via `DocModeSelector` (`role="tablist"`, Arrow-Key-Navigation).
-
-**Multimodal:** Akzeptiert Screenshots via `buildImageBlocks()` (max. 3 für Story, max. 1 für Feature). Identisches Muster wie Test Case Generator.
-
-**Timeout:** 60 Sekunden via `withTimeout()`.
-
-**Output:** Reines Markdown (kein JSON-Parsing). Sektionen des Outputs werden durch optionale Felder gesteuert — leere optionale Felder im Input führen dazu, dass die entsprechenden Sektionen im Output weggelassen werden.
-
-**Pflichtfelder:** Story = Titel + Beschreibung; Feature = Titel + Beschreibung + Enthaltene Stories. Submit-Button ist `disabled` bis Pflichtfelder gefüllt.
-
-**Fehlerbehandlung:** API-Fehler auf Input-Screen via `InlineError` (unter Submit-Button). Fehler nach "Neu generieren" auf Output-Screen via `error`-Prop in `DocGeneratorOutputPanel` (unter dem "Neu generieren"-Button).
-
-**Layout:** 2-Screen State-Machine (`'input' | 'output'`) — konsistent mit TCG. Mode-Wechsel mit `window.confirm()` wenn Eingaben vorhanden.
-
-**Typen:** `DocMode`, `StoryDocInput`, `FeatureDocInput`, `GenerateDocParams` (Discriminated Union) in `src/types/index.ts`.
-
-**Service:** `src/services/docGenerator.ts` — `generateDoc()` (interne Builder `buildStoryText`/`buildFeatureText` für User-Messages).
-
-**Hook:** `src/hooks/useDocGenerator.ts` — `useGenerateDoc()` (TanStack Query `useMutation`).
-
-## Goal Generator
-
-**Modell:** `claude-sonnet-4-5`
-
-**Modi:** `sprint-goal` (`max_tokens: 2000` Generate / `1000` Refine, optionaler Backlog-Screenshot) und `pi-objective` (`max_tokens: 6000` Generate / `2000` Refine, kein Screenshot).
-
-**Output:** 2–3 Varianten mit Qualitätsbegründung und optionaler Schwachstelle. Parser `parseVariants()` teilt am `Variante N`-Header auf, behandelt PI-Objective-Format mit `---` Separator. `parseRefinedVariant()` für single-Variant-Refinement-Responses.
-
-**Refinement-Loop:** Gewählte Variante + Hinweis → neue Variante mit identischer Struktur. Conversation-History wird im Hook-State gehalten und an den nächsten Refinement-Call angehängt.
-
-**Service:** `src/services/goalGenerator.ts` — `generateGoals()`, `refineGoal()`, `parseVariants()`, `parseRefinedVariant()`.
-
-**Hook:** `src/hooks/useGoalGenerator.ts` — `useGenerateGoals()`, `useRefineGoal()`.
-
-## Accessibility (WCAG 2.1 AA)
-
-- Skip-Link auf `#main-content` (App.tsx, erstes fokussierbares Element)
-- `<header aria-label>`, `<main id="main-content">`, `role="region"` auf Output-Panels
-- `role="tablist/tab"` in AppShell (Mobile), UseCaseSelector; Arrow-Key-Navigation
-- `role="radiogroup/radio"` in ToneSelector; Arrow-Key-Navigation
-- `role="alert" aria-live="assertive"` auf InlineError
-- `role="status" aria-live="polite"` auf LoadingSkeleton und Refinement-Banner
-- Programmatischer Fokus nach Generierung (beide Output-Panels, `tabIndex={-1}`)
-- `RevealButton`: `min-h-[44px] min-w-[44px]` (WCAG 2.5.5 Touch Target)
-- Fokus-Ring: weiss (`ring-white`) auf dunklem Brand-Hintergrund (ToneSelector aktiver Button)
 
 ## Tests
 
-Vitest + @testing-library/react + jsdom. Konfiguration: `vitest.config.ts`, Setup: `src/test/setup.ts`.
+448 Tests in 42 Dateien — Vitest + @testing-library/react + jsdom.
 
-```bash
-npm test              # Single-Run (npm run test:run als Alias)
-npm run test:watch    # Watch-Mode
-npm run test:coverage # Coverage-Report
-```
+**Muster:**
+- Service-Tests: `vi.mock('shared/services/apiClient')` → `messagesCreateMock`
+- Page-Tests: `vi.mock('../services/...')` + `QueryClientProvider`-Wrapper
+- Auth-Tests: Credentials via `vitest.config.ts → test.env` (kein `vi.stubEnv`)
+- Copy-Tests: `Object.defineProperty(navigator, 'clipboard', ...)` + `fireEvent.click`
 
-| Datei | Was getestet |
-|---|---|
-| `claude.test.ts` | `parseOutput` — Story/Hints-Trennung |
-| `storage.test.ts` | localStorage CRUD für Stories + Refinements |
-| `textPolisher.test.ts` | `polishText` — 3 Use Cases, E-Mail-Format-Validierung, API-Fehler |
-| `testCaseGenerator.test.ts` | `buildJiraMarkdown`, `buildSingleTcMarkdown`, `getAvailableTypes/Levels` |
-| `docGenerator.test.ts` | Mode-Routing (story=4000/feature=6000), User-Message-Mapping, Multimodal, Empty-Response-Errors |
-| `goalGenerator.test.ts` | `parseVariants` (Sprint + PI), `parseRefinedVariant`, `generateGoals` Mode-Routing, `refineGoal` Conversation-History |
-| `useTextPolisher.test.ts` | `usePolishText` Mutation — Aufruf, Fehler |
-| `useTestCaseGenerator.test.ts` | `useGenerateTestCases` Mutation — Aufruf, Fehler |
-| `useDocGenerator.test.ts` | `useGenerateDoc` Mutation — Aufruf, Fehler |
-| `useGoalGenerator.test.ts` | `useGenerateGoals` + `useRefineGoal` Mutations |
-| `useCopyToClipboard.test.ts` | copied-State, Timeout, Clipboard-API |
-| `AuthContext.test.tsx` | login/logout/setApiKey, sessionStorage-Persistenz |
-| `LoginForm.test.tsx` | Formular-Rendering, Passwort/API-Key-Reveal, Submit, Fehleranzeige |
-| `Button.test.tsx` | Varianten, Loading-State, Disabled |
-| `InlineError.test.tsx` | ARIA role="alert", Nachricht |
-| `CopyButton.test.tsx` | Copy-Flow, copied-Feedback |
-| `RevealButton.test.tsx` | Toggle-Sichtbarkeit, ARIA |
-| `SettingsDialog.test.tsx` | Dialog Open/Close, API-Key-Speicherung |
-| `ScreenshotUpload.test.tsx` | Upload, Validierung, Remove, ARIA |
-| `AppShell.test.tsx` | 3-Panel-Layout, Mobile-Tabs, Keyboard-Navigation |
-| `TopNav.test.tsx` | Sticky-Nav, Tool-Links, aria-current, Settings-Dialog |
-| `UseCaseSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation |
-| `ToneSelector.test.tsx` | Radio-Gruppe, ARIA, Keyboard-Navigation |
-| `TextPolisherInputPanel.test.tsx` | Felder, Submit-Disabled, Use-Case- und Ton-Übergabe |
-| `TextPolisherOutputPanel.test.tsx` | Loading-/Output-Zustand, Copy-Button, A11y |
-| `StoryOutputPanel.test.tsx` | Loading-/Output-Zustand, Refinement-Hints, Copy |
-| `TestCaseCard.test.tsx` | Stammdaten, Flags, Copy |
-| `TestCaseFilterBar.test.tsx` | Typ-Filter, Level-Filter, Ergebnis-Zähler |
-| `DocModeSelector.test.tsx` | Tab-Rendering, ARIA, Keyboard-Navigation (ArrowLeft/Right/Home/End) |
-| `DocGeneratorInputPanel.test.tsx` | Pflichtfelder Story/Feature, Ladezustand, Fehleranzeige, Moduswechsel |
-| `DocGeneratorOutputPanel.test.tsx` | Loading-/Output-/Error-Zustand, Buttons, A11y (aria-live, aria-busy, tabIndex) |
-| `GoalGeneratorOutputPanel.test.tsx` | Variants-View, Refining-View, mode-spez. Rendering, Copy, A11y |
-| `AuthPage.test.tsx` | Login-Form-Rendering, Redirect bei eingeloggtem User |
-| `ToolSelectionPage.test.tsx` | Alle Tools gerendert, Navigation per Klick |
-| `WorkspacePage.test.tsx` | AppShell mit 3 Panels gerendert |
-| `TextPolisherPage.test.tsx` | Submit, Output, UseCase-Wechsel, Persistenz, Clear |
-| `DocGeneratorPage.test.tsx` | Submit, Output, Reset, Mode-Wechsel |
-| `TestCaseGeneratorPage.test.tsx` | Submit → Output, Fehler, Reset |
-| `GoalGeneratorPage.test.tsx` | Submit → Output, Tab-Wechsel, Fehler, Reset |
+## Accessibility (WCAG 2.1 AA)
 
-**Service-Tests** mocken `getApiClient` via `vi.mock('shared/services/apiClient')` mit gemeinsamem `messagesCreateMock`.
+Skip-Link → `#main-content`, `role="tablist/tab"` + Arrow-Key-Navigation in AppShell/UseCaseSelector/DocModeSelector, `role="radiogroup/radio"` in ToneSelector, `role="alert"` auf InlineError, `role="status"` auf LoadingSkeleton, programmatischer Fokus nach Generierung (`tabIndex={-1}` + `useEffect`), Touch-Targets ≥ 44×44 px.
 
-**Page-Tests** mocken den Service direkt (`vi.mock('../services/...')`) und benötigen einen `QueryClientProvider`-Wrapper.
+## Bekannte Eigenheiten
 
-**Auth-Tests** (AuthContext): Credentials werden via `vitest.config.ts` → `test.env` gesetzt; kein vi.stubEnv nötig.
-
-**Output-Panel-Tests** für Copy-Funktionalität: `Object.defineProperty(navigator, 'clipboard', ...)` + `fireEvent.click` (umgeht userEvents Clipboard-Override).
-
-**Gesamt: 448 Tests in 42 Test-Dateien**
+- **Story Generator abweichendes Layout**: Einziger Tool mit AppShell (3-Panel-Layout) statt 2-Screen-State-Machine — historisch gewachsen, nicht unified.
+- **`window.confirm()` in DocGenerator**: `src/pages/DocGeneratorPage.tsx:52` — nicht testbar in jsdom, blockiert Keyboard. P1-Schuld.
+- **Enterprise-httpClient nicht unit-getestet**: `src/shared/services/httpClient.ts` ist nur via `vitest.enterprise.config.ts` (15 Tests) abgedeckt — keine Service-Level-Unit-Tests.
+- **`dangerouslyAllowBrowser: true`**: Nur für Single-User-Prototypen, API-Key liegt im Browser.
 
 ## Claude Code Konfiguration
 
-**Hooks** (`.claude/settings.json`):
+**Hooks** (`.claude/settings.json`): `SessionStart` → `session-start.sh` (npm install bei Remote), `PostToolUse` → Test-Run nach `git commit`.
 
-| Hook | Auslöser | Aktion |
-|---|---|---|
-| `SessionStart` | Sitzungsstart | `session-start.sh` — führt `npm install` aus, wenn `CLAUDE_CODE_REMOTE=true` |
-| `PostToolUse` | Bash-Call mit `git commit*` | Automatischer Test-Run nach Commit; Ergebnis als `systemMessage` |
-
-**Slash Commands** (`.claude/commands/`):
-
-| Command | Zweck |
-|---|---|
-| `/new-component` | Konventionen für neue React-Komponenten (Design-Tokens, ARIA, Imports) |
-| `/new-service` | Konventionen für neue API-Services (`getApiClient()`, Modell, max_tokens, Parsing) |
-
-## Bekannte Einschränkungen
-
-- **Auth ist ein Prototype**: Credentials werden strikt aus `VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD` gelesen — kein Code-Fallback. Bei fehlenden Env-Vars wirft Login einen Konfigurationsfehler. Für Multi-User-Betrieb durch echte Authentifizierung ersetzen (Supabase empfohlen).
-- **API-Key im Browser**: `dangerouslyAllowBrowser: true` — nur für Single-User-Prototypen geeignet.
-- **Text Polisher Zustand**: Wird via `useSessionState` in sessionStorage persistiert — bleibt innerhalb einer Browser-Session erhalten, wird beim Tab-Schliessen verworfen.
-- **Test Case Generator Zustand**: Ephemer (kein Persist). Screenshots sind nicht JSON-serialisierbar; State lebt nur in der aktuellen Page-Instanz.
+**Slash Commands**: `/new-component` (React-Konventionen), `/new-service` (Service-Konventionen inkl. `withTimeout`-Pflicht).
