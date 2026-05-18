@@ -6,7 +6,7 @@ React 18 + TypeScript + Vite SPA. Fünf Tools: Story Generator, Goal Generator, 
 
 **Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`
 
-Alle fünf Module vollständig implementiert. **448 Vitest-Tests + 10 Playwright-E2E-Tests grün, Build sauber** (211 kB Hauptbundle, Code-Splitting via lazy-loaded Pages).
+Alle fünf Module vollständig implementiert. **457 Vitest-Tests + 10 Playwright-E2E-Tests grün, Build sauber** (211 kB Hauptbundle, Code-Splitting via lazy-loaded Pages).
 
 **GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — Deploy automatisch auf Push zu `main` mit Änderungen unter `apps/po-suite/**` oder manuell via `workflow_dispatch`.
 
@@ -19,7 +19,7 @@ Alle fünf Module vollständig implementiert. **448 Vitest-Tests + 10 Playwright
 
 ## Nächster Schritt
 
-**P1 — `window.confirm()` in DocGeneratorPage ersetzen** (`src/pages/DocGeneratorPage.tsx:52`): Synchrones Dialog für Mode-Wechsel durch eine wiederverwendbare `ConfirmDialog`-Komponente in `src/shared/components/` ersetzen. Muster: controlled Dialog, `open`/`onConfirm`/`onCancel`-Props, `role="alertdialog"`, ARIA-Beschriftung.
+**P1 — `httpClient.ts` Unit-Tests** (`src/shared/services/httpClient.ts`): Enterprise-Path ist nur via `vitest.enterprise.config.ts` (15 Integration-Tests) abgedeckt — keine isolierten Unit-Tests für `fetchApi`, `fetchApiGet`, `fetchApiDelete`, Timeout-Verhalten und 401-Handling.
 
 ## Konventionen
 
@@ -41,7 +41,7 @@ Alle fünf Module vollständig implementiert. **448 Vitest-Tests + 10 Playwright
 ```bash
 npm install                    # Root-Install (alle Workspaces)
 npm run dev                    # http://localhost:5173
-npm run test                   # 448 Tests
+npm run test                   # 457 Tests
 npm run build                  # tsc + Vite, muss 0 Warnings haben
 cd apps/po-suite && npm run e2e  # 10 Playwright-Tests
 ```
@@ -87,7 +87,7 @@ src/
 | Story Generator | 2048 | AppShell (3-Panel), localStorage-Persist, Refinement-Loop mit Hint-Paaren |
 | Text Polisher | 2048 | 3 Use Cases (email/meeting/freetext), sessionStorage-Persist, Ton-Auswahl nur bei email |
 | Test Case Generator | 4000 | JSON-Output, Jira-Export, bis zu 3 Screenshots, ephemer (kein Persist) |
-| Doc Generator | 4000/6000 | 2 Modi (story/feature), Markdown-Output, Screenshots, `window.confirm()` bei Mode-Wechsel ⚠ |
+| Doc Generator | 4000/6000 | 2 Modi (story/feature), Markdown-Output, Screenshots, `ConfirmDialog` bei Mode-Wechsel |
 | Goal Generator | 2000/1000, 6000/2000 | 2 Tabs (sprint-goal/pi-objective), 2–3 Varianten + Refinement-Loop |
 
 ## Auth
@@ -107,7 +107,7 @@ font-serif Playfair Display  /  font-sans Inter
 
 ## Tests
 
-448 Tests in 42 Dateien — Vitest + @testing-library/react + jsdom.
+457 Tests in 43 Dateien — Vitest + @testing-library/react + jsdom.
 
 **Muster:**
 - Service-Tests: `vi.mock('shared/services/apiClient')` → `messagesCreateMock`
@@ -122,8 +122,7 @@ Skip-Link → `#main-content`, `role="tablist/tab"` + Arrow-Key-Navigation in Ap
 ## Bekannte Eigenheiten
 
 - **Story Generator abweichendes Layout**: Einziger Tool mit AppShell (3-Panel-Layout) statt 2-Screen-State-Machine — historisch gewachsen, nicht unified.
-- **`window.confirm()` in DocGenerator**: `src/pages/DocGeneratorPage.tsx:52` — nicht testbar in jsdom, blockiert Keyboard. P1-Schuld.
-- **Enterprise-httpClient nicht unit-getestet**: `src/shared/services/httpClient.ts` ist nur via `vitest.enterprise.config.ts` (15 Tests) abgedeckt — keine Service-Level-Unit-Tests.
+- **Enterprise-httpClient nicht unit-getestet**: `src/shared/services/httpClient.ts` ist nur via `vitest.enterprise.config.ts` (15 Tests) abgedeckt — keine isolierten Unit-Tests. P1-Schuld.
 - **`dangerouslyAllowBrowser: true`**: Nur für Single-User-Prototypen, API-Key liegt im Browser.
 
 ## Claude Code Konfiguration
