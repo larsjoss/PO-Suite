@@ -4,7 +4,7 @@ import {
   buildEmailPolishPrompt,
   MEETING_POLISH_PROMPT,
   FREETEXT_POLISH_PROMPT,
-} from './prompts';
+} from './prompts/textPolisher';
 import type { UseCase, Tone } from '../types';
 
 // ─── API call ─────────────────────────────────────────────────────────────────

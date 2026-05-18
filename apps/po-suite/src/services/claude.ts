@@ -1,6 +1,6 @@
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
-import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts';
+import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts/story';
 
 export interface ConversationMessage {
   role: 'user' | 'assistant';

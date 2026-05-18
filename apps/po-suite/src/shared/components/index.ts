@@ -8,3 +8,4 @@ export { MarkdownOutput } from './MarkdownOutput';
 export { PanelHeader } from './PanelHeader';
 export { RevealButton } from './RevealButton';
 export { ScreenshotUpload } from './ScreenshotUpload';
+export { ConfirmDialog } from './ConfirmDialog';

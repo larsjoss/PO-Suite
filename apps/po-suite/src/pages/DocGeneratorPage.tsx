@@ -1,8 +1,9 @@
-import { type FormEvent, useEffect, useRef, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import type { DocMode, StoryDocInput, FeatureDocInput, UploadedFile } from '../types';
 import { useGenerateDoc } from '../hooks/useDocGenerator';
 import { DocGeneratorInputPanel } from '../components/doc-generator/DocGeneratorInputPanel';
 import { DocGeneratorOutputPanel } from '../components/doc-generator/DocGeneratorOutputPanel';
+import { ConfirmDialog } from '../shared/components';
 
 const EMPTY_STORY: StoryDocInput = {
   title: '',
@@ -31,26 +32,42 @@ function hasFeatureInput(input: FeatureDocInput): boolean {
   return !!(input.title.trim() || input.description.trim() || input.stories.trim() || input.confluenceSpec.trim() || input.code.trim());
 }
 
+type PendingConfirm = { title: string; message: string; onConfirm: () => void } | null;
+
 export function DocGeneratorPage() {
   const [mode, setMode] = useState<DocMode>('story');
   const [screen, setScreen] = useState<'input' | 'output'>('input');
   const [storyInput, setStoryInput] = useState<StoryDocInput>(EMPTY_STORY);
   const [featureInput, setFeatureInput] = useState<FeatureDocInput>(EMPTY_FEATURE);
   const [screenshots, setScreenshots] = useState<UploadedFile[]>([]);
+  const [confirm, setConfirm] = useState<PendingConfirm>(null);
 
   const outputRef = useRef<HTMLDivElement>(null);
   const mutation = useGenerateDoc();
 
-  // Programmatischer Fokus auf Output nach Screen-Transition (WCAG 2.4.3)
   useEffect(() => {
     if (screen === 'output') outputRef.current?.focus();
   }, [screen]);
+
+  const dismissConfirm = useCallback(() => setConfirm(null), []);
 
   function handleModeChange(newMode: DocMode) {
     if (newMode === mode) return;
     const hasInput =
       mode === 'story' ? hasStoryInput(storyInput) : hasFeatureInput(featureInput);
-    if (hasInput && !window.confirm('Beim Wechsel des Modus gehen die Eingaben verloren. Fortfahren?')) {
+    if (hasInput) {
+      setConfirm({
+        title: 'Modus wechseln',
+        message: 'Beim Wechsel des Modus gehen die Eingaben verloren. Fortfahren?',
+        onConfirm: () => {
+          setMode(newMode);
+          setStoryInput(EMPTY_STORY);
+          setFeatureInput(EMPTY_FEATURE);
+          setScreenshots([]);
+          mutation.reset();
+          setConfirm(null);
+        },
+      });
       return;
     }
     setMode(newMode);
@@ -87,16 +104,29 @@ export function DocGeneratorPage() {
   }
 
   function handleReset() {
-    if (!window.confirm('Formular und Output zurücksetzen?')) return;
-    setScreen('input');
-    setStoryInput(EMPTY_STORY);
-    setFeatureInput(EMPTY_FEATURE);
-    setScreenshots([]);
-    mutation.reset();
+    setConfirm({
+      title: 'Zurücksetzen',
+      message: 'Formular und Output zurücksetzen?',
+      onConfirm: () => {
+        setScreen('input');
+        setStoryInput(EMPTY_STORY);
+        setFeatureInput(EMPTY_FEATURE);
+        setScreenshots([]);
+        mutation.reset();
+        setConfirm(null);
+      },
+    });
   }
 
   return (
     <main id="main-content" className="flex-1 overflow-auto bg-canvas">
+      <ConfirmDialog
+        open={confirm !== null}
+        title={confirm?.title ?? ''}
+        message={confirm?.message ?? ''}
+        onConfirm={confirm?.onConfirm ?? dismissConfirm}
+        onCancel={dismissConfirm}
+      />
       {screen === 'input' ? (
         <div className="max-w-3xl mx-auto px-6 py-8">
           <DocGeneratorInputPanel
