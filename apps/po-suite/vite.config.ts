@@ -5,5 +5,6 @@ const isEnterprise = process.env.VITE_TARGET === 'enterprise';
 
 export default defineConfig({
   base: isEnterprise ? '/' : '/PO-Suite/',
+  envDir: '../../',
   plugins: [react()],
 });

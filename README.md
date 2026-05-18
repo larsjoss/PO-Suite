@@ -59,6 +59,21 @@ Zwei Deployment-Varianten aus derselben Codebasis: **GitHub Pages** (browser-onl
 
 ---
 
+## Lokales .env-Setup
+
+Beim ersten Checkout:
+
+```bash
+cp .env.example .env.local
+# .env.local öffnen und VITE_AUTH_EMAIL / VITE_AUTH_PASSWORD setzen
+```
+
+`.env.local` ist gitignored und wird nie committet. Vite liest die Datei beim Start des Dev-Servers automatisch vom Repo-Root ein.
+
+> **Anthropic API-Key:** Der Key gehört **nicht** in `.env.local`. Er wird im Login-Formular eingegeben und nur in `sessionStorage` gehalten — nie als Build-Zeit-Variable eingebettet. Details: [`.env.example`](.env.example).
+
+---
+
 ## Schnellstart
 
 ### GitHub-Pages-Variante (browser-only)
@@ -73,8 +88,7 @@ npm run build              # Production-Build (VITE_TARGET=github ist Default)
 npm run e2e                # Playwright Smoke-Tests (einmalig: npx playwright install chromium)
 ```
 
-Vor dem ersten Login: `.env`-Datei mit `VITE_AUTH_EMAIL` und `VITE_AUTH_PASSWORD` anlegen
-(siehe [`apps/po-suite/.env.example`](apps/po-suite/.env.example)). Den Anthropic API-Key (`sk-ant-…`) im Login-Formular hinterlegen.
+Vor dem ersten Login `.env.local` am Root anlegen (siehe oben). Den Anthropic API-Key (`sk-ant-…`) danach im Login-Formular eingeben.
 
 ### Enterprise-Variante (Backend + PostgreSQL)
 
