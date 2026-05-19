@@ -116,8 +116,8 @@ export function ScreenshotUpload({ files, onChange, disabled, maxFiles = 3 }: Pr
             'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-sm transition-colors',
             disabled
               ? 'opacity-50 cursor-not-allowed'
-              : 'cursor-pointer hover:bg-edge-2',
-            dragOver ? 'border-brand bg-brand-light' : 'border-edge',
+              : 'cursor-pointer hover:border-brand hover:bg-brand-light/40',
+            dragOver ? 'border-brand bg-brand-light' : 'border-edge bg-brand-light/20',
           ].join(' ')}
         >
           <svg
