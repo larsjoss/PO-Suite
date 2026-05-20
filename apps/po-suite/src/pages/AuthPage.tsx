@@ -11,8 +11,8 @@ export function AuthPage() {
     <div className="min-h-screen bg-canvas flex items-center justify-center p-6">
       <main className="w-full max-w-sm" aria-label="Anmeldung">
         <div className="text-center mb-10">
-          <h1 className="font-serif text-3xl font-semibold text-ink">AI Tools</h1>
-          <p className="text-sm text-ink-secondary mt-2">Story · Goal · Text Polisher · Test Cases · Docs</p>
+          <h1 className="font-serif text-3xl font-semibold text-ink">PO-Suite</h1>
+          <p className="text-sm text-ink-secondary mt-2">Storys · Goals · Polished Text · Test Cases · Docs</p>
         </div>
 
         <div className="bg-surface rounded-xl shadow-sm border border-edge p-8">

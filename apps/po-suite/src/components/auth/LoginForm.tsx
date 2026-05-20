@@ -84,7 +84,6 @@ export function LoginForm() {
               className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
               placeholder="sk-ant-…"
               autoComplete="off"
-              aria-describedby="login-apikey-hint"
             />
             <RevealButton
               show={showApiKey}
@@ -92,17 +91,6 @@ export function LoginForm() {
               label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
             />
           </div>
-          <p className="mt-1.5 text-xs text-ink-tertiary" id="login-apikey-hint">
-            Beginnt mit «sk-ant-». Findest du unter{' '}
-            <a
-              href="https://console.anthropic.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand hover:underline"
-            >
-              console.anthropic.com
-            </a>
-          </p>
         </div>
       )}
 
