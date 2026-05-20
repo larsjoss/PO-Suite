@@ -83,17 +83,6 @@ export function SettingsDialog({ open, onClose }: Props) {
               label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
             />
           </div>
-          <p className="mt-1.5 text-xs text-ink-tertiary">
-            Deinen API-Key findest du unter{' '}
-            <a
-              href="https://console.anthropic.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand hover:underline"
-            >
-              console.anthropic.com
-            </a>
-          </p>
         </div>
 
         <div className="flex gap-2 mt-5">

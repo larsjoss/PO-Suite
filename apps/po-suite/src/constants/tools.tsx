@@ -24,6 +24,7 @@ export interface ToolDef {
   navLabel: string;
   title: string;
   description: string;
+  chipLabel: string;
   Icon: FC<{ className?: string }>;
   category: ToolCategory;
 }
@@ -87,6 +88,7 @@ export const TOOLS: ToolDef[] = [
     title: 'Story Generator',
     description:
       'Wandelt Anforderungen in strukturierte Storys mit Akzeptanzkriterien um und liefert Hinweise fürs Refinement.',
+    chipLabel: 'Schreiben',
     Icon: StoryIcon,
     category: 'concept',
   },
@@ -97,6 +99,7 @@ export const TOOLS: ToolDef[] = [
     title: 'Goal Generator',
     description:
       'Outcome-orientierte Sprint Goals und PI Objectives formulieren – mit Qualitätsbegründung und Verfeinerungsloop.',
+    chipLabel: 'Planen',
     Icon: GoalIcon,
     category: 'concept',
   },
@@ -107,6 +110,7 @@ export const TOOLS: ToolDef[] = [
     title: 'Test Case Generator',
     description:
       'Erstellt strukturierte Testpläne mit AK-Coverage aus User Stories — optional mit UI-Screenshots.',
+    chipLabel: 'Testen',
     Icon: TestCaseIcon,
     category: 'quality',
   },
@@ -117,6 +121,7 @@ export const TOOLS: ToolDef[] = [
     title: 'Doc Generator',
     description:
       'Fachtechnische Dokumentation aus User Stories und Features für Confluence generieren.',
+    chipLabel: 'Dokumentieren',
     Icon: DocIcon,
     category: 'docs',
   },
@@ -127,6 +132,7 @@ export const TOOLS: ToolDef[] = [
     title: 'Text Polisher',
     description:
       'Bereitet Texte, Meetingnotizen & E-Mail Entwürfe sprachlich und strukturell auf.',
+    chipLabel: 'Verfassen',
     Icon: TextPolisherIcon,
     category: 'polish',
   },
