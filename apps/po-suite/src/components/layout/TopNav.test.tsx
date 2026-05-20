@@ -54,9 +54,9 @@ describe('TopNav — Rendering', () => {
     expect(screen.getByRole('navigation', { name: /Tool-Navigation/i })).toBeInTheDocument();
   });
 
-  it('rendert Brand-Link "AI Tools" zu /tools', () => {
+  it('rendert Brand-Link "PO-Suite" zu /tools', () => {
     setup();
-    const brand = screen.getByRole('link', { name: 'AI Tools' });
+    const brand = screen.getByRole('link', { name: 'PO-Suite' });
     expect(brand).toHaveAttribute('href', '/tools');
   });
 

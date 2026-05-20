@@ -24,6 +24,7 @@ export interface ToolDef {
   navLabel: string;
   title: string;
   description: string;
+  chipLabel: string;
   Icon: FC<{ className?: string }>;
   category: ToolCategory;
 }
@@ -85,8 +86,8 @@ export const TOOLS: ToolDef[] = [
     path: '/tools/story-generator',
     navLabel: 'Story',
     title: 'Story Generator',
-    description:
-      'Wandelt Anforderungen in strukturierte Storys mit Akzeptanzkriterien um und liefert Hinweise fürs Refinement.',
+    description: 'Anforderungen in strukturierte User Stories mit Akzeptanzkriterien umwandeln.',
+    chipLabel: 'Schreiben',
     Icon: StoryIcon,
     category: 'concept',
   },
@@ -95,8 +96,8 @@ export const TOOLS: ToolDef[] = [
     path: '/tools/goal-generator',
     navLabel: 'Goal',
     title: 'Goal Generator',
-    description:
-      'Outcome-orientierte Sprint Goals und PI Objectives formulieren – mit Qualitätsbegründung und Verfeinerungsloop.',
+    description: 'Sprint Goals und PI Objectives outcome-orientiert formulieren.',
+    chipLabel: 'Planen',
     Icon: GoalIcon,
     category: 'concept',
   },
@@ -105,8 +106,8 @@ export const TOOLS: ToolDef[] = [
     path: '/tools/test-case-generator',
     navLabel: 'Test Case',
     title: 'Test Case Generator',
-    description:
-      'Erstellt strukturierte Testpläne mit AK-Coverage aus User Stories — optional mit UI-Screenshots.',
+    description: 'Testfälle aus User Stories erstellen, optional mit Screenshots.',
+    chipLabel: 'Testen',
     Icon: TestCaseIcon,
     category: 'quality',
   },
@@ -115,8 +116,8 @@ export const TOOLS: ToolDef[] = [
     path: '/tools/doc-generator',
     navLabel: 'Doc',
     title: 'Doc Generator',
-    description:
-      'Fachtechnische Dokumentation aus User Stories und Features für Confluence generieren.',
+    description: 'Confluence-Dokumentation aus User Stories und Features generieren.',
+    chipLabel: 'Dokumentieren',
     Icon: DocIcon,
     category: 'docs',
   },
@@ -125,8 +126,8 @@ export const TOOLS: ToolDef[] = [
     path: '/tools/text-polisher',
     navLabel: 'Polisher',
     title: 'Text Polisher',
-    description:
-      'Bereitet Texte, Meetingnotizen & E-Mail Entwürfe sprachlich und strukturell auf.',
+    description: 'E-Mails, Meetingnotizen und Texte überarbeiten und strukturieren.',
+    chipLabel: 'Verfassen',
     Icon: TextPolisherIcon,
     category: 'polish',
   },

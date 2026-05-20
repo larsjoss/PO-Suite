@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CATEGORY_CHIP_LABELS, type ToolDef } from '../../constants/tools';
+import type { ToolDef } from '../../constants/tools';
 
 interface Props {
   tool: ToolDef;
@@ -21,7 +21,7 @@ export function ToolTile({ tool }: Props) {
                    text-[10px] font-semibold uppercase tracking-wider
                    text-ink-secondary bg-edge-2 rounded-full"
       >
-        {CATEGORY_CHIP_LABELS[tool.category]}
+        {tool.chipLabel}
       </span>
 
       <div className="mb-4 w-fit" aria-hidden="true">

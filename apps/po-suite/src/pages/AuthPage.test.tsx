@@ -35,7 +35,7 @@ describe('AuthPage', () => {
   it('rendert Login-Form wenn kein User', () => {
     renderPage();
     expect(screen.getByRole('main', { name: /Anmeldung/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'AI Tools' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'PO-Suite' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Anmelden' })).toBeInTheDocument();
   });
 
@@ -43,6 +43,6 @@ describe('AuthPage', () => {
     mockUser = { id: '1', email: 'x@y.ch' };
     renderPage();
     expect(screen.getByText('Tool-Auswahl')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'AI Tools' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'PO-Suite' })).not.toBeInTheDocument();
   });
 });

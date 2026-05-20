@@ -65,7 +65,7 @@ export function TopNav() {
               to="/tools"
               className="font-serif text-sm font-semibold text-ink hover:text-brand transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
             >
-              AI Tools
+              PO-Suite
             </NavLink>
             {activeTool && (
               <>
