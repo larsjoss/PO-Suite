@@ -12,7 +12,7 @@ export function Sidebar() {
   return (
     <aside className="flex flex-col h-full">
       <div className="px-4 pt-4 pb-3 shrink-0">
-        <h2 className="font-serif text-sm font-semibold text-ink">Stories</h2>
+        <h2 className="font-serif text-sm font-semibold text-ink">Storys</h2>
       </div>
 
       <nav aria-label="Gespeicherte Stories" className="flex-1 overflow-hidden flex flex-col">
