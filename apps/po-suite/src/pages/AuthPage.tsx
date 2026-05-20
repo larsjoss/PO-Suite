@@ -12,7 +12,7 @@ export function AuthPage() {
       <main className="w-full max-w-sm" aria-label="Anmeldung">
         <div className="text-center mb-10">
           <h1 className="font-serif text-3xl font-semibold text-ink">AI Tools</h1>
-          <p className="text-sm text-ink-secondary mt-2">Story Generator · Text Polisher · Test Case Generator</p>
+          <p className="text-sm text-ink-secondary mt-2">Story · Goal · Text Polisher · Test Cases · Docs</p>
         </div>
 
         <div className="bg-surface rounded-xl shadow-sm border border-edge p-8">

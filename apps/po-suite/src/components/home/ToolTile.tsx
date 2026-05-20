@@ -24,8 +24,10 @@ export function ToolTile({ tool }: Props) {
         {CATEGORY_CHIP_LABELS[tool.category]}
       </span>
 
-      <div className="text-brand mb-3 group-hover:scale-105 transition-transform w-fit" aria-hidden="true">
-        <tool.Icon className="w-10 h-10" />
+      <div className="mb-4 w-fit" aria-hidden="true">
+        <div className="bg-brand-light rounded-xl p-2.5 text-brand group-hover:scale-105 transition-transform">
+          <tool.Icon className="w-8 h-8" />
+        </div>
       </div>
 
       <h3 className="font-serif text-base font-semibold text-ink mb-1.5">{tool.title}</h3>
