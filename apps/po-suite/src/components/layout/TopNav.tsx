@@ -67,14 +67,6 @@ export function TopNav() {
             >
               PO-Suite
             </NavLink>
-            {activeTool && (
-              <>
-                <span className="text-ink-tertiary text-xs select-none" aria-hidden="true">›</span>
-                <span className="hidden sm:inline font-serif text-sm font-semibold text-ink truncate max-w-[180px]">
-                  {activeTool.title}
-                </span>
-              </>
-            )}
           </div>
 
           {/* Divider */}

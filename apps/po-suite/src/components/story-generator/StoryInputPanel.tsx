@@ -29,17 +29,18 @@ export function StoryInputPanel({ onGeneratingChange }: Props) {
     <div className="flex flex-col h-full">
       <PanelHeader title="Anforderung" id="anforderung-heading" />
 
-      <div className="flex-1 overflow-y-auto p-5">
-        <section aria-labelledby="anforderung-heading">
-          <form onSubmit={handleGenerate} className="space-y-3">
+      <div className="flex flex-col flex-1 overflow-hidden p-5">
+        <section aria-labelledby="anforderung-heading" className="flex flex-col flex-1">
+          <form onSubmit={handleGenerate} className="flex flex-col flex-1 gap-3">
             <TextArea
               id="anforderung-input"
               label="Anforderung beschreiben"
               value={rawInput}
               onChange={setRawInput}
               placeholder="Anforderung in eigenen Worten beschreiben."
-              rows={8}
+              rows={4}
               disabled={isGenerating}
+              className="flex-1 [&>textarea]:flex-1 [&>textarea]:h-auto"
             />
 
             {generateError && (
