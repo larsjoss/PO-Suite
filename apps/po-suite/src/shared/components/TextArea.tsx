@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 interface TextAreaProps {
   id: string;
   label: string;
+  hideLabel?: boolean;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -15,6 +16,7 @@ interface TextAreaProps {
 export function TextArea({
   id,
   label,
+  hideLabel = false,
   value,
   onChange,
   placeholder,
@@ -33,7 +35,7 @@ export function TextArea({
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-sm font-medium text-ink">
+      <label htmlFor={id} className={`text-sm font-medium text-ink${hideLabel ? ' sr-only' : ''}`}>
         {label}
       </label>
       <textarea
