@@ -59,6 +59,11 @@ export function StoryInputPanel({ onGeneratingChange }: Props) {
               loading={isGenerating}
               className="w-full"
             >
+              {!isGenerating && (
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                </svg>
+              )}
               {isGenerating ? 'Wird generiert…' : 'Story generieren'}
             </Button>
           </form>
