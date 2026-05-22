@@ -44,7 +44,7 @@ export function AppShell({ leftPanel, centerPanel, rightPanel }: Props) {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop-Sidebar */}
-        <div className="hidden md:flex md:flex-col md:w-64 shrink-0 border-r border-edge bg-surface overflow-hidden">
+        <div className="hidden md:flex md:flex-col md:w-72 shrink-0 border-r border-edge bg-surface overflow-hidden">
           <Sidebar />
         </div>
 
