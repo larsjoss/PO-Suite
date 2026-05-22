@@ -2,20 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design Tokens — Light Mode ─────────────────────────────────────────── */
+:root {
+  --color-brand:       28 43 30;    /* #1C2B1E */
+  --color-brand-dark:  19 30 21;    /* #131E15 */
+  --color-brand-light: 232 239 233; /* #E8EFE9 */
+  --color-canvas:      245 240 232; /* #F5F0E8 */
+  --color-surface:     250 250 248; /* #FAFAF8 */
+  --color-ink:         28 36 32;    /* #1C2420 */
+  --color-ink-secondary: 92 88 82;  /* #5C5852 */
+  --color-ink-tertiary:  107 104 96; /* #6B6860 */
+  --color-edge:        221 216 207; /* #DDD8CF */
+  --color-edge-2:      235 230 218; /* #EBE6DA */
+  --color-error:       220 38 38;   /* #dc2626 */
+  --color-success:     22 163 74;   /* #16a34a */
+}
+
+/* ─── Design Tokens — Dark Mode ──────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-brand:       143 175 147; /* #8FAF93 */
+  --color-brand-dark:  168 197 171; /* #A8C5AB */
+  --color-brand-light: 30 47 32;    /* #1E2F20 */
+  --color-canvas:      19 24 22;    /* #131816 */
+  --color-surface:     28 33 29;    /* #1C211D */
+  --color-ink:         232 227 220; /* #E8E3DC */
+  --color-ink-secondary: 156 151 144; /* #9C9790 */
+  --color-ink-tertiary:  110 106 100; /* #6E6A64 */
+  --color-edge:        46 52 48;    /* #2E3430 */
+  --color-edge-2:      38 44 40;    /* #262C28 */
+  --color-error:       248 113 113; /* #f87171 */
+  --color-success:     74 222 128;  /* #4ade80 */
+}
+
 body {
-  background-color: #F5F0E8;
-  color: #1C2420;
+  background-color: rgb(var(--color-canvas));
+  color: rgb(var(--color-ink));
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 /*
  * WCAG 2.4.7 – Focus Visible (AA) / WCAG 2.4.11 – Focus Appearance (AA, WCAG 2.2)
- * Globaler Fallback-Fokus-Ring. Farbe: #1C2B1E auf #FAFAF8 ≈ 14:1 (> 3:1 ✓).
+ * Globaler Fallback-Fokus-Ring. Farbe: brand auf surface ≈ 14:1 (> 3:1 ✓).
  */
 :focus-visible {
-  outline: 2px solid #1C2B1E;
+  outline: 2px solid rgb(var(--color-brand));
   outline-offset: 2px;
 }
 
@@ -37,9 +70,14 @@ summary::-webkit-details-marker { display: none; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* LoadingSkeleton: moving shimmer instead of flat opacity-pulse */
+/* LoadingSkeleton: shimmer uses CSS variables — flips automatically with dark mode */
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #EBE6DA 25%, #F5F0E8 50%, #EBE6DA 75%);
+  background: linear-gradient(
+    90deg,
+    rgb(var(--color-edge-2)) 25%,
+    rgb(var(--color-canvas)) 50%,
+    rgb(var(--color-edge-2)) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.8s ease-in-out infinite;
 }
@@ -47,4 +85,23 @@ summary::-webkit-details-marker { display: none; }
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+.progress-indeterminate {
+  width: 40% !important;
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+details[open] .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-chevron {
+  transition: transform 0.2s ease-out;
+  flex-shrink: 0;
 }
