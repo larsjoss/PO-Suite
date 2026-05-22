@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
 const generateTestCasesMock = vi.fn();
@@ -17,13 +18,41 @@ vi.mock('../services/testCaseGenerator', async () => {
   };
 });
 
+vi.mock('../services/testCaseStorage', () => {
+  const plan = {
+    id: 'test-id',
+    storyText: 'Als User',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    story_title: 'Login-Feature',
+    story_id: null,
+    generated_at: '2025-01-01T10:00:00.000Z',
+    input_sources: { has_screenshot: false, has_test_context: false, screenshot_count: 0 },
+    summary: { total_count: 1, by_level: { ENTW: 1 }, by_type: { happy_path: 1 }, ak_coverage: [{ ak_id: 'AK-1', covered: true, tc_count: 1 }], gaps: [], risk_flags: [] },
+    test_cases: [{ id: 'TC-01', title: 'Login', type: 'happy_path', level: 'ENTW', linked_aks: ['AK-1'], preconditions: [], steps: [{ step: 1, action: 'URL aufrufen' }], expected_result: 'OK', source: 'story_ak' }],
+  };
+  return {
+    createTestPlan: vi.fn(() => plan),
+    getTestPlan: vi.fn(() => plan),
+    getTestPlans: vi.fn(() => ({ plans: [], total: 0 })),
+    deleteTestPlan: vi.fn(),
+  };
+});
+
+vi.mock('../components/test-case-generator/TestCasePlanSidebar', () => ({
+  TestCasePlanSidebar: () => null,
+}));
+
 import { TestCaseGeneratorPage } from './TestCaseGeneratorPage';
 
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <MemoryRouter>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </MemoryRouter>
+  );
 }
 
 const MOCK_PLAN = {

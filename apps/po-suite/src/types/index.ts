@@ -104,6 +104,17 @@ export interface TestPlan {
   summary: TestPlanSummary;
 }
 
+export interface StoredTestPlan extends TestPlan {
+  id: string;
+  storyText: string;
+  createdAt: string;
+}
+
+export interface TestPlansResponse {
+  plans: StoredTestPlan[];
+  total: number;
+}
+
 export interface UploadedFile {
   id: string;
   file: File;

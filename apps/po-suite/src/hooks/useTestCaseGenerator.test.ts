@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { createElement } from 'react';
 import type { TestPlan } from '../types';
@@ -11,13 +12,22 @@ vi.mock('../services/testCaseGenerator', () => ({
   generateTestCases: (...args: unknown[]) => generateTestCasesMock(...args),
 }));
 
+vi.mock('../services/testCaseStorage', () => ({
+  createTestPlan: vi.fn((plan: TestPlan, storyText: string) => ({
+    ...plan,
+    id: 'test-id',
+    storyText,
+    createdAt: '2026-01-01T00:00:00.000Z',
+  })),
+}));
+
 import { useGenerateTestCases } from './useTestCaseGenerator';
 
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  return createElement(QueryClientProvider, { client }, children);
+  return createElement(MemoryRouter, null, createElement(QueryClientProvider, { client }, children));
 }
 
 const samplePlan: TestPlan = {
