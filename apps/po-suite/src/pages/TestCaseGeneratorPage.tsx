@@ -101,7 +101,7 @@ export function TestCaseGeneratorPage() {
     <div id="main-content" className="flex flex-col flex-1 overflow-hidden">
       {/* Desktop: Sidebar + Hauptinhalt nebeneinander */}
       <div className="hidden md:flex flex-1 overflow-hidden">
-        <div className="w-64 shrink-0 border-r border-edge bg-surface overflow-hidden flex flex-col">
+        <div className="w-72 shrink-0 border-r border-edge bg-surface overflow-hidden flex flex-col">
           <TestCasePlanSidebar />
         </div>
         <main className="flex-1 overflow-auto bg-canvas">
