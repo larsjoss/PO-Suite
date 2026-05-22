@@ -10,12 +10,13 @@ Alle fünf Module vollständig implementiert. **457 Vitest-Tests + 10 Playwright
 
 **GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — Deploy automatisch auf Push zu `main` mit Änderungen unter `apps/po-suite/**` oder manuell via `workflow_dispatch`.
 
-## Letzte Änderungen (Session 2026-05-18)
+## Letzte Änderungen (Session 2026-05-22)
 
-- **Monorepo-Migration**: `frontend/` → `apps/po-suite/`, `backend/` → `apps/backend/`, Root-`package.json` mit npm Workspaces, geteilte `tsconfig.base.json` + `eslint.config.js`
-- **ESLint** hinzugefügt (TypeScript, React, A11y-Plugins) — 0 Errors, 0 Warnings
-- **`.env`-Setup**: Root-`.env.example` mit Dokumentation; Vite liest via `envDir: '../../'` vom Monorepo-Root
-- **`withTimeout` in allen Services**: Story Generator (`claude.ts`) und Text Polisher (`textPolisher.ts`) nachgezogen — alle fünf Services nutzen nun konsistent `withTimeout()`
+- **Design System implementiert**: CSS-Custom-Property-Token-System (`src/index.css` + `tailwind.config.ts`) — alle 12 Farb-Tokens als RGB-Kanal-Variablen, Opacity-Modifier (`bg-ink/40`) vollständig funktionsfähig
+- **Dark Mode**: `ThemeContext` + `ThemeProvider`, `localStorage`-Persistenz (`po-theme`), `ThemeToggle` in TopNav
+- **11 neue Shared Components**: `Select`, `Checkbox`, `RadioGroup`, `Toggle`, `SegmentedControl`, `ProgressBar`, `Snackbar`, `StatusBadge`/`Chip`, `Accordion`, `Tooltip`, `ThemeToggle`
+- **Button**: `danger`-Variante hinzugefügt
+- **TCG History + Sidebar**: localStorage-Persistenz für Testpläne, `TestCasePlanSidebar`, URL-Routing `/:id`
 
 ## Nächster Schritt
 
@@ -53,6 +54,7 @@ src/
 ├── App.tsx                   Router + ProtectedLayout (TopNav + Outlet)
 ├── types/index.ts            Alle geteilten Typen
 ├── context/AuthContext.tsx   Auth-State, login/logout, setApiKey
+├── context/ThemeContext.tsx  Dark/Light-Mode-State, localStorage-Persistenz (po-theme)
 ├── constants/tools.tsx       Single-Source-of-Truth: alle 5 Tool-Definitionen
 ├── shared/
 │   ├── services/
@@ -60,9 +62,12 @@ src/
 │   │   ├── storageKeys.ts    Zentrale sessionStorage-Keys (SDK-frei)
 │   │   ├── withTimeout.ts    withTimeout() — 60 s default
 │   │   └── imageBlocks.ts    buildImageBlock(), buildImageBlocks()
-│   └── components/           Button, TextArea, CopyButton, InlineError,
+│   └── components/           Button (+ danger), TextArea, CopyButton, InlineError,
 │                             LoadingSkeleton, MarkdownOutput, PanelHeader,
-│                             RevealButton, ScreenshotUpload, SettingsDialog
+│                             RevealButton, ScreenshotUpload, SettingsDialog,
+│                             ConfirmDialog, Select, Checkbox, RadioGroup,
+│                             Toggle, SegmentedControl, ProgressBar, Snackbar,
+│                             StatusBadge, Chip, Accordion, Tooltip, ThemeToggle
 ├── services/
 │   ├── prompts.ts            Alle System-Prompts (Single Source)
 │   ├── claude.ts             Story Generator
@@ -94,14 +99,16 @@ src/
 
 Env-Var-Credentials (`VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD`) aus `.env.local` am Monorepo-Root (Vite `envDir: '../../'`). Bei fehlenden Vars wirft Login einen klaren Konfigurationsfehler. API-Key wird nur im Login-Formular eingegeben und in sessionStorage gehalten — nie in `.env`.
 
-## Design-Tokens (Tailwind)
+## Design-Tokens (Tailwind + CSS-Variablen)
+
+Alle Farben sind als CSS Custom Properties in `src/index.css` definiert und werden via `rgb(var(--color-X) / <alpha-value>)` in `tailwind.config.ts` referenziert. Dark Mode wechselt automatisch durch `[data-theme="dark"]` auf `<html>`.
 
 ```
-brand      #1C2B1E  / brand-light #E8EFE9
-canvas     #F5F0E8  (Seiten-Hintergrund)
-surface    #FAFAF8  (Karten, Panels)
-ink        #1C2420  / ink-secondary #5C5852
-edge       #DDD8CF  / edge-2 #EBE6DA
+Light:  brand #1C2B1E  /  canvas #F5F0E8  /  surface #FAFAF8
+Dark:   brand #8FAF93  /  canvas #131816  /  surface #1C211D
+ink #1C2420 / ink-secondary #5C5852 / ink-tertiary #6B6860
+edge #DDD8CF / edge-2 #EBE6DA
+error #dc2626 / success #16a34a
 font-serif Playfair Display  /  font-sans Inter
 ```
 

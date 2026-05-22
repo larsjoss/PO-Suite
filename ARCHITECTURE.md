@@ -42,7 +42,7 @@ Enterprise-Variante:
 | Styling | Tailwind CSS | 3 | Eigene Design-Tokens, keine UI-Library |
 | KI | @anthropic-ai/sdk | 0.90 | GitHub-Variante: Browser-fähig (`dangerouslyAllowBrowser: true`) |
 | Markdown | react-markdown + rehype-sanitize | 9 / 6 | Default-Schema blockt `<script>`/`<iframe>` |
-| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 448 Tests, 42 Dateien |
+| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 457 Tests, 43 Dateien |
 | E2E | Playwright | 1.59 | Smoke + Auth + Tool-Happy-Paths, Chromium-only |
 
 ### Backend (Enterprise-Variante)
@@ -80,9 +80,10 @@ Pages          ─→  Hooks      ─→  Services / httpClient  ─→  Anthrop
   │
   ├──→  Components (shared + tool-spezifisch)
   │
-  └──→  Context (Auth)
-         GitHub-Pfad:  liest API-Key aus sessionStorage → getApiClient()
-         Enterprise:   liest JWT aus sessionStorage → fetchApi()
+  └──→  Context (Auth, Theme)
+         Auth (GitHub):    liest API-Key aus sessionStorage → getApiClient()
+         Auth (Enterprise): liest JWT aus sessionStorage → fetchApi()
+         Theme:            setzt data-theme auf <html>, persistiert in localStorage
 ```
 
 | Schicht | Verantwortung | Verweis |
@@ -92,7 +93,7 @@ Pages          ─→  Hooks      ─→  Services / httpClient  ─→  Anthrop
 | **Services** | GitHub-Pfad: Anthropic API-Calls, Prompt-Building, Output-Parsing | `src/services/` |
 | **httpClient** | Enterprise-Pfad: REST-Calls mit JWT, Timeout, 401-Handling | `src/shared/services/httpClient.ts` |
 | **Components** | Reine Render-Komponenten, tool-spezifisch oder shared | `src/components/`, `src/shared/components/` |
-| **Context** | Auth-State; Enterprise: login via POST /api/auth/login | `src/context/AuthContext.tsx` |
+| **Context** | Auth-State (Login/Logout/API-Key); ThemeContext (Dark/Light, localStorage) | `src/context/AuthContext.tsx`, `src/context/ThemeContext.tsx` |
 | **Constants** | Tool-Definitionen, Kategorie-Labels | `src/constants/tools.tsx` |
 
 ### Backend (Enterprise)
@@ -209,6 +210,7 @@ Logout   ─→  clearJwt() → navigate('/auth')
 | Speicher | Was wird gespeichert | Lebensdauer |
 |---|---|---|
 | `localStorage` (`sg_stories`, `sg_refinements`) | Stories und Refinements | Persistent |
+| `localStorage` (`po-theme`) | Dark/Light-Mode-Einstellung | Persistent |
 | `sessionStorage` (`session_user`, `anthropic_api_key`) | Auth-User + API-Key | Bis Tab geschlossen |
 | `sessionStorage` (`tp_*`) | Text Polisher: Use Case, Tone, Input, Output | Bis Tab geschlossen |
 | React State | TCG, DocGen, Goal Generator: aktiver Input/Output | Bis Page-Wechsel |
@@ -311,7 +313,7 @@ push → main
 | Integration | @testing-library/react | Page-Flows (Submit → Output) | ✅ Auth, DocGen, TextPolisher, TCG, GoalGen |
 | E2E | Playwright | Smoke + Auth + Tool-Flows | ✅ Login-Flow, Logout, Story Generator-Routing, Form-Validation |
 
-**Stand:** 448 Vitest-Tests in 42 Dateien + 18 Backend-Tests + 10 Playwright-E2E-Tests.
+**Stand:** 457 Vitest-Tests in 43 Dateien + 18 Backend-Tests + 10 Playwright-E2E-Tests.
 
 **Enterprise-Tests:** `vitest.enterprise.config.ts` setzt `VITE_TARGET=enterprise`, damit `IS_ENTERPRISE`-Branches abgedeckt sind.
 
@@ -342,6 +344,7 @@ npm run e2e
 | Dual-Build (`VITE_TARGET`) | ✅ Erledigt | GitHub-Build unverändert, Enterprise-Build via Adapter |
 | E2E-Tests (Playwright) | ✅ Erledigt | 10 Tests: Smoke, Auth-Flow, Story Generator |
 | Backend-Tests (Vitest + Supertest) | ✅ Erledigt | health (4) + auth (14) — Tool/Story-Routen ausstehend |
+| Design System + Dark Mode | ✅ Erledigt | CSS-Custom-Property-Token-System, 11 neue Shared Components, ThemeToggle in TopNav |
 | Keycloak/OIDC | Optional | JWT-Middleware v2-Upgrade-Pfad |
 | Internationalisierung | Nicht geplant | Aktuell DE-CH only |
 | Re-Render-Optimierung | Bedarf-getrieben | useMemo/useCallback nur nach Profiler-Befund |

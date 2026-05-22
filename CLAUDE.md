@@ -37,7 +37,7 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 ```bash
 npm install                              # Root-Install (alle Workspaces)
 npm run dev                              # http://localhost:5173
-npm run test                             # 448 Tests, alle grün
+npm run test                             # 457 Tests, alle grün
 npm run build                            # Production-Build (tsc + Vite)
 # oder direkt im Workspace:
 cd apps/po-suite
@@ -63,6 +63,7 @@ cd apps/po-suite && npm run test:enterprise  # 15 Enterprise-Pfad-Tests
 - sessionStorage-Keys: zentral in `src/shared/services/storageKeys.ts`
 - Keine direkten `sessionStorage`-Zugriffe in Komponenten
 - Validierung: Submit-Button `disabled`, kein Toast/Alert
+- Dark Mode: CSS-Variablen-Token-System (`src/index.css`), Theme via `ThemeContext` — keine `dark:`-Präfixe in Komponenten nötig
 
 ### Claude Code Hooks
 

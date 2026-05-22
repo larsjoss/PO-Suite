@@ -31,7 +31,7 @@ Zwei Deployment-Varianten aus derselben Codebasis: **GitHub Pages** (browser-onl
 | Routing | React Router v6 |
 | Server-State | TanStack Query v5 |
 | KI | @anthropic-ai/sdk, Modell `claude-sonnet-4-5` |
-| Tests | Vitest + @testing-library/react (448 Unit/Integration-Tests, 42 Dateien) + Playwright (10 E2E-Tests) |
+| Tests | Vitest + @testing-library/react (457 Unit/Integration-Tests, 43 Dateien) + Playwright (10 E2E-Tests) |
 
 ### Backend (Enterprise-Variante)
 
@@ -81,7 +81,7 @@ cp .env.example .env.local
 ```bash
 npm install                # Root-Install (alle Workspaces)
 npm run dev                # Dev-Server auf http://localhost:5173
-npm run test               # 448 Vitest-Tests
+npm run test               # 457 Vitest-Tests
 # oder direkt im Workspace:
 cd apps/po-suite
 npm run build              # Production-Build (VITE_TARGET=github ist Default)
