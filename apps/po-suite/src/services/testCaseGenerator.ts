@@ -34,7 +34,7 @@ export async function generateTestCases(params: GenerateTestCasesParams): Promis
   const response = await withTimeout(
     client.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
+      max_tokens: 6000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: contentBlocks }],
     }),
@@ -45,8 +45,10 @@ export async function generateTestCases(params: GenerateTestCasesParams): Promis
     .map((b) => b.text)
     .join('');
 
-  // Code-Fence-Wrapping abfangen (```json ... ```)
-  const jsonStr = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
+  // Extract outermost JSON object, tolerating preamble/postamble or code fences
+  const start = rawText.indexOf('{');
+  const end = rawText.lastIndexOf('}');
+  const jsonStr = start !== -1 && end > start ? rawText.slice(start, end + 1) : rawText;
 
   let plan: TestPlan;
   try {
