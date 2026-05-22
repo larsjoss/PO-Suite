@@ -3,9 +3,11 @@ import { useDebounce } from '../../hooks/useDebounce';
 
 interface Props {
   onSearch: (q: string) => void;
+  placeholder?: string;
+  ariaLabel?: string;
 }
 
-export function SearchBox({ onSearch }: Props) {
+export function SearchBox({ onSearch, placeholder = 'Storys durchsuchen…', ariaLabel = 'Storys durchsuchen' }: Props) {
   const [value, setValue] = useState('');
   useDebounce(() => onSearch(value), [value], 300);
 
@@ -24,8 +26,8 @@ export function SearchBox({ onSearch }: Props) {
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Storys durchsuchen…"
-        aria-label="Storys durchsuchen"
+        placeholder={placeholder}
+        aria-label={ariaLabel}
         className="w-full pl-8 pr-3 py-2 text-sm border border-edge rounded-lg bg-canvas text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus:bg-surface placeholder:text-ink-tertiary"
       />
     </div>
