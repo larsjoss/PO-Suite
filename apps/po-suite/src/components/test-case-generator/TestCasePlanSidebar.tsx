@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTestCasePlans } from '../../hooks/useTestCasePlans';
 import { SearchBox } from '../sidebar/SearchBox';
 import { TestCasePlanListItem } from './TestCasePlanListItem';
+import { PanelHeader } from '../../shared/components';
 
 export function TestCasePlanSidebar() {
   const [q, setQ] = useState('');
@@ -11,13 +12,15 @@ export function TestCasePlanSidebar() {
 
   return (
     <aside className="flex flex-col h-full">
-      <div className="px-4 pt-4 pb-3 shrink-0 border-b border-edge">
-        <h2 className="font-serif text-sm font-semibold text-ink border-l-2 border-brand pl-2">Testpläne</h2>
-      </div>
+      <PanelHeader title="Testpläne" />
 
       <nav aria-label="Gespeicherte Testpläne" className="flex-1 overflow-hidden flex flex-col">
-        <div className="px-3 pb-2 pt-2 shrink-0">
-          <SearchBox onSearch={setQ} />
+        <div className="px-4 pt-5 pb-2 shrink-0">
+          <SearchBox
+            onSearch={setQ}
+            placeholder="Testpläne durchsuchen…"
+            ariaLabel="Testpläne durchsuchen"
+          />
         </div>
         <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
           {isLoading && (
