@@ -66,14 +66,14 @@ export function ConfirmDialog({
             ref={cancelRef}
             type="button"
             onClick={onCancel}
-            className={`${btnBase} bg-surface border border-brand text-brand hover:bg-brand-light`}
+            className={`${btnBase} text-ink-secondary hover:text-ink hover:bg-edge-2`}
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`${btnBase} bg-brand hover:bg-brand-dark text-white`}
+            className={`${btnBase} bg-red-600 hover:bg-red-700 text-white`}
           >
             {confirmLabel}
           </button>
