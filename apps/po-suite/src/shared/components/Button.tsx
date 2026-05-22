@@ -4,7 +4,7 @@ interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md';
   disabled?: boolean;
   loading?: boolean;
@@ -33,6 +33,7 @@ export function Button({
     secondary: 'border border-edge text-ink-secondary hover:bg-edge-2',
     outline: 'bg-surface border border-brand text-brand hover:bg-brand-light',
     ghost: 'text-ink-tertiary hover:text-ink hover:bg-edge-2',
+    danger: 'bg-red-600 hover:bg-red-700 text-white rounded-full',
   };
 
   const sizes: Record<string, string> = {

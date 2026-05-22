@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss';
 import typography from '@tailwindcss/typography';
 
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
@@ -22,6 +23,8 @@ export default {
           DEFAULT: '#DDD8CF',
           2: '#EBE6DA',
         },
+        error: '#dc2626',
+        success: '#16a34a',
       },
       fontFamily: {
         serif: ['Playfair Display', 'Georgia', 'serif'],

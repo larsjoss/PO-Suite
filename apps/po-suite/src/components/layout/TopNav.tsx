@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { SettingsDialog } from '../../shared/components/SettingsDialog';
+import { ThemeToggle } from '../../shared/components/ThemeToggle';
 import { TOOLS } from '../../constants/tools';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
@@ -101,8 +102,9 @@ export function TopNav() {
             })}
           </nav>
 
-          {/* Rechte Seite: API-Key-Status + Einstellungen + Logout */}
+          {/* Rechte Seite: API-Key-Status + Theme-Toggle + Einstellungen + Logout */}
           <div className="flex items-center gap-1 shrink-0 pl-3">
+            <ThemeToggle />
             {!IS_ENTERPRISE && (
               <>
                 <span
