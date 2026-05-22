@@ -100,6 +100,7 @@ export default function App() {
           <Route path="/tools/story-generator/:id" element={<WorkspacePage />} />
           <Route path="/tools/text-polisher" element={<TextPolisherPage />} />
           <Route path="/tools/test-case-generator" element={<TestCaseGeneratorPage />} />
+          <Route path="/tools/test-case-generator/:id" element={<TestCaseGeneratorPage />} />
           <Route path="/tools/doc-generator" element={<DocGeneratorPage />} />
           <Route path="/tools/goal-generator" element={<GoalGeneratorPage />} />
         </Route>
