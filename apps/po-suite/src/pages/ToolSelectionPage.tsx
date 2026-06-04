@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import { TOOLS } from '../constants/tools';
 import { ToolTile } from '../components/home/ToolTile';
+import { ArsenalCelebration } from '../components/home/ArsenalCelebration';
 
 export function ToolSelectionPage() {
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
+
   return (
     <main
       id="main-content"
-      className="flex-1 overflow-auto bg-canvas"
+      className="relative flex-1 overflow-auto bg-canvas"
     >
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="mb-10">
@@ -23,6 +27,20 @@ export function ToolSelectionPage() {
           ))}
         </div>
       </div>
+
+      {/* Easter Egg Button */}
+      <button
+        className="absolute bottom-4 right-4 text-base leading-none opacity-20 hover:opacity-60 transition-opacity focus-visible:opacity-60 focus-visible:ring-2 focus-visible:ring-ink/30 rounded"
+        title="AFC"
+        aria-label="AFC"
+        onClick={() => setShowEasterEgg(true)}
+      >
+        🔴
+      </button>
+
+      {showEasterEgg && (
+        <ArsenalCelebration onClose={() => setShowEasterEgg(false)} />
+      )}
     </main>
   );
 }
