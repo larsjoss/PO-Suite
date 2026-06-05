@@ -4,18 +4,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-// AppShell bringt Sidebar (TanStack + Storage + Routing) mit — stub für Layout-Isolierung
-vi.mock('../components/layout/AppShell', () => ({
-  AppShell: ({ leftPanel, centerPanel, rightPanel }: { leftPanel: ReactNode; centerPanel: ReactNode; rightPanel: ReactNode }) => (
-    <div data-testid="appshell">
-      <div data-testid="left">{leftPanel}</div>
-      <div data-testid="center">{centerPanel}</div>
-      <div data-testid="right">{rightPanel}</div>
-    </div>
-  ),
+// Sub-components have their own hooks — stub for page-level isolation
+vi.mock('../components/sidebar/Sidebar', () => ({
+  Sidebar: () => <div data-testid="sidebar" />,
 }));
-
-// Story-Panels haben eigene Sub-Hooks — stub für WorkspacePage-Isolation
 vi.mock('../components/story-generator/StoryInputPanel', () => ({
   StoryInputPanel: () => <div data-testid="story-input-panel" />,
 }));
@@ -25,34 +17,51 @@ vi.mock('../components/story-generator/StoryOutputPanel', () => ({
 vi.mock('../components/story-generator/InsightsPanel', () => ({
   InsightsPanel: () => <div data-testid="insights-panel" />,
 }));
-
-// useStory braucht localStorage + QueryClient
 vi.mock('../hooks/useStory', () => ({
   useStory: () => ({ data: undefined, isLoading: false }),
 }));
 
 import { WorkspacePage } from './WorkspacePage';
 
-function wrapper({ children }: { children: ReactNode }) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return (
-    <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/tools/story-generator']}>
-        <Routes>
-          <Route path="/tools/story-generator" element={children} />
-          <Route path="/tools/story-generator/:id" element={children} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>
-  );
+function makeWrapper(initialPath: string) {
+  return function Wrapper({ children }: { children: ReactNode }) {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return (
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={[initialPath]}>
+          <Routes>
+            <Route path="/tools/story-generator" element={children} />
+            <Route path="/tools/story-generator/:id" element={children} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  };
 }
 
-describe('WorkspacePage — Rendering', () => {
-  it('rendert AppShell mit allen drei Panels', () => {
-    render(<WorkspacePage />, { wrapper });
-    expect(screen.getByTestId('appshell')).toBeInTheDocument();
-    expect(screen.getByTestId('story-input-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('story-output-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('insights-panel')).toBeInTheDocument();
+describe('WorkspacePage — Input-Screen (kein ID)', () => {
+  it('zeigt Sidebar und StoryInputPanel', () => {
+    render(<WorkspacePage />, { wrapper: makeWrapper('/tools/story-generator') });
+    expect(screen.getAllByTestId('sidebar').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('story-input-panel').length).toBeGreaterThan(0);
+  });
+
+  it('zeigt keinen Output-Panel auf Input-Screen', () => {
+    render(<WorkspacePage />, { wrapper: makeWrapper('/tools/story-generator') });
+    // On desktop (no id), output panel hidden inside tabpanel (hidden attr)
+    const outputPanels = screen.getAllByTestId('story-output-panel');
+    outputPanels.forEach((el) => {
+      // Only visible inside hidden mobile tabpanel — not in the main desktop area
+      expect(el.closest('[hidden]')).not.toBeNull();
+    });
+  });
+});
+
+describe('WorkspacePage — Output-Screen (mit ID)', () => {
+  it('zeigt Sidebar, StoryOutputPanel und InsightsPanel', () => {
+    render(<WorkspacePage />, { wrapper: makeWrapper('/tools/story-generator/story-123') });
+    expect(screen.getAllByTestId('sidebar').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('story-output-panel').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('insights-panel').length).toBeGreaterThan(0);
   });
 });

@@ -2,16 +2,8 @@ import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildSystemPrompt } from '../shared/services/promptUtils';
 import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts/story';
-
-export interface ConversationMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface HintAnswer {
-  hint: string;
-  answer: string;
-}
+import type { ConversationMessage, HintAnswer } from '@po-suite/api-types';
+export type { ConversationMessage, HintAnswer };
 
 /**
  * Applies visual Markdown formatting to story output at render time.

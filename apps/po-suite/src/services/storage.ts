@@ -2,6 +2,7 @@ import type { Story, RefinementLog, StoriesResponse, StoryDetailResponse } from 
 
 const STORIES_KEY = 'sg_stories';
 const REFINEMENTS_KEY = 'sg_refinements';
+const MAX_STORIES = 100;
 
 function loadStories(): Story[] {
   try {
@@ -76,6 +77,7 @@ export function createStory(
     updatedAt: now,
   };
   stories.unshift(story);
+  if (stories.length > MAX_STORIES) stories.splice(MAX_STORIES);
   saveStories(stories);
   return story;
 }

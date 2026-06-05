@@ -3,28 +3,8 @@ import { getApiClient, extractTextContent } from '../shared/apiClient';
 import { withTimeout } from '../shared/withTimeout';
 import { buildImageBlocks, type ImageInput } from '../shared/imageBlocks';
 import { STORY_DOC_SYSTEM_PROMPT, FEATURE_DOC_SYSTEM_PROMPT } from './prompts';
-
-export type DocMode = 'story' | 'feature';
-
-export interface StoryDocInput {
-  title: string;
-  description: string;
-  confluenceSpec: string;
-  code: string;
-  acceptedBy: string;
-  deploymentDate: string;
-}
-
-export interface FeatureDocInput {
-  title: string;
-  description: string;
-  stories: string;
-  confluenceSpec: string;
-  code: string;
-  responsible: string;
-  deploymentDate: string;
-  decisions: string;
-}
+import type { DocMode, StoryDocInput, FeatureDocInput } from '@po-suite/api-types';
+export type { DocMode, StoryDocInput, FeatureDocInput };
 
 export type GenerateDocParams =
   | { mode: 'story'; input: StoryDocInput; screenshots: ImageInput[] }
