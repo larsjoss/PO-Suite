@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { generateTestCases, type GenerateTestCasesParams } from '../services/testCaseGenerator';
 import { createTestPlan } from '../services/testCaseStorage';
 import { fetchApi } from '../shared/services/httpClient';
+import { useTeamContext } from '../shared/hooks/useTeamContext';
 import type { StoredTestPlan, TestPlan } from '../types';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
@@ -10,13 +11,14 @@ const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
 export function useGenerateTestCases() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { teamContext } = useTeamContext();
 
   return useMutation<StoredTestPlan | TestPlan, Error, GenerateTestCasesParams>({
     mutationFn: async (params) => {
       if (IS_ENTERPRISE) {
         return fetchApi<TestPlan>('/api/tools/test-case-generator/generate', params);
       }
-      const plan = await generateTestCases(params);
+      const plan = await generateTestCases(params, teamContext);
       return createTestPlan(plan, params.storyText);
     },
     onSuccess: (result) => {

@@ -13,7 +13,15 @@ export interface GenerateTestCasesParams {
 
 // ─── API Call ─────────────────────────────────────────────────────────────────
 
-export async function generateTestCases(params: GenerateTestCasesParams): Promise<TestPlan> {
+function withTeamContext(systemPrompt: string, teamContext: string): string {
+  if (!teamContext.trim()) return systemPrompt;
+  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
+}
+
+export async function generateTestCases(
+  params: GenerateTestCasesParams,
+  teamContext = '',
+): Promise<TestPlan> {
   const client = getApiClient();
 
   const contentBlocks: Anthropic.Messages.ContentBlockParam[] = [];
@@ -35,7 +43,7 @@ export async function generateTestCases(params: GenerateTestCasesParams): Promis
     client.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 6000,
-      system: SYSTEM_PROMPT,
+      system: withTeamContext(SYSTEM_PROMPT, teamContext),
       messages: [{ role: 'user', content: contentBlocks }],
     }),
   );

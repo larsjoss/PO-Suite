@@ -37,7 +37,7 @@ describe('usePolishText', () => {
     result.current.mutate({ input: 'roh', useCase: 'email', tone: 'formell' });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(polishTextMock.mock.calls[0]).toEqual(['roh', 'email', 'formell']);
+    expect(polishTextMock.mock.calls[0]).toEqual(['roh', 'email', 'formell', '']);
   });
 
   it('liefert die Service-Response als data', async () => {

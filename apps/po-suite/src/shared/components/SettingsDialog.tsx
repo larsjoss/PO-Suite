@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTeamContext } from '../hooks/useTeamContext';
 import { Button } from './Button';
 import { RevealButton } from './RevealButton';
 
@@ -10,7 +11,9 @@ interface Props {
 
 export function SettingsDialog({ open, onClose }: Props) {
   const { apiKey, setApiKey } = useAuth();
+  const { teamContext, setTeamContext } = useTeamContext();
   const [value, setValue] = useState('');
+  const [contextValue, setContextValue] = useState('');
   const [showKey, setShowKey] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -20,6 +23,7 @@ export function SettingsDialog({ open, onClose }: Props) {
     if (!dialog) return;
     if (open) {
       setValue(apiKey ?? '');
+      setContextValue(teamContext);
       setShowKey(false);
       dialog.showModal();
       requestAnimationFrame(() => inputRef.current?.focus());
@@ -42,6 +46,7 @@ export function SettingsDialog({ open, onClose }: Props) {
   const handleSave = () => {
     const trimmed = value.trim();
     if (trimmed) setApiKey(trimmed);
+    setTeamContext(contextValue.trim());
     onClose();
   };
 
@@ -54,7 +59,7 @@ export function SettingsDialog({ open, onClose }: Props) {
       ref={dialogRef}
       onClick={handleBackdropClick}
       aria-labelledby="settings-dialog-title"
-      className="m-auto rounded-xl shadow-xl border border-edge bg-surface p-0 w-full max-w-sm backdrop:bg-ink/40"
+      className="m-auto rounded-xl shadow-xl border border-edge bg-surface p-0 w-full max-w-md backdrop:bg-ink/40"
     >
       <div className="p-5">
         <h2 id="settings-dialog-title" className="font-serif text-base font-semibold text-ink mb-4">
@@ -82,6 +87,28 @@ export function SettingsDialog({ open, onClose }: Props) {
               onToggle={() => setShowKey((v) => !v)}
               label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
             />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="settings-teamcontext" className="block text-sm font-medium text-ink mb-1">
+            Team-Kontext (optional)
+          </label>
+          <textarea
+            id="settings-teamcontext"
+            value={contextValue}
+            onChange={(e) => setContextValue(e.target.value.slice(0, 800))}
+            placeholder="z.B. Grosse Schweizer Versicherung, B2C Self-Service, Mobile-First, WCAG 2.1 AA, Datenschutz nach DSG/DSGVO. Kürzel: AK = Akzeptanzkriterium."
+            rows={4}
+            className="w-full border border-edge rounded-lg bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent resize-none"
+          />
+          <div className="flex justify-between items-start mt-1 gap-2">
+            <p className="text-xs text-ink-secondary">
+              Dieser Kontext wird automatisch bei jedem Tool-Aufruf mitgegeben — du musst ihn nie wieder eintippen.
+            </p>
+            <span className="text-xs text-ink-secondary whitespace-nowrap">
+              {contextValue.length} / 800
+            </span>
           </div>
         </div>
 

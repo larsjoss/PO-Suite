@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { generateGoals, refineGoal } from '../services/goalGenerator';
 import { fetchApi } from '../shared/services/httpClient';
+import { useTeamContext } from '../shared/hooks/useTeamContext';
 import type {
   GenerateGoalParams,
   GenerateGoalResult,
@@ -24,6 +25,8 @@ function serializeGoalParams(params: GenerateGoalParams | RefineGoalParams) {
 }
 
 export function useGenerateGoals() {
+  const { teamContext } = useTeamContext();
+
   return useMutation<GenerateGoalResult, Error, GenerateGoalParams>({
     mutationFn: (params) => {
       if (IS_ENTERPRISE) {
@@ -32,12 +35,14 @@ export function useGenerateGoals() {
           serializeGoalParams(params),
         );
       }
-      return generateGoals(params);
+      return generateGoals(params, teamContext);
     },
   });
 }
 
 export function useRefineGoal() {
+  const { teamContext } = useTeamContext();
+
   return useMutation<RefineGoalResult, Error, RefineGoalParams>({
     mutationFn: (params) => {
       if (IS_ENTERPRISE) {
@@ -46,7 +51,7 @@ export function useRefineGoal() {
           serializeGoalParams(params),
         );
       }
-      return refineGoal(params);
+      return refineGoal(params, teamContext);
     },
   });
 }
