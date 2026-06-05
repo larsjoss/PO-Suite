@@ -1,8 +1,10 @@
 import { useMemo, useState, type RefObject } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { TestCase, TestCaseType, TestLevel, TestPlan } from '../../types';
 import { Button } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { buildJiraMarkdown, getAvailableTypes } from '../../services/testCaseGenerator';
+import { setHandoff } from '../../shared/services/handoffService';
 import { TestCaseSummaryBlock } from './TestCaseSummaryBlock';
 import { TestCaseFilterBar } from './TestCaseFilterBar';
 import { TestCaseCard } from './TestCaseCard';
@@ -18,6 +20,17 @@ export function TestCaseOutputPanel({ testPlan, onReset, contentRef }: Props) {
   const [selectedLevel, setSelectedLevel] = useState<TestLevel | 'all'>('all');
 
   const { copied, copy } = useCopyToClipboard();
+  const navigate = useNavigate();
+
+  const handleHandoffToDoc = () => {
+    setHandoff({
+      source: 'testcase',
+      timestamp: Date.now(),
+      title: testPlan.story_title ?? '',
+      content: buildJiraMarkdown(testPlan),
+    });
+    navigate('/tools/doc-generator');
+  };
 
   const availableTypes = useMemo(
     () => getAvailableTypes(testPlan.test_cases),
@@ -162,6 +175,16 @@ export function TestCaseOutputPanel({ testPlan, onReset, contentRef }: Props) {
             </>
           )}
         </Button>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs text-ink-secondary shrink-0">Weiterverarbeiten:</span>
+          <button
+            onClick={handleHandoffToDoc}
+            className="text-xs text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded px-1"
+          >
+            → In Doc Generator
+          </button>
+        </div>
 
         {/* Padding am Ende */}
         <div className="h-4" aria-hidden="true" />

@@ -6,6 +6,8 @@ import { useTestCasePlan } from '../hooks/useTestCasePlans';
 import { TestCaseInputPanel } from '../components/test-case-generator/TestCaseInputPanel';
 import { TestCaseOutputPanel } from '../components/test-case-generator/TestCaseOutputPanel';
 import { TestCasePlanSidebar } from '../components/test-case-generator/TestCasePlanSidebar';
+import { getHandoff, clearHandoff } from '../shared/services/handoffService';
+import { HandoffBanner } from '../shared/components';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
 
@@ -19,6 +21,7 @@ export function TestCaseGeneratorPage() {
   const [screenshots, setScreenshots] = useState<UploadedFile[]>([]);
   const [testContext, setTestContext] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>(id ? 'inhalt' : 'verlauf');
+  const [handoffSource, setHandoffSource] = useState<string | null>(null);
 
   const outputRef = useRef<HTMLDivElement>(null);
   const mutation = useGenerateTestCases();
@@ -33,6 +36,16 @@ export function TestCaseGeneratorPage() {
   useEffect(() => {
     if (showOutput && !isLoading) outputRef.current?.focus();
   }, [showOutput, isLoading, id]);
+
+  // Handoff beim Mount lesen
+  useEffect(() => {
+    const handoff = getHandoff();
+    if (handoff?.source === 'story') {
+      setStoryText(handoff.content);
+      setHandoffSource('Story Generator');
+      clearHandoff();
+    }
+  }, []);
 
   // Bei neuer ID aus URL → Tab auf Inhalt wechseln (mobile)
   useEffect(() => {
@@ -74,6 +87,9 @@ export function TestCaseGeneratorPage() {
     />
   ) : (
     <div className="max-w-3xl mx-auto px-6 py-8">
+      {handoffSource && (
+        <HandoffBanner source={handoffSource} onDismiss={() => setHandoffSource(null)} />
+      )}
       <TestCaseInputPanel
         storyText={storyText}
         screenshots={screenshots}
