@@ -3,7 +3,8 @@ import type { DocMode, StoryDocInput, FeatureDocInput, UploadedFile } from '../t
 import { useGenerateDoc } from '../hooks/useDocGenerator';
 import { DocGeneratorInputPanel } from '../components/doc-generator/DocGeneratorInputPanel';
 import { DocGeneratorOutputPanel } from '../components/doc-generator/DocGeneratorOutputPanel';
-import { ConfirmDialog } from '../shared/components';
+import { ConfirmDialog, HandoffBanner } from '../shared/components';
+import { getHandoff, clearHandoff } from '../shared/services/handoffService';
 
 const EMPTY_STORY: StoryDocInput = {
   title: '',
@@ -41,6 +42,7 @@ export function DocGeneratorPage() {
   const [featureInput, setFeatureInput] = useState<FeatureDocInput>(EMPTY_FEATURE);
   const [screenshots, setScreenshots] = useState<UploadedFile[]>([]);
   const [confirm, setConfirm] = useState<PendingConfirm>(null);
+  const [handoffSource, setHandoffSource] = useState<string | null>(null);
 
   const outputRef = useRef<HTMLDivElement>(null);
   const mutation = useGenerateDoc();
@@ -48,6 +50,30 @@ export function DocGeneratorPage() {
   useEffect(() => {
     if (screen === 'output') outputRef.current?.focus();
   }, [screen]);
+
+  // Handoff beim Mount lesen
+  useEffect(() => {
+    const handoff = getHandoff();
+    if (!handoff) return;
+    if (handoff.source === 'story') {
+      setMode('story');
+      setStoryInput((prev) => ({
+        ...prev,
+        description: handoff.content,
+        ...(handoff.title ? { title: handoff.title } : {}),
+      }));
+      setHandoffSource('Story Generator');
+    } else if (handoff.source === 'testcase') {
+      setMode('story');
+      setStoryInput((prev) => ({
+        ...prev,
+        confluenceSpec: handoff.content,
+        ...(handoff.title ? { title: handoff.title } : {}),
+      }));
+      setHandoffSource('Test Case Generator');
+    }
+    clearHandoff();
+  }, []);
 
   const dismissConfirm = useCallback(() => setConfirm(null), []);
 
@@ -129,6 +155,9 @@ export function DocGeneratorPage() {
       />
       {screen === 'input' ? (
         <div className="max-w-3xl mx-auto px-6 py-8">
+          {handoffSource && (
+            <HandoffBanner source={handoffSource} onDismiss={() => setHandoffSource(null)} />
+          )}
           <DocGeneratorInputPanel
             mode={mode}
             storyInput={storyInput}

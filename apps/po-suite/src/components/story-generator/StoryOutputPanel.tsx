@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Story } from '../../types';
 import { LoadingSkeleton, Button, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { formatStoryMarkdown } from '../../services/claude';
+import { setHandoff, extractFirstLine } from '../../shared/services/handoffService';
 
 interface Props {
   story?: Story;
@@ -15,6 +17,17 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
   const outputRef = useRef<HTMLDivElement>(null);
   const wasGenerating = useRef(false);
   const { copied, copy } = useCopyToClipboard();
+  const navigate = useNavigate();
+
+  const handleHandoff = (target: string) => {
+    setHandoff({
+      source: 'story',
+      timestamp: Date.now(),
+      title: extractFirstLine(story!.generatedStory),
+      content: story!.generatedStory,
+    });
+    navigate(target);
+  };
 
   useEffect(() => {
     if (wasGenerating.current && !isGenerating && story) {
@@ -101,6 +114,21 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
                 </>
               )}
             </Button>
+            <div className="mt-3 flex items-center gap-3 flex-wrap">
+              <span className="text-xs text-ink-secondary shrink-0">Weiterverarbeiten:</span>
+              <button
+                onClick={() => handleHandoff('/tools/test-case-generator')}
+                className="text-xs text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded px-1"
+              >
+                → In Test Case Generator
+              </button>
+              <button
+                onClick={() => handleHandoff('/tools/doc-generator')}
+                className="text-xs text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded px-1"
+              >
+                → In Doc Generator
+              </button>
+            </div>
           </div>
         )}
       </div>
