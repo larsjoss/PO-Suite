@@ -81,6 +81,7 @@ describe('useGenerateDoc (Enterprise)', () => {
         code: '',
         responsible: '',
         deploymentDate: '',
+        decisions: '',
       },
       screenshots: [makeUploadedFile('shot.png', 'image/png', 'BASE64PNG')],
     };

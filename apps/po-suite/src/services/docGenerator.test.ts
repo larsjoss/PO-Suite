@@ -40,6 +40,7 @@ const makeFeatureInput = (overrides: Partial<FeatureDocInput> = {}): FeatureDocI
   code: '',
   responsible: '',
   deploymentDate: '',
+  decisions: '',
   ...overrides,
 });
 
@@ -169,6 +170,33 @@ describe('generateDoc — Feature-Input Mapping', () => {
     expect(text).toContain('**Titel:** Auth');
     expect(text).toContain('Auth-Beschreibung');
     expect(text).toContain('Story A, Story B');
+  });
+
+  it('fügt decisions-Block ein wenn Entscheidungsfeld befüllt', async () => {
+    messagesCreateMock.mockResolvedValueOnce(mockTextResponse('# Doku'));
+
+    await generateDoc({
+      mode: 'feature',
+      input: makeFeatureInput({ decisions: 'Wir haben A vs. B evaluiert.' }),
+      screenshots: [],
+    });
+
+    const text = messagesCreateMock.mock.calls[0][0].messages[0].content[0].text as string;
+    expect(text).toContain('Fachliche Entscheidungen & Begründungen des Nutzers');
+    expect(text).toContain('Wir haben A vs. B evaluiert.');
+  });
+
+  it('lässt decisions-Block weg wenn Entscheidungsfeld leer', async () => {
+    messagesCreateMock.mockResolvedValueOnce(mockTextResponse('# Doku'));
+
+    await generateDoc({
+      mode: 'feature',
+      input: makeFeatureInput({ decisions: '' }),
+      screenshots: [],
+    });
+
+    const text = messagesCreateMock.mock.calls[0][0].messages[0].content[0].text as string;
+    expect(text).not.toContain('Fachliche Entscheidungen');
   });
 
   it('inkludiert Verantwortlich und Deployment-Datum, wenn gesetzt', async () => {

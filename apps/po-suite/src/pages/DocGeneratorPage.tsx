@@ -23,6 +23,7 @@ const EMPTY_FEATURE: FeatureDocInput = {
   code: '',
   responsible: '',
   deploymentDate: '',
+  decisions: '',
 };
 
 function hasStoryInput(input: StoryDocInput): boolean {

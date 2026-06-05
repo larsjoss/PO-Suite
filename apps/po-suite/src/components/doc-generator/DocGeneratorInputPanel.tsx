@@ -115,7 +115,7 @@ export function DocGeneratorInputPanel({
           files={screenshots}
           onChange={onScreenshotsChange}
           disabled={isLoading}
-          maxFiles={isStory ? 3 : 1}
+          maxFiles={3}
         />
 
         {/* Confluence-Spezifikation — optional */}
@@ -204,6 +204,35 @@ export function DocGeneratorInputPanel({
             />
           </div>
         </div>
+
+        {/* Fachliche Entscheidungen — optional, nur Feature Mode */}
+        {!isStory && (
+          <div>
+            <label htmlFor="dg-decisions" className="block text-sm font-medium text-ink mb-1">
+              Fachliche Entscheidungen & Begründungen{' '}
+              <span className="font-normal text-ink-tertiary">– Optional</span>
+            </label>
+            <TextArea
+              id="dg-decisions"
+              label="Fachliche Entscheidungen & Begründungen"
+              hideLabel
+              value={featureInput.decisions}
+              onChange={(val) => onFeatureChange({ decisions: val.slice(0, 1000) })}
+              placeholder="Welche Alternativen wurden evaluiert? Warum wurde Variante X gewählt? Welche Annahmen liegen dem Feature zugrunde? Welche Abhängigkeiten oder Risiken sind bekannt?"
+              rows={4}
+              autoGrow
+              disabled={isLoading}
+            />
+            <div className="flex justify-between items-start mt-1 gap-2">
+              <p className="text-xs text-ink-secondary">
+                Erscheint als eigene Sektion im generierten Dokument.
+              </p>
+              <span className="text-xs text-ink-secondary whitespace-nowrap">
+                {featureInput.decisions.length} / 1000
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Fehler */}
         {error && (

@@ -143,6 +143,7 @@ export interface FeatureDocInput {
   code: string;
   responsible: string;
   deploymentDate: string;
+  decisions: string;
 }
 
 export type GenerateDocParams =
