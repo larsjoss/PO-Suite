@@ -7,3 +7,5 @@ export const WORKSPACE_INDEX_KEY = 'po_workspace_index';
 export const WORKSPACE_ITEM_PREFIX = 'po_workspace_';
 export const ACTIVE_WORKSPACE_KEY = 'po_active_workspace';
 export const COACH_DISMISSED_KEY = 'po_coach_dismissed';
+export const LAST_USED_TOOL_KEY = 'po_last_used_tool';
+export const LAST_USED_AT_KEY = 'po_last_used_at';
