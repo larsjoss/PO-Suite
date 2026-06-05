@@ -2,9 +2,20 @@ import { useState } from 'react';
 import { TOOLS } from '../constants/tools';
 import { ToolTile } from '../components/home/ToolTile';
 import { ArsenalCelebration } from '../components/home/ArsenalCelebration';
+import { LAST_USED_TOOL_KEY, LAST_USED_AT_KEY } from '../shared/services/storageKeys';
+
+const TTL_MS = 24 * 60 * 60 * 1000;
+
+function readLastUsedToolId(): string | null {
+  const id = localStorage.getItem(LAST_USED_TOOL_KEY);
+  const at = Number(localStorage.getItem(LAST_USED_AT_KEY) ?? '0');
+  if (!id || Date.now() - at > TTL_MS) return null;
+  return id;
+}
 
 export function ToolSelectionPage() {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const lastUsedToolId = readLastUsedToolId();
 
   return (
     <main
@@ -23,7 +34,7 @@ export function ToolSelectionPage() {
 
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {TOOLS.map((tool) => (
-            <ToolTile key={tool.id} tool={tool} />
+            <ToolTile key={tool.id} tool={tool} isLastUsed={tool.id === lastUsedToolId} />
           ))}
         </div>
       </div>
