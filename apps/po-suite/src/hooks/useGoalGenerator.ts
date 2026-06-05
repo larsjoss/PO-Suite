@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { generateGoals, refineGoal } from '../services/goalGenerator';
 import { fetchApi } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
+import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type {
   GenerateGoalParams,
   GenerateGoalResult,
@@ -26,6 +27,7 @@ function serializeGoalParams(params: GenerateGoalParams | RefineGoalParams) {
 
 export function useGenerateGoals() {
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
 
   return useMutation<GenerateGoalResult, Error, GenerateGoalParams>({
     mutationFn: (params) => {
@@ -35,13 +37,14 @@ export function useGenerateGoals() {
           serializeGoalParams(params),
         );
       }
-      return generateGoals(params, teamContext);
+      return generateGoals(params, teamContext, activeWorkspace?.workspaceContext ?? '');
     },
   });
 }
 
 export function useRefineGoal() {
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
 
   return useMutation<RefineGoalResult, Error, RefineGoalParams>({
     mutationFn: (params) => {
@@ -51,7 +54,7 @@ export function useRefineGoal() {
           serializeGoalParams(params),
         );
       }
-      return refineGoal(params, teamContext);
+      return refineGoal(params, teamContext, activeWorkspace?.workspaceContext ?? '');
     },
   });
 }

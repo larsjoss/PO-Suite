@@ -2,6 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildImageBlock } from '../shared/services/imageBlocks';
+import { buildSystemPrompt } from '../shared/services/promptUtils';
 import { TEST_CASE_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts/testCaseGenerator';
 import type { TestPlan, TestCase, TestCaseType, TestLevel } from '../types';
 
@@ -13,14 +14,10 @@ export interface GenerateTestCasesParams {
 
 // ─── API Call ─────────────────────────────────────────────────────────────────
 
-function withTeamContext(systemPrompt: string, teamContext: string): string {
-  if (!teamContext.trim()) return systemPrompt;
-  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
-}
-
 export async function generateTestCases(
   params: GenerateTestCasesParams,
   teamContext = '',
+  workspaceContext = '',
 ): Promise<TestPlan> {
   const client = getApiClient();
 
@@ -43,7 +40,7 @@ export async function generateTestCases(
     client.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 6000,
-      system: withTeamContext(SYSTEM_PROMPT, teamContext),
+      system: buildSystemPrompt(SYSTEM_PROMPT, teamContext, workspaceContext),
       messages: [{ role: 'user', content: contentBlocks }],
     }),
   );

@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import type { UploadedFile } from '../../types';
 import { Button, TextArea, InlineError, ScreenshotUpload } from '../../shared/components';
+import { WorkspaceArtifactPanel } from '../workspace/WorkspaceArtifactPanel';
 
 interface Props {
   storyText: string;
@@ -37,6 +38,7 @@ export function TestCaseInputPanel({
       </div>
 
       <form onSubmit={onSubmit} className="space-y-5" noValidate>
+        <WorkspaceArtifactPanel onAppend={(c) => onStoryChange(storyText + c)} />
         {/* Story-Textarea */}
         <TextArea
           id="tcg-story"

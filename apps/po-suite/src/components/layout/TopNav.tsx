@@ -102,8 +102,21 @@ export function TopNav() {
             })}
           </nav>
 
-          {/* Rechte Seite: API-Key-Status + Theme-Toggle + Einstellungen + Logout */}
+          {/* Rechte Seite: Workspaces + API-Key-Status + Theme-Toggle + Einstellungen + Logout */}
           <div className="flex items-center gap-1 shrink-0 pl-3">
+            <NavLink
+              to="/workspaces"
+              aria-label="Workspaces verwalten"
+              className={({ isActive }) => [
+                'flex items-center px-2 py-1.5 rounded-md text-xs transition-colors',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+                isActive ? 'text-brand' : 'text-ink-secondary hover:text-ink hover:bg-edge-2',
+              ].join(' ')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+              </svg>
+            </NavLink>
             <ThemeToggle />
             {!IS_ENTERPRISE && (
               <>

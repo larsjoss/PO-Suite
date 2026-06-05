@@ -2,6 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildImageBlocks } from '../shared/services/imageBlocks';
+import { buildSystemPrompt } from '../shared/services/promptUtils';
 import { STORY_DOC_SYSTEM_PROMPT, FEATURE_DOC_SYSTEM_PROMPT } from './prompts/docGenerator';
 import type { GenerateDocParams, StoryDocInput, FeatureDocInput } from '../types';
 
@@ -66,16 +67,15 @@ function buildFeatureText(input: FeatureDocInput): string {
 
 // ─── API Call ─────────────────────────────────────────────────────────────────
 
-function withTeamContext(systemPrompt: string, teamContext: string): string {
-  if (!teamContext.trim()) return systemPrompt;
-  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
-}
-
-export async function generateDoc(params: GenerateDocParams, teamContext = ''): Promise<string> {
+export async function generateDoc(
+  params: GenerateDocParams,
+  teamContext = '',
+  workspaceContext = '',
+): Promise<string> {
   const client = getApiClient();
 
   const basePrompt = params.mode === 'story' ? STORY_DOC_SYSTEM_PROMPT : FEATURE_DOC_SYSTEM_PROMPT;
-  const systemPrompt = withTeamContext(basePrompt, teamContext);
+  const systemPrompt = buildSystemPrompt(basePrompt, teamContext, workspaceContext);
   const maxTokens = params.mode === 'story' ? 4000 : 6000;
 
   const userText =

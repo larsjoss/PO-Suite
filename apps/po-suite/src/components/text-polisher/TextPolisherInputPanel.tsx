@@ -3,6 +3,7 @@ import type { UseCase, Tone } from '../../types';
 import { Button, TextArea, InlineError, PanelHeader } from '../../shared/components';
 import { UseCaseSelector } from './UseCaseSelector';
 import { ToneSelector } from './ToneSelector';
+import { WorkspaceArtifactPanel } from '../workspace/WorkspaceArtifactPanel';
 
 // ─── Context-specific labels / placeholders ───────────────────────────────────
 
@@ -75,6 +76,7 @@ export function TextPolisherInputPanel({
         className="flex-1 overflow-y-auto p-5"
       >
         <form onSubmit={onSubmit} className="space-y-4">
+          <WorkspaceArtifactPanel onAppend={(c) => onInputChange(input + c)} />
           {/* Textarea (UI-03): min. 12 Zeilen auf Desktop */}
           <TextArea
             id="tp-input"

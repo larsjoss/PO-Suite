@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import type { GoalMode, GoalVariant } from '../../types';
 import { Button, InlineError, LoadingSkeleton, PanelHeader } from '../../shared/components';
 import { GoalVariantCard } from './GoalVariantCard';
+import { SaveToWorkspaceButton } from '../workspace/SaveToWorkspaceButton';
 
 const REFINE_PLACEHOLDER: Record<GoalMode, string> = {
   'sprint-goal': 'z.B. "Mehr Fokus auf Business-Nutzen", "Kürzer", "Weniger technisch"',
@@ -103,6 +104,11 @@ export function GoalGeneratorOutputPanel({
             {generateError && <InlineError message={generateError.message} />}
 
             <div className="space-y-3 pt-2">
+              <SaveToWorkspaceButton
+                toolId="goal"
+                title={variants[0]?.text?.slice(0, 80) ?? 'Goal'}
+                content={variants.map((v, i) => `Variante ${i + 1}:\n${v.text}${v.rationale ? `\n\nQualitätsbegründung: ${v.rationale}` : ''}`).join('\n\n---\n\n')}
+              />
               <Button onClick={onRegenerate} variant="secondary" disabled={isGenerating} className="w-full">
                 Neu generieren
               </Button>

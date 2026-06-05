@@ -1,5 +1,6 @@
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
+import { buildSystemPrompt } from '../shared/services/promptUtils';
 import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts/story';
 
 export interface ConversationMessage {
@@ -40,21 +41,17 @@ export function extractTitle(generatedStory: string, fallback: string): string {
   return match ? match[1].trim() : fallback.slice(0, 60);
 }
 
-function withTeamContext(systemPrompt: string, teamContext: string): string {
-  if (!teamContext.trim()) return systemPrompt;
-  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
-}
-
 export async function generateStory(
   rawInput: string,
   teamContext = '',
+  workspaceContext = '',
 ): Promise<{ generatedStory: string; refinementHints: string }> {
   const client = getApiClient();
   const response = await withTimeout(
     client.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 2048,
-      system: withTeamContext(SYSTEM_PROMPT, teamContext),
+      system: buildSystemPrompt(SYSTEM_PROMPT, teamContext, workspaceContext),
       messages: [{ role: 'user', content: rawInput }],
     }),
   );
@@ -65,6 +62,7 @@ export async function refineStoryWithHints(
   currentStory: string,
   hintAnswers: HintAnswer[],
   teamContext = '',
+  workspaceContext = '',
 ): Promise<{ generatedStory: string; refinementHints: string }> {
   const client = getApiClient();
   const pairs = hintAnswers
@@ -78,7 +76,7 @@ export async function refineStoryWithHints(
     client.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 2048,
-      system: withTeamContext(SYSTEM_PROMPT, teamContext),
+      system: buildSystemPrompt(SYSTEM_PROMPT, teamContext, workspaceContext),
       messages: [{ role: 'user', content: userMessage }],
     }),
   );
@@ -88,13 +86,14 @@ export async function refineStoryWithHints(
 export async function refineStory(
   conversationHistory: ConversationMessage[],
   teamContext = '',
+  workspaceContext = '',
 ): Promise<{ generatedStory: string; refinementHints: string }> {
   const client = getApiClient();
   const response = await withTimeout(
     client.messages.create({
       model: 'claude-sonnet-4-5',
       max_tokens: 2048,
-      system: withTeamContext(SYSTEM_PROMPT, teamContext),
+      system: buildSystemPrompt(SYSTEM_PROMPT, teamContext, workspaceContext),
       messages: conversationHistory,
     }),
   );

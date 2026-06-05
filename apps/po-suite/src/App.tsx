@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { TopNav } from './components/layout/TopNav';
+import { WorkspaceSelector } from './components/workspace/WorkspaceSelector';
+import { WorkspaceProvider } from './shared/context/WorkspaceContext';
 
 const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })));
 const ToolSelectionPage = lazy(() =>
@@ -21,6 +23,9 @@ const DocGeneratorPage = lazy(() =>
 );
 const GoalGeneratorPage = lazy(() =>
   import('./pages/GoalGeneratorPage').then((m) => ({ default: m.GoalGeneratorPage })),
+);
+const WorkspacesPage = lazy(() =>
+  import('./pages/WorkspacesPage').then((m) => ({ default: m.WorkspacesPage })),
 );
 
 function PageLoader() {
@@ -53,6 +58,7 @@ function ProtectedLayout() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <TopNav />
+      <WorkspaceSelector />
       <Suspense fallback={<PageLoader />}>
         <Outlet />
       </Suspense>
@@ -62,6 +68,7 @@ function ProtectedLayout() {
 
 export default function App() {
   return (
+    <WorkspaceProvider>
     <>
       {/*
        * WCAG 2.4.1 – Bypass Blocks (AA): Skip-Navigation als erstes
@@ -103,6 +110,7 @@ export default function App() {
           <Route path="/tools/test-case-generator/:id" element={<TestCaseGeneratorPage />} />
           <Route path="/tools/doc-generator" element={<DocGeneratorPage />} />
           <Route path="/tools/goal-generator" element={<GoalGeneratorPage />} />
+          <Route path="/workspaces" element={<WorkspacesPage />} />
         </Route>
 
         {/* Legacy-URLs weiterleiten */}
@@ -110,5 +118,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/tools" replace />} />
       </Routes>
     </>
+    </WorkspaceProvider>
   );
 }

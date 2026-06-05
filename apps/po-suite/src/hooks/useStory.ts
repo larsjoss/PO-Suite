@@ -4,6 +4,7 @@ import * as storage from '../services/storage';
 import * as claude from '../services/claude';
 import { fetchApi, fetchApiGet } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
+import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type { Story, StoryDetailResponse } from '../types';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
@@ -25,6 +26,8 @@ export function useGenerateStory() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
+  const workspaceContext = activeWorkspace?.workspaceContext ?? '';
 
   return useMutation({
     mutationFn: async (rawInput: string) => {
@@ -32,7 +35,7 @@ export function useGenerateStory() {
         // Backend generates + persists atomically — returns full Story object
         return fetchApi<Story>('/api/tools/story/generate', { rawInput });
       }
-      const { generatedStory, refinementHints } = await claude.generateStory(rawInput, teamContext);
+      const { generatedStory, refinementHints } = await claude.generateStory(rawInput, teamContext, workspaceContext);
       const title = claude.extractTitle(generatedStory, rawInput);
       return storage.createStory(title, rawInput, generatedStory, refinementHints);
     },
@@ -46,6 +49,7 @@ export function useGenerateStory() {
 export function useRefineStoryWithHints(id: string) {
   const queryClient = useQueryClient();
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
 
   return useMutation({
     mutationFn: async (params: {
@@ -65,6 +69,7 @@ export function useRefineStoryWithHints(id: string) {
         params.currentStory,
         params.hintAnswers,
         teamContext,
+        activeWorkspace?.workspaceContext ?? '',
       );
       const title = claude.extractTitle(generatedStory, params.currentTitle);
       return storage.updateStory(id, generatedStory, refinementHints, title);
@@ -82,6 +87,7 @@ export function useRefineStoryWithHints(id: string) {
 export function useRefineStory(id: string) {
   const queryClient = useQueryClient();
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
 
   return useMutation({
     mutationFn: async (instruction: string) => {
@@ -130,7 +136,11 @@ export function useRefineStory(id: string) {
         { role: 'user', content: instruction },
       ];
 
-      const { generatedStory, refinementHints } = await claude.refineStory(conversationHistory, teamContext);
+      const { generatedStory, refinementHints } = await claude.refineStory(
+        conversationHistory,
+        teamContext,
+        activeWorkspace?.workspaceContext ?? '',
+      );
       const title = claude.extractTitle(generatedStory, story.rawInput);
       storage.addRefinement(id, instruction, generatedStory);
       return storage.updateStory(id, generatedStory, refinementHints, title);

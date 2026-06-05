@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import { Button, InlineError, LoadingSkeleton, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { SaveToWorkspaceButton } from '../workspace/SaveToWorkspaceButton';
 
 interface Props {
   markdown: string;
@@ -48,6 +49,11 @@ export function DocGeneratorOutputPanel({
             <MarkdownOutput>{markdown}</MarkdownOutput>
 
             <div className="mt-8 space-y-3">
+              <SaveToWorkspaceButton
+                toolId="doc"
+                title={markdown.split('\n').find((l) => l.trim().replace(/^#+\s*/, '')) ?? 'Dokumentation'}
+                content={markdown}
+              />
               <Button
                 onClick={() => copy(markdown)}
                 variant="primary"

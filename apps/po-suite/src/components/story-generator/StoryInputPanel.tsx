@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useGenerateStory } from '../../hooks/useStory';
 import { Button, TextArea, InlineError, PanelHeader } from '../../shared/components';
+import { WorkspaceArtifactPanel } from '../workspace/WorkspaceArtifactPanel';
 
 interface Props {
   onGeneratingChange?: (generating: boolean) => void;
@@ -31,6 +32,7 @@ export function StoryInputPanel({ onGeneratingChange }: Props) {
 
       <form onSubmit={handleGenerate} className="flex flex-col flex-1 overflow-hidden">
         <section aria-labelledby="anforderung-heading" className="flex flex-col flex-1 overflow-hidden p-5">
+          <WorkspaceArtifactPanel onAppend={(c) => setRawInput((prev) => prev + c)} />
           <TextArea
             id="anforderung-input"
             label="Anforderung beschreiben"

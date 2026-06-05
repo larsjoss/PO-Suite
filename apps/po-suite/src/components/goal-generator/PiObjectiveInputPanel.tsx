@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import type { PiObjectiveInput } from '../../types';
 import { Button, TextArea, InlineError } from '../../shared/components';
+import { WorkspaceArtifactPanel } from '../workspace/WorkspaceArtifactPanel';
 
 const INPUT_CLASS =
   'w-full rounded-lg border border-edge bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed';
@@ -29,6 +30,7 @@ export function PiObjectiveInputPanel({ input, isLoading, error, onChange, onSub
       className="space-y-5"
       noValidate
     >
+      <WorkspaceArtifactPanel onAppend={(c) => onChange({ featureDescription: input.featureDescription + c })} />
       {/* ART-Feature Titel — Pflicht */}
       <div>
         <label htmlFor="gg-feature-title" className="block text-sm font-medium text-ink mb-1">

@@ -2,6 +2,7 @@ import type { FormEvent } from 'react';
 import type { DocMode, StoryDocInput, FeatureDocInput, UploadedFile } from '../../types';
 import { Button, TextArea, InlineError, ScreenshotUpload } from '../../shared/components';
 import { DocModeSelector } from './DocModeSelector';
+import { WorkspaceArtifactPanel } from '../workspace/WorkspaceArtifactPanel';
 
 interface Props {
   mode: DocMode;
@@ -58,6 +59,13 @@ export function DocGeneratorInputPanel({
         className="space-y-5"
         noValidate
       >
+        <WorkspaceArtifactPanel
+          onAppend={(c) =>
+            isStory
+              ? onStoryChange({ description: descriptionValue + c })
+              : onFeatureChange({ description: descriptionValue + c })
+          }
+        />
         {/* Titel — Pflicht in beiden Modes */}
         <div>
           <label htmlFor="dg-title" className="block text-sm font-medium text-ink mb-1">

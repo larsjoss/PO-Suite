@@ -2,12 +2,14 @@ import { useMutation } from '@tanstack/react-query';
 import { generateDoc } from '../services/docGenerator';
 import { fetchApi } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
+import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type { GenerateDocParams } from '../types';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
 
 export function useGenerateDoc() {
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
 
   return useMutation<string, Error, GenerateDocParams>({
     mutationFn: async (params) => {
@@ -24,7 +26,7 @@ export function useGenerateDoc() {
         });
         return res.result;
       }
-      return generateDoc(params, teamContext);
+      return generateDoc(params, teamContext, activeWorkspace?.workspaceContext ?? '');
     },
   });
 }

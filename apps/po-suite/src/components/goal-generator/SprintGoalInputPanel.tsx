@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import type { SprintGoalInput, UploadedFile } from '../../types';
 import { Button, TextArea, InlineError, ScreenshotUpload } from '../../shared/components';
+import { WorkspaceArtifactPanel } from '../workspace/WorkspaceArtifactPanel';
 
 interface Props {
   input: SprintGoalInput;
@@ -32,6 +33,7 @@ export function SprintGoalInputPanel({
       className="space-y-5"
       noValidate
     >
+      <WorkspaceArtifactPanel onAppend={(c) => onChange({ idea: input.idea + c })} />
       <div>
         <TextArea
           id="gg-sprint-idea"
