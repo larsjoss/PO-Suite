@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { createElement } from 'react';
 import type { Story, StoryDetailResponse } from '../types';
+import type * as ClaudeModule from '../services/claude';
 
 const getStoryMock = vi.fn();
 const createStoryMock = vi.fn();
@@ -23,7 +24,7 @@ const refineStoryWithHintsMock = vi.fn();
 const refineStoryMock = vi.fn();
 
 vi.mock('../services/claude', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../services/claude')>();
+  const actual = await importOriginal<typeof ClaudeModule>();
   return {
     ...actual,
     generateStory: (...args: unknown[]) => generateStoryMock(...args),

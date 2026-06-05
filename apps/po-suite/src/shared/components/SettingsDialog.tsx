@@ -36,6 +36,9 @@ export function SettingsDialog({ open, onClose }: Props) {
     } else if (dialog.open) {
       dialog.close();
     }
+    // teamContext intentionally excluded: we only snapshot it when the dialog opens,
+    // not on every keystroke in the parent.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, apiKey]);
 
   useEffect(() => {

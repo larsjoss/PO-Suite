@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { ContentBlock } from '@anthropic-ai/sdk/resources/messages';
 import { API_KEY_SESSION_KEY } from './storageKeys';
 
 let constructorCallCount = 0;
@@ -70,7 +71,7 @@ describe('getApiClient — Sicherheitsvalidierung', () => {
 
 describe('extractTextContent', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const block = (obj: any) => obj as import('@anthropic-ai/sdk/resources/messages').ContentBlock;
+  const block = (obj: any) => obj as ContentBlock;
 
   it('extrahiert Text aus TextBlock', () => {
     const content = [block({ type: 'text', text: 'Hallo Welt' })];
