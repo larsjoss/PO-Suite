@@ -54,6 +54,13 @@ function buildFeatureText(input: FeatureDocInput): string {
     lines.push('');
     lines.push(`**Deployment-Datum:** ${input.deploymentDate.trim()}`);
   }
+  if (input.decisions.trim()) {
+    lines.push('');
+    lines.push(
+      `## Fachliche Entscheidungen & Begründungen des Nutzers\n${input.decisions.trim()}\n\n` +
+        `Erstelle im Output eine eigene Sektion 'Fachliche Entscheidungen', die diese Informationen strukturiert aufbereitet — mit Entscheidung, Begründung und (falls genannt) evaluierten Alternativen.`,
+    );
+  }
   return lines.join('\n');
 }
 

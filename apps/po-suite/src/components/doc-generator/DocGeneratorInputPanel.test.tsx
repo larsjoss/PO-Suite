@@ -21,6 +21,7 @@ const EMPTY_FEATURE: FeatureDocInput = {
   code: '',
   responsible: '',
   deploymentDate: '',
+  decisions: '',
 };
 
 interface SetupProps {
