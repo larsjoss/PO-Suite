@@ -1,9 +1,13 @@
-import { useEffect, useRef, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePolishText } from '../hooks/useTextPolisher';
 import { useSessionState } from '../hooks/useSessionState';
 import type { UseCase, Tone } from '../types';
 import { TextPolisherInputPanel } from '../components/text-polisher/TextPolisherInputPanel';
 import { TextPolisherOutputPanel } from '../components/text-polisher/TextPolisherOutputPanel';
+import { CoachPanel } from '../shared/components';
+import { useCoachVisibility } from '../shared/hooks/useCoachVisibility';
+import { POLISH_COACH_CONFIG } from '../shared/config/coachConfig';
 
 /*
  * Layout: Split-View.
@@ -15,6 +19,7 @@ import { TextPolisherOutputPanel } from '../components/text-polisher/TextPolishe
  * sodass ein Tool-Wechsel und Rückkehr den letzten Stand wiederherstellt.
  */
 export function TextPolisherPage() {
+  const navigate = useNavigate();
   const [useCase, setUseCase] = useSessionState<UseCase>('tp_use_case', 'email');
   const [tone, setTone] = useSessionState<Tone>('tp_tone', 'formell');
   const [input, setInput] = useSessionState<string>('tp_input', '');
@@ -23,14 +28,19 @@ export function TextPolisherPage() {
 
   const outputRef = useRef<HTMLDivElement>(null);
   const wasLoading = useRef(false);
+  const { isVisible: coachVisible, showCoach, dismiss: dismissCoach, dismissForever } = useCoachVisibility();
+  const [toggledSteps, setToggledSteps] = useState<Set<string>>(new Set());
 
   const hasOutput = !!output;
   const isLoading = polishMutation.isPending;
 
   // Persist API result to sessionStorage so it survives navigation.
   useEffect(() => {
-    if (polishMutation.data) setOutput(polishMutation.data);
-  }, [polishMutation.data, setOutput]);
+    if (polishMutation.data) {
+      setOutput(polishMutation.data);
+      showCoach();
+    }
+  }, [polishMutation.data, setOutput]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // WCAG 2.4.3 – Focus Order: nach erfolgreicher Generierung Fokus auf Output-Panel.
   useEffect(() => {
@@ -103,6 +113,24 @@ export function TextPolisherPage() {
           isLoading={isLoading}
           contentRef={outputRef}
         />
+        {coachVisible && (
+          <div className="px-6 pb-6">
+            <CoachPanel
+              config={POLISH_COACH_CONFIG}
+              onDismiss={dismissCoach}
+              onDismissForever={dismissForever}
+              onNavigate={navigate}
+              onStepToggle={(id) =>
+                setToggledSteps((prev) => {
+                  const next = new Set(prev);
+                  next.has(id) ? next.delete(id) : next.add(id);
+                  return next;
+                })
+              }
+              toggledSteps={toggledSteps}
+            />
+          </div>
+        )}
       </div>
     </main>
   );

@@ -1,4 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from 'react';
+import { CoachPanel } from '../shared/components';
+import { useCoachVisibility } from '../shared/hooks/useCoachVisibility';
+import { TESTCASE_COACH_CONFIG } from '../shared/config/coachConfig';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { UploadedFile } from '../types';
 import { useGenerateTestCases } from '../hooks/useTestCaseGenerator';
@@ -25,6 +28,8 @@ export function TestCaseGeneratorPage() {
 
   const outputRef = useRef<HTMLDivElement>(null);
   const mutation = useGenerateTestCases();
+  const { isVisible: coachVisible, showCoach, dismiss: dismissCoach, dismissForever } = useCoachVisibility();
+  const [toggledSteps, setToggledSteps] = useState<Set<string>>(new Set());
 
   const { data: loadedPlan, isLoading: isPlanLoading } = useTestCasePlan(id);
 
@@ -36,6 +41,10 @@ export function TestCaseGeneratorPage() {
   useEffect(() => {
     if (showOutput && !isLoading) outputRef.current?.focus();
   }, [showOutput, isLoading, id]);
+
+  useEffect(() => {
+    if (displayPlan && !isLoading) showCoach();
+  }, [displayPlan, isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handoff beim Mount lesen
   useEffect(() => {
@@ -80,11 +89,31 @@ export function TestCaseGeneratorPage() {
   }
 
   const mainContent = showOutput && displayPlan ? (
-    <TestCaseOutputPanel
-      testPlan={displayPlan}
-      onReset={handleReset}
-      contentRef={outputRef}
-    />
+    <>
+      <TestCaseOutputPanel
+        testPlan={displayPlan}
+        onReset={handleReset}
+        contentRef={outputRef}
+      />
+      {coachVisible && (
+        <div className="max-w-3xl mx-auto px-6 pb-8">
+          <CoachPanel
+            config={TESTCASE_COACH_CONFIG}
+            onDismiss={dismissCoach}
+            onDismissForever={dismissForever}
+            onNavigate={navigate}
+            onStepToggle={(id) =>
+              setToggledSteps((prev) => {
+                const next = new Set(prev);
+                next.has(id) ? next.delete(id) : next.add(id);
+                return next;
+              })
+            }
+            toggledSteps={toggledSteps}
+          />
+        </div>
+      )}
+    </>
   ) : (
     <div className="max-w-3xl mx-auto px-6 py-8">
       {handoffSource && (

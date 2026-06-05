@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useTeamContext } from '../hooks/useTeamContext';
 import { Button } from './Button';
 import { RevealButton } from './RevealButton';
+import { Toggle } from './Toggle';
+import { COACH_DISMISSED_KEY } from '../services/storageKeys';
 
 interface Props {
   open: boolean;
@@ -14,6 +16,9 @@ export function SettingsDialog({ open, onClose }: Props) {
   const { teamContext, setTeamContext } = useTeamContext();
   const [value, setValue] = useState('');
   const [contextValue, setContextValue] = useState('');
+  const [coachEnabled, setCoachEnabled] = useState(
+    () => localStorage.getItem(COACH_DISMISSED_KEY) !== 'true',
+  );
   const [showKey, setShowKey] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +30,7 @@ export function SettingsDialog({ open, onClose }: Props) {
       setValue(apiKey ?? '');
       setContextValue(teamContext);
       setShowKey(false);
+      setCoachEnabled(localStorage.getItem(COACH_DISMISSED_KEY) !== 'true');
       dialog.showModal();
       requestAnimationFrame(() => inputRef.current?.focus());
     } else if (dialog.open) {
@@ -47,6 +53,11 @@ export function SettingsDialog({ open, onClose }: Props) {
     const trimmed = value.trim();
     if (trimmed) setApiKey(trimmed);
     setTeamContext(contextValue.trim());
+    if (coachEnabled) {
+      localStorage.removeItem(COACH_DISMISSED_KEY);
+    } else {
+      localStorage.setItem(COACH_DISMISSED_KEY, 'true');
+    }
     onClose();
   };
 
@@ -110,6 +121,15 @@ export function SettingsDialog({ open, onClose }: Props) {
               {contextValue.length} / 800
             </span>
           </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-sm font-medium text-ink">PO-Coach anzeigen</span>
+          <Toggle
+            checked={coachEnabled}
+            onChange={setCoachEnabled}
+            aria-label="PO-Coach anzeigen"
+          />
         </div>
 
         <div className="flex gap-2 mt-5">

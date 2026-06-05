@@ -1,4 +1,8 @@
 import { type FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CoachPanel } from '../shared/components';
+import { useCoachVisibility } from '../shared/hooks/useCoachVisibility';
+import { DOC_COACH_CONFIG } from '../shared/config/coachConfig';
 import type { DocMode, StoryDocInput, FeatureDocInput, UploadedFile } from '../types';
 import { useGenerateDoc } from '../hooks/useDocGenerator';
 import { DocGeneratorInputPanel } from '../components/doc-generator/DocGeneratorInputPanel';
@@ -45,8 +49,11 @@ export function DocGeneratorPage() {
   const [confirm, setConfirm] = useState<PendingConfirm>(null);
   const [handoffSource, setHandoffSource] = useState<string | null>(null);
 
+  const navigate = useNavigate();
   const outputRef = useRef<HTMLDivElement>(null);
   const mutation = useGenerateDoc();
+  const { isVisible: coachVisible, showCoach, dismiss: dismissCoach, dismissForever } = useCoachVisibility();
+  const [toggledSteps, setToggledSteps] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (screen === 'output') outputRef.current?.focus();
@@ -113,6 +120,7 @@ export function DocGeneratorPage() {
           : { mode: 'feature', input: featureInput, screenshots },
       );
       setScreen('output');
+      showCoach();
     } catch {
       // Fehler liegt in mutation.error — wird im InputPanel als InlineError angezeigt
     }
@@ -174,14 +182,34 @@ export function DocGeneratorPage() {
           />
         </div>
       ) : mutation.data ? (
-        <DocGeneratorOutputPanel
-          markdown={mutation.data}
-          isLoading={mutation.isPending}
-          error={mutation.error}
-          onRegenerate={handleRegenerate}
-          onReset={handleReset}
-          contentRef={outputRef}
-        />
+        <>
+          <DocGeneratorOutputPanel
+            markdown={mutation.data}
+            isLoading={mutation.isPending}
+            error={mutation.error}
+            onRegenerate={handleRegenerate}
+            onReset={handleReset}
+            contentRef={outputRef}
+          />
+          {coachVisible && (
+            <div className="max-w-3xl mx-auto px-6 pb-8">
+              <CoachPanel
+                config={DOC_COACH_CONFIG}
+                onDismiss={dismissCoach}
+                onDismissForever={dismissForever}
+                onNavigate={navigate}
+                onStepToggle={(id) =>
+                  setToggledSteps((prev) => {
+                    const next = new Set(prev);
+                    next.has(id) ? next.delete(id) : next.add(id);
+                    return next;
+                  })
+                }
+                toggledSteps={toggledSteps}
+              />
+            </div>
+          )}
+        </>
       ) : null}
     </main>
   );

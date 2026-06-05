@@ -21,3 +21,4 @@ export { Accordion } from './Accordion';
 export { Tooltip } from './Tooltip';
 export { ThemeToggle } from './ThemeToggle';
 export { HandoffBanner } from './HandoffBanner';
+export { CoachPanel } from './CoachPanel';
