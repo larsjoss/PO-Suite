@@ -123,11 +123,11 @@ export function TopNav() {
                 <span
                   aria-label={apiKey ? 'Anthropic API-Key aktiv' : 'Kein API-Key konfiguriert'}
                   className={`flex items-center gap-1.5 text-xs mr-1 select-none ${
-                    apiKey ? 'text-green-700' : 'text-red-600'
+                    apiKey ? 'text-success' : 'text-amber-600'
                   }`}
                 >
                   <span
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${apiKey ? 'bg-green-500' : 'bg-red-500'}`}
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${apiKey ? 'bg-success' : 'bg-amber-500'}`}
                     aria-hidden="true"
                   />
                   <span className="hidden sm:inline">API</span>
