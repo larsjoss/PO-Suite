@@ -1,139 +1,298 @@
-# AI Tools — Frontend (PO Suite)
+# PO Suite — Developer Guide (Claude Code)
 
-React 18 + TypeScript + Vite SPA. Fünf Tools: Story Generator, Goal Generator, Text Polisher, Test Case Generator, Doc Generator. Build läuft vollständig im Browser gegen die Anthropic API (GitHub-Pages-Variante) oder via Express-Backend (Enterprise-Variante).
+React 18 + TypeScript + Vite SPA. Fünf KI-gestützte Tools für Product Owner in agilen Teams (Scrum/SAFe). Build läuft vollständig im Browser gegen die Anthropic API (GitHub-Pages-Variante) oder via Express-Backend (Enterprise-Variante).
 
-## Aktueller Stand
+**Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`  
+**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/`  
+**Architekturentscheide:** [`docs/adr/`](../../docs/adr/README.md)
 
-**Repo:** `larsjoss/PO-Suite` — **Hauptbranch:** `main`
+---
 
-Alle fünf Module vollständig implementiert. **457 Vitest-Tests + 10 Playwright-E2E-Tests grün, Build sauber** (211 kB Hauptbundle, Code-Splitting via lazy-loaded Pages).
+## Projekt-Übersicht
 
-**GitHub Pages:** `https://larsjoss.github.io/PO-Suite/` — Deploy automatisch auf Push zu `main` mit Änderungen unter `apps/po-suite/**` oder manuell via `workflow_dispatch`.
+**Was:** Fünf KI-Tools die die häufigsten Schreibaufgaben im PO-Alltag automatisieren — Story-Schreiben, Test Cases, Sprint Goals, PI Objectives, Dokumentation, Texte polieren.
 
-## Letzte Änderungen (Session 2026-05-22)
+**Für wen:** Einzelner Product Owner (Single-User-Prototyp). Kein Multi-User, kein Team-Sharing in der GitHub-Pages-Variante.
 
-- **Design System implementiert**: CSS-Custom-Property-Token-System (`src/index.css` + `tailwind.config.ts`) — alle 12 Farb-Tokens als RGB-Kanal-Variablen, Opacity-Modifier (`bg-ink/40`) vollständig funktionsfähig
-- **Dark Mode**: `ThemeContext` + `ThemeProvider`, `localStorage`-Persistenz (`po-theme`), `ThemeToggle` in TopNav
-- **11 neue Shared Components**: `Select`, `Checkbox`, `RadioGroup`, `Toggle`, `SegmentedControl`, `ProgressBar`, `Snackbar`, `StatusBadge`/`Chip`, `Accordion`, `Tooltip`, `ThemeToggle`
-- **Button**: `danger`-Variante hinzugefügt
-- **TCG History + Sidebar**: localStorage-Persistenz für Testpläne, `TestCasePlanSidebar`, URL-Routing `/:id`
+**Warum kein Backend (GitHub-Pages-Variante):** Privacy (Business-Kontext verlässt nur via Anthropic API den Browser), Zero-Ops (GitHub Pages, kein Server), und Entwicklungsgeschwindigkeit. Details: [ADR-002](../../docs/adr/ADR-002-client-side-spa.md).
 
-## Nächster Schritt
+---
 
-**P1 — `httpClient.ts` Unit-Tests** (`src/shared/services/httpClient.ts`): Enterprise-Path ist nur via `vitest.enterprise.config.ts` (15 Integration-Tests) abgedeckt — keine isolierten Unit-Tests für `fetchApi`, `fetchApiGet`, `fetchApiDelete`, Timeout-Verhalten und 401-Handling.
+## Tech Stack
 
-## Konventionen
+| Layer | Technologie | Version |
+|---|---|---|
+| UI | React 18 + TypeScript | 18.x / 5.x |
+| Build | Vite | 5.4 |
+| Styling | Tailwind CSS v3 + CSS Custom Properties | 3.x |
+| Routing | React Router v6 | 6.x |
+| Server-State | TanStack Query v5 | 5.x |
+| KI | @anthropic-ai/sdk, Modell `claude-sonnet-4-5` | latest |
+| Tests | Vitest 4 + @testing-library/react + jsdom | 4.x |
+| E2E | Playwright | latest |
+| Linting | ESLint Flat Config v9 + typescript-eslint | 9.x |
 
-| Was | Wie |
-|---|---|
-| Modell | `claude-sonnet-4-5`, `max_tokens` tool-spezifisch (2048 / 4000 / 6000) |
-| API-Calls | nur via `getApiClient()` aus `shared/services/apiClient.ts` |
-| Timeout | **alle** API-Calls via `withTimeout()` aus `shared/services/withTimeout.ts` (60 s) |
-| System-Prompts | zentral in `services/prompts.ts` — kein Prompt im Service oder Hook |
-| Storage-Keys | zentral in `shared/services/storageKeys.ts` — kein Hardcoding |
-| Neues Tool | Prompt → Service → Hook → Komponenten → Page → `App.tsx` (lazy) → `constants/tools.tsx` |
-| State-Pattern | `'input' | 'output'` State-Machine (Vorbild TCG/DocGen) |
-| Validierung | Submit-Button `disabled`, kein Toast/Alert |
-| Fehler | `InlineError` im Input-Screen und im Output-Panel bei Regenerierung |
-| sessionStorage | kein Direktzugriff in Komponenten — nur via `getApiClient()`, `AuthContext`, `useSessionState` |
+---
 
-## Entwicklung
+## Entwicklungs-Befehle
 
 ```bash
-npm install                    # Root-Install (alle Workspaces)
-npm run dev                    # http://localhost:5173
-npm run test                   # 457 Tests
-npm run build                  # tsc + Vite, muss 0 Warnings haben
-cd apps/po-suite && npm run e2e  # 10 Playwright-Tests
+# Root-Ebene (empfohlen)
+npm install                          # Root-Install (alle Workspaces)
+npm run dev                          # Dev-Server: http://localhost:5173
+npm run test                         # 585 Vitest-Tests (GitHub-Pfad)
+npm run build                        # tsc + Vite, muss 0 Errors haben
+npm run lint                         # ESLint für Frontend + Backend
+
+# Im apps/po-suite/ Workspace
+cd apps/po-suite
+npm run test:run                     # Tests ohne Watch-Mode
+npm run test:coverage                # Coverage-Report (v8)
+npm run e2e                          # 10 Playwright-Tests (einmalig: npx playwright install chromium)
+npm run test:enterprise              # 15 Enterprise-Pfad-Tests
+
+# Mit Backend (Enterprise-Variante)
+docker compose up                    # db + backend
+cd apps/backend && npm test          # 18 Backend-Tests
 ```
 
-## Ordnerstruktur
+---
+
+## Kritische Constraints — NIE ändern ohne Begründung
+
+| Constraint | Warum |
+|---|---|
+| `sessionStorage.getItem('anthropic_api_key')` — genau dieser Key | Tests in `apiClient.test.ts` prüfen explizit dass der Key **nicht** aus localStorage kommt. Änderung = Sicherheitsregression. |
+| `IS_ENTERPRISE` nur aus `shared/config/env.ts` lesen | Compile-Time-Tree-Shaking. Direktes `import.meta.env.VITE_TARGET` in Komponenten/Hooks zerstört den ADR-003-Ansatz. |
+| Alle Storage-Keys aus `shared/services/storageKeys.ts` | Kein Hardcoding. Bei Änderung eines Keys muss `storageKeys.ts` der einzige Ort sein. |
+| `withTimeout()` um **alle** API-Calls | Kein API-Call ohne 60-s-Timeout. Neue Services müssen `withTimeout` einbinden. |
+| Prompts nur in `src/services/prompts/` | Kein Prompt-Text in Services, Hooks oder Komponenten. |
+
+---
+
+## Architektur-Prinzipien
+
+### Dual-Build (GitHub Pages / Enterprise)
 
 ```
-src/
-├── App.tsx                   Router + ProtectedLayout (TopNav + Outlet)
-├── types/index.ts            Alle geteilten Typen
-├── context/AuthContext.tsx   Auth-State, login/logout, setApiKey
-├── context/ThemeContext.tsx  Dark/Light-Mode-State, localStorage-Persistenz (po-theme)
-├── constants/tools.tsx       Single-Source-of-Truth: alle 5 Tool-Definitionen
-├── shared/
+VITE_TARGET=github (Default)     →  IS_ENTERPRISE = false
+VITE_TARGET=enterprise           →  IS_ENTERPRISE = true
+```
+
+Vite löst `IS_ENTERPRISE` zur Build-Zeit auf. Enterprise-Branches werden aus dem GitHub-Bundle entfernt (Tree-Shaking). Jeder Hook hat zwei Pfade:
+- **GitHub:** `getApiClient()` + `withTimeout()` → direkt zur Anthropic API
+- **Enterprise:** `fetchApi()` aus `httpClient.ts` → zum Express-Backend
+
+### Service-Layer-Aufbau (neues Tool)
+
+```
+prompts/ → service → hook → components → Page → App.tsx (lazy) → constants/tools.tsx
+```
+
+Kein Schritt überspringen. Services enthalten Prompt-Aufbau und API-Call. Hooks enthalten State-Management und Mutations. Komponenten enthalten nur UI.
+
+### State-Pattern
+
+Alle Tools ausser Story Generator: `'input' | 'output'`-State-Machine.
+
+```typescript
+const [screen, setScreen] = useState<'input' | 'output'>('input');
+```
+
+Story Generator ist historisch abweichend (3-Panel-AppShell) — nicht als Vorbild nehmen.
+
+### Storage-Strategie
+
+| Was | Wo | Warum |
+|---|---|---|
+| API-Key | `sessionStorage` | Tab-scoped, wird bei Browser-Close gelöscht |
+| Auth-State, Handoff | `sessionStorage` | Kurzlebig, Tab-scoped |
+| Stories, Testpläne | `localStorage` | Persistent, überlebt Reload |
+| Workspaces | `localStorage` | Persistent, max. 10 Stück mit LRU-Rotation |
+| Kein Direktzugriff in Komponenten | — | Nur via `getApiClient()`, `AuthContext`, `useSessionState` |
+
+---
+
+## Dateistruktur
+
+```
+apps/po-suite/
+├── src/
+│   ├── App.tsx                      Router + ProtectedLayout (TopNav + Outlet)
+│   ├── types/index.ts               Alle geteilten Frontend-Typen
+│   ├── context/
+│   │   ├── AuthContext.tsx           Auth-State, login/logout, setApiKey
+│   │   └── ThemeContext.tsx          Dark/Light-Mode, localStorage-Persistenz (po-theme)
+│   ├── constants/tools.tsx          Single-Source-of-Truth: alle 5 Tool-Definitionen
+│   ├── shared/
+│   │   ├── config/
+│   │   │   └── env.ts               IS_ENTERPRISE, API_BASE (einzige Source)
+│   │   ├── services/
+│   │   │   ├── apiClient.ts         getApiClient(), extractTextContent()
+│   │   │   ├── storageKeys.ts       Alle Storage-Keys (kein Hardcoding)
+│   │   │   ├── withTimeout.ts       withTimeout() — 60 s Default, Promise.race
+│   │   │   ├── httpClient.ts        fetchApi(), fetchApiGet(), fetchApiDelete() (Enterprise)
+│   │   │   ├── handoffService.ts    Tool-zu-Tool-Handoff via sessionStorage (15-min TTL)
+│   │   │   ├── imageBlocks.ts       buildImageBlocks() für Screenshots
+│   │   │   ├── promptUtils.ts       buildSystemPrompt() — Team+Workspace-Kontext
+│   │   │   └── workspaceService.ts  localStorage CRUD für Workspaces (max. 10)
+│   │   ├── hooks/
+│   │   │   ├── useSessionState.ts   useState-kompatibler sessionStorage-Wrapper
+│   │   │   └── useTeamContext.ts    Team-Kontext aus sessionStorage
+│   │   └── components/              Alle Shared-UI-Komponenten (siehe unten)
 │   ├── services/
-│   │   ├── apiClient.ts      getApiClient(), extractTextContent()
-│   │   ├── storageKeys.ts    Zentrale sessionStorage-Keys (SDK-frei)
-│   │   ├── withTimeout.ts    withTimeout() — 60 s default
-│   │   └── imageBlocks.ts    buildImageBlock(), buildImageBlocks()
-│   └── components/           Button (+ danger), TextArea, CopyButton, InlineError,
-│                             LoadingSkeleton, MarkdownOutput, PanelHeader,
-│                             RevealButton, ScreenshotUpload, SettingsDialog,
-│                             ConfirmDialog, Select, Checkbox, RadioGroup,
-│                             Toggle, SegmentedControl, ProgressBar, Snackbar,
-│                             StatusBadge, Chip, Accordion, Tooltip, ThemeToggle
-├── services/
-│   ├── prompts.ts            Alle System-Prompts (Single Source)
-│   ├── claude.ts             Story Generator
-│   ├── textPolisher.ts       Text Polisher
-│   ├── testCaseGenerator.ts  Test Case Generator
-│   ├── docGenerator.ts       Doc Generator
-│   ├── goalGenerator.ts      Goal Generator
-│   └── storage.ts            localStorage CRUD (Stories)
-├── hooks/                    useStory, useStories, useTextPolisher,
-│                             useTestCaseGenerator, useDocGenerator,
-│                             useGoalGenerator, useCopyToClipboard,
-│                             useDebounce, useSessionState
-└── pages/                    AuthPage, ToolSelectionPage, WorkspacePage,
-                              TextPolisherPage, TestCaseGeneratorPage,
-                              DocGeneratorPage, GoalGeneratorPage
+│   │   ├── prompts/                 System-Prompts pro Tool (story, goal, test, doc, text)
+│   │   ├── claude.ts                Story Generator API-Calls
+│   │   ├── textPolisher.ts          Text Polisher API-Calls
+│   │   ├── testCaseGenerator.ts     Test Case Generator API-Calls
+│   │   ├── docGenerator.ts          Doc Generator API-Calls
+│   │   ├── goalGenerator.ts         Goal Generator API-Calls
+│   │   ├── storage.ts               localStorage CRUD (Stories + Refinements)
+│   │   └── testCaseStorage.ts       localStorage CRUD (Testpläne)
+│   ├── hooks/                       useStory, useStories, useTextPolisher,
+│   │                                useTestCaseGenerator, useDocGenerator,
+│   │                                useGoalGenerator, useCopyToClipboard,
+│   │                                useDebounce, useTestCasePlans
+│   └── pages/                       AuthPage, ToolSelectionPage, WorkspacePage,
+│                                    TextPolisherPage, TestCaseGeneratorPage,
+│                                    DocGeneratorPage, GoalGeneratorPage, StoryPage
+├── vitest.config.ts                 Haupt-Test-Konfiguration (jsdom, v8-coverage)
+├── vitest.enterprise.config.ts      Enterprise-Pfad-Tests (VITE_TARGET=enterprise)
+└── vite.config.ts                   Build-Config (base, envDir, plugin-react)
 ```
+
+---
 
 ## Tool-Details
 
-| Tool | max_tokens | Besonderheiten |
-|---|---|---|
-| Story Generator | 2048 | AppShell (3-Panel), localStorage-Persist, Refinement-Loop mit Hint-Paaren |
-| Text Polisher | 2048 | 3 Use Cases (email/meeting/freetext), sessionStorage-Persist, Ton-Auswahl nur bei email |
-| Test Case Generator | 4000 | JSON-Output, Jira-Export, bis zu 3 Screenshots, ephemer (kein Persist) |
-| Doc Generator | 4000/6000 | 2 Modi (story/feature), Markdown-Output, Screenshots, `ConfirmDialog` bei Mode-Wechsel |
-| Goal Generator | 2000/1000, 6000/2000 | 2 Tabs (sprint-goal/pi-objective), 2–3 Varianten + Refinement-Loop |
+| Tool | max_tokens | Persistenz | Besonderheiten |
+|---|---|---|---|
+| **Story Generator** | 2048 | localStorage | AppShell (3-Panel), Refinement-Loop mit Hint-Paaren, `buildStoryConversationHistory()` in `claude.ts` |
+| **Goal Generator** | 2000/1000, 6000/2000 | sessionStorage | 2 Tabs (sprint-goal/pi-objective), 2–3 Varianten + Refinement-Loop, `ConfirmDialog` bei Tab-Wechsel |
+| **Text Polisher** | 2048 | sessionStorage | 3 Use Cases (email/meeting/freetext), Ton-Auswahl nur bei email, `ConfirmDialog` bei Use-Case-Wechsel |
+| **Test Case Generator** | 4000 | localStorage (Pläne) | JSON-Output, Jira-Export, bis zu 3 Screenshots, Sidebar-History mit URL-Routing `/:id` |
+| **Doc Generator** | 4000/6000 | — (ephemer) | 2 Modi (story/feature), Markdown-Output, Screenshots, `ConfirmDialog` bei Mode-Wechsel |
+
+---
+
+## Testing-Philosophie
+
+**Was wird getestet:**
+- Services: Business-Logik, API-Call-Parameter, Prompt-Aufbau, Parsing-Funktionen
+- Hooks: Mutation-Erfolg/Fehler, Query-Verhalten, State-Übergänge
+- Kritische Shared Services: `apiClient` (Sicherheit), `storage` + `testCaseStorage` (Quota), `withTimeout`
+- Pages: Happy-Path, wichtige Error-States, ConfirmDialog-Interaktionen
+
+**Was nicht Unit-getestet wird:**
+- Rein visuelle Komponenten ohne Branch-Logik (`Accordion`, `Tooltip`, `Select`)
+- Enterprise-Pfade in GitHub-Tests (IS_ENTERPRISE = false zur Compile-Zeit)
+- Playwright deckt E2E-Pfade für kritische Flows ab
+
+**Muster:**
+
+```typescript
+// Service-Tests: genau einen Mock-Einstiegspunkt
+vi.mock('../shared/services/apiClient', () => ({
+  getApiClient: () => ({ messages: { create: messagesCreateMock } }),
+  extractTextContent: (content) => content.filter(b => b.type === 'text').map(b => b.text).join(''),
+}));
+
+// Page-Tests: QueryClientProvider-Wrapper
+const makeWrapper = () => ({ children }) =>
+  createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }, children);
+
+// Auth-Credentials: via vitest.config.ts → test.env (kein vi.stubEnv nötig)
+// Clipboard: Object.defineProperty(navigator, 'clipboard', ...)
+// ConfirmDialog: screen.getByRole('alertdialog') — NICHT 'dialog'
+```
+
+**Coverage-Status (2026-06-05):** 585 Tests, 78.6 % Statements, 64.8 % Branch. Ziel: ≥ 80 % Branch für kritische Services.
+
+---
+
+## Deployment
+
+### GitHub Pages (automatisch)
+
+Trigger: Push zu `main` mit Änderungen in `apps/po-suite/**` oder manuell via `workflow_dispatch`.
+
+```yaml
+# .github/workflows/deploy.yml
+build: npm run build             # tsc + vite (VITE_TARGET=github)
+deploy: actions/deploy-pages@v4  # SPA-Routing: index.html → 404.html kopiert
+```
+
+Credentials (`VITE_AUTH_EMAIL`, `VITE_AUTH_PASSWORD`) kommen aus GitHub Secrets — nie committen.
+
+### Enterprise (manuell via workflow_dispatch)
+
+```bash
+docker build --build-arg VITE_TARGET=enterprise --build-arg VITE_API_URL=https://... .
+# → GHCR → OpenShift rollout
+```
+
+---
 
 ## Auth
 
-Env-Var-Credentials (`VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD`) aus `.env.local` am Monorepo-Root (Vite `envDir: '../../'`). Bei fehlenden Vars wirft Login einen klaren Konfigurationsfehler. API-Key wird nur im Login-Formular eingegeben und in sessionStorage gehalten — nie in `.env`.
+**GitHub-Pages-Variante:** Statische Credentials aus `.env.local` (`VITE_AUTH_EMAIL` / `VITE_AUTH_PASSWORD`). Vite liest von `../../` (Repo-Root, `envDir: '../../'`). Bei fehlenden Vars: klarer Konfigurationsfehler.
 
-## Design-Tokens (Tailwind + CSS-Variablen)
+**Enterprise-Variante:** Username/Password → POST `/api/auth/login` → JWT in sessionStorage (`ENTERPRISE_JWT_KEY`). API-Key liegt serverseitig.
 
-Alle Farben sind als CSS Custom Properties in `src/index.css` definiert und werden via `rgb(var(--color-X) / <alpha-value>)` in `tailwind.config.ts` referenziert. Dark Mode wechselt automatisch durch `[data-theme="dark"]` auf `<html>`.
+**API-Key:** Nur im Login-Formular eingeben. Liegt in `sessionStorage('anthropic_api_key')`. Nie in `.env`. Details: [ADR-001](../../docs/adr/ADR-001-sessionstorage-api-key.md).
+
+---
+
+## Design-Tokens
+
+CSS Custom Properties in `src/index.css`, referenziert via `rgb(var(--color-X) / <alpha-value>)` in `tailwind.config.ts`. Dark Mode via `[data-theme="dark"]` auf `<html>` — keine `dark:`-Präfixe in Komponenten.
 
 ```
 Light:  brand #1C2B1E  /  canvas #F5F0E8  /  surface #FAFAF8
 Dark:   brand #8FAF93  /  canvas #131816  /  surface #1C211D
 ink #1C2420 / ink-secondary #5C5852 / ink-tertiary #6B6860
 edge #DDD8CF / edge-2 #EBE6DA
-error #dc2626 / success #16a34a
-font-serif Playfair Display  /  font-sans Inter
+error #dc2626 / success #16a34a (light) | #f87171 / #4ade80 (dark)
+font-serif: Playfair Display  /  font-sans: Inter
 ```
 
-## Tests
+Vollständige UI/UX-Dokumentation: [`docs/UI_UX.md`](../../docs/UI_UX.md).
 
-457 Tests in 43 Dateien — Vitest + @testing-library/react + jsdom.
+---
 
-**Muster:**
-- Service-Tests: `vi.mock('shared/services/apiClient')` → `messagesCreateMock`
-- Page-Tests: `vi.mock('../services/...')` + `QueryClientProvider`-Wrapper
-- Auth-Tests: Credentials via `vitest.config.ts → test.env` (kein `vi.stubEnv`)
-- Copy-Tests: `Object.defineProperty(navigator, 'clipboard', ...)` + `fireEvent.click`
+## Bekannte Eigenheiten & offene Schulden
 
-## Accessibility (WCAG 2.1 AA)
+| Thema | Status |
+|---|---|
+| Story Generator abweichendes Layout (3-Panel statt 2-Screen) | Historisch gewachsen, Backlog |
+| `httpClient.ts` Enterprise: nur via `vitest.enterprise.config.ts` getestet | P1-Schuld, keine isolierten Unit-Tests |
+| `dangerouslyAllowBrowser: true` | Für Single-User-Prototyp akzeptiert; bei Rollout zu Enterprise-Backend migrieren |
+| `packages/api-types` fehlt | Frontend- und Backend-Typen separat — Typ-Drift möglich (siehe [ADR-005](../../docs/adr/ADR-005-npm-workspaces-monorepo.md)) |
+| `withTimeout` via Promise.race | Underlying API-Call läuft nach Timeout weiter — für GitHub-Build akzeptiert (siehe [ADR-004](../../docs/adr/ADR-004-vitest-statt-jest.md)) |
 
-Skip-Link → `#main-content`, `role="tablist/tab"` + Arrow-Key-Navigation in AppShell/UseCaseSelector/DocModeSelector, `role="radiogroup/radio"` in ToneSelector, `role="alert"` auf InlineError, `role="status"` auf LoadingSkeleton, programmatischer Fokus nach Generierung (`tabIndex={-1}` + `useEffect`), Touch-Targets ≥ 44×44 px.
+---
 
-## Bekannte Eigenheiten
+## Konventionen (Kurzreferenz)
 
-- **Story Generator abweichendes Layout**: Einziger Tool mit AppShell (3-Panel-Layout) statt 2-Screen-State-Machine — historisch gewachsen, nicht unified.
-- **Enterprise-httpClient nicht unit-getestet**: `src/shared/services/httpClient.ts` ist nur via `vitest.enterprise.config.ts` (15 Tests) abgedeckt — keine isolierten Unit-Tests. P1-Schuld.
-- **`dangerouslyAllowBrowser: true`**: Nur für Single-User-Prototypen, API-Key liegt im Browser.
+| Was | Wie |
+|---|---|
+| Modell | `claude-sonnet-4-5`, `max_tokens` tool-spezifisch |
+| API-Calls | nur via `getApiClient()` aus `shared/services/apiClient.ts` |
+| Timeout | **alle** API-Calls via `withTimeout()` aus `shared/services/withTimeout.ts` (60 s) |
+| System-Prompts | zentral in `services/prompts/[tool].ts` — kein Prompt im Service oder Hook |
+| Storage-Keys | zentral in `shared/services/storageKeys.ts` — kein Hardcoding |
+| Neues Tool | Prompt → Service → Hook → Komponenten → Page → `App.tsx` (lazy) → `constants/tools.tsx` |
+| State-Pattern | `'input' \| 'output'` State-Machine (Vorbild TCG/DocGen) |
+| Validierung | Submit-Button `disabled`, kein Toast/Alert |
+| Fehler | `InlineError` im Input-Screen und im Output-Panel bei Regenerierung |
+| Dialoge | `ConfirmDialog` aus `shared/components` — kein `window.confirm()` |
+
+---
 
 ## Claude Code Konfiguration
 
-**Hooks** (`.claude/settings.json`): `SessionStart` → `session-start.sh` (npm install bei Remote), `PostToolUse` → Test-Run nach `git commit`.
+**Hooks** (`.claude/settings.json`):
+- `SessionStart` → `session-start.sh` (npm install bei `CLAUDE_CODE_REMOTE=true`)
+- `PostToolUse` → Test-Run nach `git commit`
 
 **Slash Commands**: `/new-component` (React-Konventionen), `/new-service` (Service-Konventionen inkl. `withTimeout`-Pflicht).
