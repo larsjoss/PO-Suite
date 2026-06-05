@@ -2,9 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '../types';
 import { API_KEY_SESSION_KEY, SESSION_USER_KEY, ENTERPRISE_JWT_KEY } from '../shared/services/storageKeys';
 import { setJwt, clearJwt, setOn401Handler } from '../shared/services/httpClient';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+import { IS_ENTERPRISE, API_BASE } from '../shared/config/env';
 
 const ALLOWED_EMAIL = import.meta.env.VITE_AUTH_EMAIL;
 const ALLOWED_PASSWORD = import.meta.env.VITE_AUTH_PASSWORD;

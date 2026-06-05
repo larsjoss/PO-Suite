@@ -4,8 +4,7 @@ import { fetchApi } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
 import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type { UseCase, Tone } from '../types';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 export function usePolishText() {
   const { teamContext } = useTeamContext();

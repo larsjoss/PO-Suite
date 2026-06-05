@@ -6,8 +6,7 @@ import { fetchApi, fetchApiGet } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
 import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type { Story, StoryDetailResponse } from '../types';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 export function useStory(id: string | undefined) {
   return useQuery({

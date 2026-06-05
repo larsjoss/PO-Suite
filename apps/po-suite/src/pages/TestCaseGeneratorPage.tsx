@@ -11,8 +11,7 @@ import { TestCaseOutputPanel } from '../components/test-case-generator/TestCaseO
 import { TestCasePlanSidebar } from '../components/test-case-generator/TestCasePlanSidebar';
 import { getHandoff, clearHandoff } from '../shared/services/handoffService';
 import { HandoffBanner } from '../shared/components';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 type TabId = 'verlauf' | 'inhalt';
 

@@ -4,8 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { SettingsDialog } from '../../shared/components/SettingsDialog';
 import { ThemeToggle } from '../../shared/components/ThemeToggle';
 import { TOOLS } from '../../constants/tools';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../../shared/config/env';
 
 function KeyIcon() {
   return (
