@@ -1,5 +1,9 @@
 import type { FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CoachPanel } from '../shared/components';
+import { useCoachVisibility } from '../shared/hooks/useCoachVisibility';
+import { GOAL_COACH_CONFIG } from '../shared/config/coachConfig';
 import type {
   GoalMode,
   GoalVariant,
@@ -44,9 +48,12 @@ export function GoalGeneratorPage() {
     Array<{ userMessage: string; rawResult: string }>
   >([]);
 
+  const navigate = useNavigate();
   const outputRef = useRef<HTMLDivElement>(null);
   const generateMutation = useGenerateGoals();
   const refineMutation = useRefineGoal();
+  const { isVisible: coachVisible, showCoach, dismiss: dismissCoach, dismissForever } = useCoachVisibility();
+  const [toggledSteps, setToggledSteps] = useState<Set<string>>(new Set());
 
   // WCAG 2.4.3: Fokus auf Output-Bereich nach Screen-Transition
   useEffect(() => {
@@ -102,6 +109,7 @@ export function GoalGeneratorPage() {
       setRawInitialResponse(result.rawText);
       resetRefinementState();
       setScreen('output');
+      showCoach();
     } catch {
       // Fehler in generateMutation.error → InlineError im InputPanel
     }
@@ -197,6 +205,24 @@ export function GoalGeneratorPage() {
           onBackToVariants={handleBackToVariants}
           contentRef={outputRef}
         />
+        {coachVisible && (
+          <div className="max-w-3xl mx-auto px-6 pb-8">
+            <CoachPanel
+              config={GOAL_COACH_CONFIG}
+              onDismiss={dismissCoach}
+              onDismissForever={dismissForever}
+              onNavigate={navigate}
+              onStepToggle={(id) =>
+                setToggledSteps((prev) => {
+                  const next = new Set(prev);
+                  next.has(id) ? next.delete(id) : next.add(id);
+                  return next;
+                })
+              }
+              toggledSteps={toggledSteps}
+            />
+          </div>
+        )}
       </main>
     );
   }

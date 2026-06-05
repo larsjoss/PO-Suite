@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Story } from '../../types';
 import { LoadingSkeleton, Button, MarkdownOutput, PanelHeader } from '../../shared/components';
@@ -12,9 +12,10 @@ interface Props {
   isLoading?: boolean;
   isGenerating?: boolean;
   isRefining?: boolean;
+  coachSlot?: ReactNode;
 }
 
-export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }: Props) {
+export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining, coachSlot }: Props) {
   const outputRef = useRef<HTMLDivElement>(null);
   const wasGenerating = useRef(false);
   const { copied, copy } = useCopyToClipboard();
@@ -137,6 +138,7 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
                 → In Doc Generator
               </button>
             </div>
+            {coachSlot && <div className="mt-4">{coachSlot}</div>}
           </div>
         )}
       </div>

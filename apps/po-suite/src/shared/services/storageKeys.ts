@@ -6,3 +6,4 @@ export const HANDOFF_KEY = 'po_handoff';
 export const WORKSPACE_INDEX_KEY = 'po_workspace_index';
 export const WORKSPACE_ITEM_PREFIX = 'po_workspace_';
 export const ACTIVE_WORKSPACE_KEY = 'po_active_workspace';
+export const COACH_DISMISSED_KEY = 'po_coach_dismissed';
