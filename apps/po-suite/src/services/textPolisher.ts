@@ -9,19 +9,26 @@ import type { UseCase, Tone } from '../types';
 
 // ─── API call ─────────────────────────────────────────────────────────────────
 
+function withTeamContext(systemPrompt: string, teamContext: string): string {
+  if (!teamContext.trim()) return systemPrompt;
+  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
+}
+
 export async function polishText(
   input: string,
   useCase: UseCase,
   tone: Tone = 'formell',
+  teamContext = '',
 ): Promise<string> {
   const client = getApiClient();
 
-  const systemPrompt =
+  const basePrompt =
     useCase === 'email'
       ? buildEmailPolishPrompt(tone)
       : useCase === 'meeting'
         ? MEETING_POLISH_PROMPT
         : FREETEXT_POLISH_PROMPT;
+  const systemPrompt = withTeamContext(basePrompt, teamContext);
 
   const response = await withTimeout(
     client.messages.create({

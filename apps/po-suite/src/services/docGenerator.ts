@@ -59,10 +59,16 @@ function buildFeatureText(input: FeatureDocInput): string {
 
 // ─── API Call ─────────────────────────────────────────────────────────────────
 
-export async function generateDoc(params: GenerateDocParams): Promise<string> {
+function withTeamContext(systemPrompt: string, teamContext: string): string {
+  if (!teamContext.trim()) return systemPrompt;
+  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
+}
+
+export async function generateDoc(params: GenerateDocParams, teamContext = ''): Promise<string> {
   const client = getApiClient();
 
-  const systemPrompt = params.mode === 'story' ? STORY_DOC_SYSTEM_PROMPT : FEATURE_DOC_SYSTEM_PROMPT;
+  const basePrompt = params.mode === 'story' ? STORY_DOC_SYSTEM_PROMPT : FEATURE_DOC_SYSTEM_PROMPT;
+  const systemPrompt = withTeamContext(basePrompt, teamContext);
   const maxTokens = params.mode === 'story' ? 4000 : 6000;
 
   const userText =

@@ -1,11 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
 import { generateDoc } from '../services/docGenerator';
 import { fetchApi } from '../shared/services/httpClient';
+import { useTeamContext } from '../shared/hooks/useTeamContext';
 import type { GenerateDocParams } from '../types';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
 
 export function useGenerateDoc() {
+  const { teamContext } = useTeamContext();
+
   return useMutation<string, Error, GenerateDocParams>({
     mutationFn: async (params) => {
       if (IS_ENTERPRISE) {
@@ -21,7 +24,7 @@ export function useGenerateDoc() {
         });
         return res.result;
       }
-      return generateDoc(params);
+      return generateDoc(params, teamContext);
     },
   });
 }

@@ -125,11 +125,21 @@ function buildOriginalContentBlocks(
 
 // ─── API-Calls ────────────────────────────────────────────────────────────────
 
-export async function generateGoals(params: GenerateGoalParams): Promise<GenerateGoalResult> {
+function withTeamContext(systemPrompt: string, teamContext: string): string {
+  if (!teamContext.trim()) return systemPrompt;
+  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
+}
+
+export async function generateGoals(
+  params: GenerateGoalParams,
+  teamContext = '',
+): Promise<GenerateGoalResult> {
   const client = getApiClient();
 
-  const systemPrompt =
-    params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT;
+  const systemPrompt = withTeamContext(
+    params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT,
+    teamContext,
+  );
   const maxTokens = params.mode === 'sprint-goal' ? 2000 : 6000;
 
   const response = await withTimeout(
@@ -149,11 +159,16 @@ export async function generateGoals(params: GenerateGoalParams): Promise<Generat
   return { variants: parseVariants(rawText), rawText };
 }
 
-export async function refineGoal(params: RefineGoalParams): Promise<RefineGoalResult> {
+export async function refineGoal(
+  params: RefineGoalParams,
+  teamContext = '',
+): Promise<RefineGoalResult> {
   const client = getApiClient();
 
-  const systemPrompt =
-    params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT;
+  const systemPrompt = withTeamContext(
+    params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT,
+    teamContext,
+  );
   const maxTokens = params.mode === 'sprint-goal' ? 1000 : 2000;
 
   const userMessage = buildRefinementInstruction(params.selectedVariantText, params.refinementHint);
