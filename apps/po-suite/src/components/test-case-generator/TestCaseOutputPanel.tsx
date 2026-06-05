@@ -5,6 +5,7 @@ import { Button } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { buildJiraMarkdown, getAvailableTypes } from '../../services/testCaseGenerator';
 import { setHandoff } from '../../shared/services/handoffService';
+import { SaveToWorkspaceButton } from '../workspace/SaveToWorkspaceButton';
 import { TestCaseSummaryBlock } from './TestCaseSummaryBlock';
 import { TestCaseFilterBar } from './TestCaseFilterBar';
 import { TestCaseCard } from './TestCaseCard';
@@ -177,6 +178,13 @@ export function TestCaseOutputPanel({ testPlan, onReset, contentRef }: Props) {
         </Button>
 
         <div className="flex items-center gap-3 flex-wrap">
+          <SaveToWorkspaceButton
+            toolId="testcase"
+            title={testPlan.story_title ?? 'Testplan'}
+            content={buildJiraMarkdown(testPlan)}
+          />
+        </div>
+        <div className="flex items-center gap-3 flex-wrap mt-2">
           <span className="text-xs text-ink-secondary shrink-0">Weiterverarbeiten:</span>
           <button
             onClick={handleHandoffToDoc}

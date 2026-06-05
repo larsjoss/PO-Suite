@@ -2,6 +2,7 @@ import type { RefObject } from 'react';
 import type { UseCase } from '../../types';
 import { Button, LoadingSkeleton, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { SaveToWorkspaceButton } from '../workspace/SaveToWorkspaceButton';
 
 const PANEL_TITLES: Record<UseCase, string> = {
   email: 'Geschriebene E-Mail',
@@ -77,11 +78,18 @@ export function TextPolisherOutputPanel({ useCase, output, isLoading, contentRef
           <div className="px-6 py-5">
             <MarkdownOutput>{output!}</MarkdownOutput>
 
+            <div className="mt-3">
+              <SaveToWorkspaceButton
+                toolId="polish"
+                title={output!.split('\n').find((l) => l.trim()) ?? 'Aufbereiteter Text'}
+                content={output!}
+              />
+            </div>
             <Button
               onClick={() => copy(output!)}
               variant="primary"
               aria-label={copied ? 'Text kopiert' : 'Text kopieren'}
-              className="mt-6 w-full"
+              className="mt-3 w-full"
             >
               {copied ? (
                 <>

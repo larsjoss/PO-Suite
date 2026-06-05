@@ -1,5 +1,6 @@
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
+import { buildSystemPrompt } from '../shared/services/promptUtils';
 import {
   buildEmailPolishPrompt,
   MEETING_POLISH_PROMPT,
@@ -9,16 +10,12 @@ import type { UseCase, Tone } from '../types';
 
 // ─── API call ─────────────────────────────────────────────────────────────────
 
-function withTeamContext(systemPrompt: string, teamContext: string): string {
-  if (!teamContext.trim()) return systemPrompt;
-  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
-}
-
 export async function polishText(
   input: string,
   useCase: UseCase,
   tone: Tone = 'formell',
   teamContext = '',
+  workspaceContext = '',
 ): Promise<string> {
   const client = getApiClient();
 
@@ -28,7 +25,7 @@ export async function polishText(
       : useCase === 'meeting'
         ? MEETING_POLISH_PROMPT
         : FREETEXT_POLISH_PROMPT;
-  const systemPrompt = withTeamContext(basePrompt, teamContext);
+  const systemPrompt = buildSystemPrompt(basePrompt, teamContext, workspaceContext);
 
   const response = await withTimeout(
     client.messages.create({

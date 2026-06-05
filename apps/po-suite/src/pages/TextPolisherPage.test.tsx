@@ -50,7 +50,7 @@ describe('TextPolisherPage — Submit', () => {
     await user.click(screen.getByRole('button', { name: /E-Mail schreiben/i }));
 
     await waitFor(() =>
-      expect(polishTextMock).toHaveBeenCalledWith('Hallo Welt', 'email', 'formell', ''),
+      expect(polishTextMock).toHaveBeenCalledWith('Hallo Welt', 'email', 'formell', '', ''),
     );
   });
 

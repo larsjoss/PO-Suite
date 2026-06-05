@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import type { Story } from '../../types';
 import { LoadingSkeleton, Button, MarkdownOutput, PanelHeader } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
-import { formatStoryMarkdown } from '../../services/claude';
+import { formatStoryMarkdown, extractTitle } from '../../services/claude';
 import { setHandoff, extractFirstLine } from '../../shared/services/handoffService';
+import { SaveToWorkspaceButton } from '../workspace/SaveToWorkspaceButton';
 
 interface Props {
   story?: Story;
@@ -115,6 +116,13 @@ export function StoryOutputPanel({ story, isLoading, isGenerating, isRefining }:
               )}
             </Button>
             <div className="mt-3 flex items-center gap-3 flex-wrap">
+              <SaveToWorkspaceButton
+                toolId="story"
+                title={extractTitle(story.generatedStory, story.rawInput ?? '')}
+                content={story.generatedStory}
+              />
+            </div>
+            <div className="mt-2 flex items-center gap-3 flex-wrap">
               <span className="text-xs text-ink-secondary shrink-0">Weiterverarbeiten:</span>
               <button
                 onClick={() => handleHandoff('/tools/test-case-generator')}

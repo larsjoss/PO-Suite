@@ -126,7 +126,7 @@ describe('useGenerateStory', () => {
     result.current.mutate('Roh-Eingabe');
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(generateStoryMock).toHaveBeenCalledWith('Roh-Eingabe', '');
+    expect(generateStoryMock).toHaveBeenCalledWith('Roh-Eingabe', '', '');
   });
 
   it('ruft claude.extractTitle mit generatedStory und rawInput auf', async () => {
@@ -210,7 +210,7 @@ describe('useRefineStoryWithHints', () => {
     result.current.mutate(params);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(refineStoryWithHintsMock).toHaveBeenCalledWith('Aktuelle Story', hintAnswers, '');
+    expect(refineStoryWithHintsMock).toHaveBeenCalledWith('Aktuelle Story', hintAnswers, '', '');
   });
 
   it('ruft claude.extractTitle mit generatedStory und currentTitle auf', async () => {

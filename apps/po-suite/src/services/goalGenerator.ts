@@ -2,6 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { uploadedFileToImageBlock } from '../shared/services/imageBlocks';
+import { buildSystemPrompt } from '../shared/services/promptUtils';
 import { SPRINT_GOAL_SYSTEM_PROMPT, PI_OBJECTIVE_SYSTEM_PROMPT } from './prompts/goalGenerator';
 import type {
   GoalVariant,
@@ -125,20 +126,17 @@ function buildOriginalContentBlocks(
 
 // ─── API-Calls ────────────────────────────────────────────────────────────────
 
-function withTeamContext(systemPrompt: string, teamContext: string): string {
-  if (!teamContext.trim()) return systemPrompt;
-  return `## Team-Kontext des Nutzers\n${teamContext}\n\n${systemPrompt}`;
-}
-
 export async function generateGoals(
   params: GenerateGoalParams,
   teamContext = '',
+  workspaceContext = '',
 ): Promise<GenerateGoalResult> {
   const client = getApiClient();
 
-  const systemPrompt = withTeamContext(
+  const systemPrompt = buildSystemPrompt(
     params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT,
     teamContext,
+    workspaceContext,
   );
   const maxTokens = params.mode === 'sprint-goal' ? 2000 : 6000;
 
@@ -162,12 +160,14 @@ export async function generateGoals(
 export async function refineGoal(
   params: RefineGoalParams,
   teamContext = '',
+  workspaceContext = '',
 ): Promise<RefineGoalResult> {
   const client = getApiClient();
 
-  const systemPrompt = withTeamContext(
+  const systemPrompt = buildSystemPrompt(
     params.mode === 'sprint-goal' ? SPRINT_GOAL_SYSTEM_PROMPT : PI_OBJECTIVE_SYSTEM_PROMPT,
     teamContext,
+    workspaceContext,
   );
   const maxTokens = params.mode === 'sprint-goal' ? 1000 : 2000;
 

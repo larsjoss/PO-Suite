@@ -2,12 +2,14 @@ import { useMutation } from '@tanstack/react-query';
 import { polishText } from '../services/textPolisher';
 import { fetchApi } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
+import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type { UseCase, Tone } from '../types';
 
 const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
 
 export function usePolishText() {
   const { teamContext } = useTeamContext();
+  const { activeWorkspace } = useWorkspace();
 
   return useMutation({
     mutationFn: async ({
@@ -27,7 +29,7 @@ export function usePolishText() {
         });
         return res.result;
       }
-      return polishText(input, useCase, tone, teamContext);
+      return polishText(input, useCase, tone, teamContext, activeWorkspace?.workspaceContext ?? '');
     },
   });
 }
