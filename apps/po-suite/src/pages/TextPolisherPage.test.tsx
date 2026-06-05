@@ -24,11 +24,8 @@ function wrapper({ children }: { children: ReactNode }) {
   );
 }
 
-const confirmSpy = vi.spyOn(window, 'confirm');
-
 beforeEach(() => {
   polishTextMock.mockReset();
-  confirmSpy.mockReset();
   sessionStorage.clear();
 });
 
@@ -92,22 +89,21 @@ describe('TextPolisherPage — Persistenz', () => {
 });
 
 describe('TextPolisherPage — UseCase-Wechsel', () => {
-  it('wechselt zu meeting ohne confirm wenn kein Output', async () => {
+  it('wechselt zu meeting ohne Dialog wenn kein Output', async () => {
     const user = userEvent.setup();
     render(<TextPolisherPage />, { wrapper });
 
     await user.click(screen.getByRole('tab', { name: /Meeting/i }));
 
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Meetingnotiz erstellen/i }),
     ).toBeInTheDocument();
   });
 
-  it('fragt confirm bei vorhandenem Output', async () => {
+  it('zeigt ConfirmDialog bei vorhandenem Output und bleibt bei Abbrechen', async () => {
     const user = userEvent.setup();
     polishTextMock.mockResolvedValueOnce('Output da');
-    confirmSpy.mockReturnValueOnce(false);
     render(<TextPolisherPage />, { wrapper });
 
     await user.type(screen.getByLabelText(/E-Mail-Entwurf/i), 'roh');
@@ -116,9 +112,27 @@ describe('TextPolisherPage — UseCase-Wechsel', () => {
 
     await user.click(screen.getByRole('tab', { name: /Meeting/i }));
 
-    expect(confirmSpy).toHaveBeenCalled();
-    // Email bleibt aktiv (confirm=false)
+    // ConfirmDialog erscheint
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+
+    // Abbrechen → Email bleibt aktiv
+    await user.click(screen.getByRole('button', { name: /Abbrechen/i }));
     expect(screen.getByRole('button', { name: /E-Mail schreiben/i })).toBeInTheDocument();
+  });
+
+  it('wechselt UseCase bei Bestätigen im Dialog', async () => {
+    const user = userEvent.setup();
+    polishTextMock.mockResolvedValueOnce('Output da');
+    render(<TextPolisherPage />, { wrapper });
+
+    await user.type(screen.getByLabelText(/E-Mail-Entwurf/i), 'roh');
+    await user.click(screen.getByRole('button', { name: /E-Mail schreiben/i }));
+    await waitFor(() => expect(screen.getByText(/Output da/)).toBeInTheDocument());
+
+    await user.click(screen.getByRole('tab', { name: /Meeting/i }));
+    await user.click(screen.getByRole('button', { name: /Bestätigen/i }));
+
+    expect(screen.getByRole('button', { name: /Meetingnotiz erstellen/i })).toBeInTheDocument();
   });
 });
 

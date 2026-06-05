@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   createStory,
   getStories,
@@ -115,5 +115,23 @@ describe('deleteStory', () => {
     const { stories } = getStories();
     expect(stories).toHaveLength(1);
     expect(stories[0].id).toBe(keep.id);
+  });
+});
+
+describe('localStorage-Quota', () => {
+  it('wirft bei vollem localStorage beim Speichern einer Story', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(() => createStory('T', 'i', 's', '')).toThrow('Speicher voll');
+    spy.mockRestore();
+  });
+
+  it('wirft bei vollem localStorage beim Speichern eines Refinements', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(() => addRefinement('story-1', 'Anweisung', 'Ergebnis')).toThrow('Speicher voll');
+    spy.mockRestore();
   });
 });

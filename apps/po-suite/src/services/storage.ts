@@ -12,7 +12,11 @@ function loadStories(): Story[] {
 }
 
 function saveStories(stories: Story[]): void {
-  localStorage.setItem(STORIES_KEY, JSON.stringify(stories));
+  try {
+    localStorage.setItem(STORIES_KEY, JSON.stringify(stories));
+  } catch {
+    throw new Error('Speicher voll. Bitte alte Stories löschen und erneut versuchen.');
+  }
 }
 
 function loadRefinements(): RefinementLog[] {
@@ -24,7 +28,11 @@ function loadRefinements(): RefinementLog[] {
 }
 
 function saveRefinements(logs: RefinementLog[]): void {
-  localStorage.setItem(REFINEMENTS_KEY, JSON.stringify(logs));
+  try {
+    localStorage.setItem(REFINEMENTS_KEY, JSON.stringify(logs));
+  } catch {
+    throw new Error('Speicher voll. Bitte alte Stories löschen und erneut versuchen.');
+  }
 }
 
 export function getStories(q?: string): StoriesResponse {

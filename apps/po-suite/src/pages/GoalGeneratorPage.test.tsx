@@ -43,12 +43,9 @@ const MOCK_RESULT = {
   rawText: 'Variante 1: Bessere Search-UX\nQualität: Klares Outcome\n\nVariante 2: Schnellere Suche\nQualität: Messbar',
 };
 
-const confirmSpy = vi.spyOn(window, 'confirm');
-
 beforeEach(() => {
   generateGoalsMock.mockReset();
   refineGoalMock.mockReset();
-  confirmSpy.mockReset();
 });
 
 // ─── Initial Render ───────────────────────────────────────────────────────────
@@ -72,36 +69,37 @@ describe('GoalGeneratorPage — Initial Render', () => {
 // ─── Tab-Wechsel ──────────────────────────────────────────────────────────────
 
 describe('GoalGeneratorPage — Tab-Wechsel', () => {
-  it('wechselt auf PI Objective ohne confirm wenn kein Inhalt', async () => {
+  it('wechselt auf PI Objective ohne Dialog wenn kein Inhalt', async () => {
     const user = userEvent.setup();
     render(<GoalGeneratorPage />, { wrapper });
 
     await user.click(screen.getByRole('tab', { name: /PI Objective/i }));
 
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.getByLabelText(/ART-Feature Titel/i)).toBeInTheDocument();
   });
 
-  it('fragt confirm wenn Inhalt vorhanden und respektiert Abbruch', async () => {
+  it('zeigt ConfirmDialog wenn Inhalt vorhanden und bleibt bei Abbrechen', async () => {
     const user = userEvent.setup();
-    confirmSpy.mockReturnValueOnce(false);
     render(<GoalGeneratorPage />, { wrapper });
 
     await user.type(screen.getByLabelText(/Sprint Goal Idee/i), 'Bessere Search-UX');
     await user.click(screen.getByRole('tab', { name: /PI Objective/i }));
 
-    expect(confirmSpy).toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Abbrechen/i }));
+
     // Bleibt auf Sprint Goal
     expect(screen.getByLabelText(/Sprint Goal Idee/i)).toBeInTheDocument();
   });
 
-  it('wechselt Tab und löscht Eingaben bei confirm=true', async () => {
+  it('wechselt Tab und löscht Eingaben bei Bestätigen', async () => {
     const user = userEvent.setup();
-    confirmSpy.mockReturnValueOnce(true);
     render(<GoalGeneratorPage />, { wrapper });
 
     await user.type(screen.getByLabelText(/Sprint Goal Idee/i), 'Meine Idee');
     await user.click(screen.getByRole('tab', { name: /PI Objective/i }));
+    await user.click(screen.getByRole('button', { name: /Bestätigen/i }));
 
     await waitFor(() => {
       expect(screen.getByLabelText(/ART-Feature Titel/i)).toBeInTheDocument();
@@ -149,10 +147,9 @@ describe('GoalGeneratorPage — Submit Error', () => {
 // ─── Reset ───────────────────────────────────────────────────────────────────
 
 describe('GoalGeneratorPage — Reset', () => {
-  it('kehrt zum Input-Screen zurück bei confirm=true', async () => {
+  it('kehrt zum Input-Screen zurück bei Bestätigen im Dialog', async () => {
     const user = userEvent.setup();
     generateGoalsMock.mockResolvedValueOnce(MOCK_RESULT);
-    confirmSpy.mockReturnValueOnce(true);
     render(<GoalGeneratorPage />, { wrapper });
 
     await user.type(screen.getByLabelText(/Sprint Goal Idee/i), 'Idee');
@@ -163,16 +160,17 @@ describe('GoalGeneratorPage — Reset', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /Zurücksetzen/i }));
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Bestätigen/i }));
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /Varianten generieren/i })).toBeInTheDocument(),
     );
   });
 
-  it('bleibt auf Output-Screen bei confirm=false', async () => {
+  it('bleibt auf Output-Screen bei Abbrechen im Dialog', async () => {
     const user = userEvent.setup();
     generateGoalsMock.mockResolvedValueOnce(MOCK_RESULT);
-    confirmSpy.mockReturnValueOnce(false);
     render(<GoalGeneratorPage />, { wrapper });
 
     await user.type(screen.getByLabelText(/Sprint Goal Idee/i), 'Idee');
@@ -183,6 +181,7 @@ describe('GoalGeneratorPage — Reset', () => {
     );
 
     await user.click(screen.getByRole('button', { name: /Zurücksetzen/i }));
+    await user.click(screen.getByRole('button', { name: /Abbrechen/i }));
 
     expect(
       screen.getByRole('region', { name: /Generierte Varianten/i }),

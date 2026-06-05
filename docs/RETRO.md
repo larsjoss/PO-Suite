@@ -1,7 +1,7 @@
 # PO Suite — Technische Retrospektive
 
 **Datum:** 2026-06-05  
-**Version:** nach Housekeeping-Session (541 Tests, Build grün)  
+**Version:** nach Housekeeping + Phase 4 (585 Tests, Build grün)  
 **Scope:** `apps/po-suite/` — GitHub-Pages-Variante und Enterprise-Dual-Build
 
 ---
@@ -202,6 +202,56 @@ Generell: 9 Typen existieren in beiden Welten unverbunden. Aktuell sind sie kons
 **Story Generator Layout:** Als einziges Tool mit AppShell-3-Panel-Layout vs. 2-Screen-State-Machine der vier anderen. Das ist historisch gewachsen, nicht designt. Wenn Workspace-Features für alle Tools kommen, wird das Layout zum Blocker. Die Frage ist nicht ob, sondern wann.
 
 **`dangerouslyAllowBrowser: true`:** Der Anthropic SDK-Flag ist explizit für Prototypen gedacht. Er bedeutet: API-Key liegt im Browser, jeder der die DevTools öffnet kann ihn lesen. Das ist für einen Single-User-Prototyp akzeptiert. Für breitere Ausrollung (mehr Nutzer, Firmen-API-Keys) ist das eine offene Sicherheitsfrage die eine Architekturentscheidung braucht — nicht einen Fix.
+
+---
+
+## 3.5 Testabdeckung — Vorher/Nachher
+
+### Coverage (Statements / Branches)
+
+| Zeitpunkt | Tests | Statements | Branches | Funktionen |
+|---|---|---|---|---|
+| **Vor Housekeeping** (Phase 1) | 541 | ~71 % | ~61 % | ~70 % |
+| **Nach Phase 4** (heute) | **585** | **78.6 %** | **64.8 %** | **72.6 %** |
+
+Branch-Coverage-Ziel (≥ 80 %) ist noch nicht erreicht — der Haupttreiber sind untestete UI-Komponenten (`Accordion`, `Checkbox`, `RadioGroup`, `Select`, `SegmentedControl`, `Tooltip`, `Snackbar`) und Enterprise-Pfade in Hooks. Der kritische Servicebereich ist gut abgedeckt (services: 84 % Branch).
+
+### Nachgelieferte Tests — was fehlte und warum
+
+**`src/shared/services/apiClient.test.ts`** (11 Tests, neu)  
+Fehlte weil: `getApiClient()` wurde als reine Utility-Funktion behandelt. Ist aber sicherheitskritisch — API-Key-Isolation zwischen sessionStorage und localStorage, Caching-Verhalten, Fehler bei leerem Key. Diese Tests decken Fälle ab die bei einer Regression direkt Nutzerdaten exponieren würden.
+
+**`src/services/testCaseStorage.test.ts`** (12 Tests, neu)  
+Fehlte weil: `testCaseStorage.ts` wurde parallel zu `storage.ts` entwickelt — die Tests für `storage.ts` existierten, wurden aber nie auf das neue Modul portiert. `QuotaExceededError`-Handling war in beiden Modulen ungetestet; der Fix (S2) hätte ohne Tests unbemerkt regressieren können.
+
+**`src/hooks/useTestCasePlans.test.ts`** (9 Tests, neu)  
+Fehlte weil: Hook-Tests für `useStory` und `useStories` existierten — `useTestCasePlans` wurde analog geschrieben, aber das Test-File nie angelegt. `useDeleteTestPlan` ist der einzige Mutations-Hook ohne Test gewesen.
+
+**`src/services/claude.test.ts`** — erweitert um 10 Tests  
+Fehlte weil: `parseOutput`, `extractTitle`, `formatStoryMarkdown` waren getestet — aber `generateStory`, `refineStory`, `refineStoryWithHints` (die async API-Aufrufe) nicht. `buildStoryConversationHistory` existierte erst nach S3-Fix und wurde direkt mit Tests begleitet.
+
+**`src/services/storage.test.ts`** — erweitert um 2 Tests  
+Fehlte weil: `QuotaExceededError`-Handling war in `storage.ts` nicht implementiert (S2-Fund). Die Tests wurden nach dem Fix ergänzt — nicht davor. Test-first hätte den Bug verhindert.
+
+### Kritische Dateien — aktueller Stand
+
+| Datei | Branch-Coverage | Anmerkung |
+|---|---|---|
+| `services/storage.ts` | **100 %** | vollständig |
+| `services/testCaseStorage.ts` | **100 %** | vollständig |
+| `services/claude.ts` | via Mock-Isolation | async paths gedeckt |
+| `shared/services/apiClient.ts` | via Constructor-Mock | security-paths gedeckt |
+| `shared/services/withTimeout.ts` | via Integration | Promise.race + clearTimeout |
+| `shared/services/httpClient.ts` | via Enterprise-Tests | 15 Integrationstests |
+| `services/prompts.ts` | ➖ nicht gemessen | reine String-Konstanten, kein Branch |
+
+### Branchen unter 80 % — Ursachen und Plan
+
+**`hooks/useStory.ts` (58 % Branch):** Enterprise-Pfad (`IS_ENTERPRISE === true`) ist in Unit-Tests nicht erreichbar — `VITE_TARGET` wird zur Compile-Zeit eingebettet. Nur via `vitest.enterprise.config.ts` testbar. Kein unmittelbarer Handlungsbedarf.
+
+**`shared/components/` (52 % Branch):** Viele neue UI-Komponenten (`Accordion`, `Select`, `RadioGroup`, `SegmentedControl`, `Tooltip`) haben keine Tests — sie sind rein visuell und haben wenig Branch-Logik. P2-Backlog wenn ein Komponent in einem kritischen Pfad genutzt wird.
+
+**`hooks/useDocGenerator.ts`, `useGoalGenerator.ts` (50–67 % Branch):** ConfirmDialog-Pfade und Enterprise-Pfade. Nach S1-Fix sind die `window.confirm`-Branches durch `ConfirmDialog`-Tests gedeckt; Enterprise-Pfad wie oben.
 
 ---
 

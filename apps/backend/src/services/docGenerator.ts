@@ -23,6 +23,7 @@ export interface FeatureDocInput {
   code: string;
   responsible: string;
   deploymentDate: string;
+  decisions: string;
 }
 
 export type GenerateDocParams =
@@ -75,6 +76,10 @@ function buildFeatureText(input: FeatureDocInput): string {
   if (input.deploymentDate.trim()) {
     lines.push('');
     lines.push(`**Deployment-Datum:** ${input.deploymentDate.trim()}`);
+  }
+  if (input.decisions.trim()) {
+    lines.push('');
+    lines.push(`**Architekturentscheide:**\n${input.decisions.trim()}`);
   }
   return lines.join('\n');
 }

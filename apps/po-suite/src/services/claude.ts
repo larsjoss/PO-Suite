@@ -83,6 +83,25 @@ export async function refineStoryWithHints(
   return parseOutput(extractTextContent(response.content));
 }
 
+export function buildStoryConversationHistory(
+  story: { rawInput: string; generatedStory: string; refinementHints: string },
+  refinements: Array<{ instruction: string; resultStory: string }>,
+  instruction: string,
+): ConversationMessage[] {
+  const assistantContent =
+    story.generatedStory +
+    (story.refinementHints ? '\n\n**Refinement Hinweise**\n' + story.refinementHints : '');
+  return [
+    { role: 'user', content: story.rawInput },
+    { role: 'assistant', content: assistantContent },
+    ...refinements.flatMap((r) => [
+      { role: 'user' as const, content: r.instruction },
+      { role: 'assistant' as const, content: r.resultStory },
+    ]),
+    { role: 'user', content: instruction },
+  ];
+}
+
 export async function refineStory(
   conversationHistory: ConversationMessage[],
   teamContext = '',

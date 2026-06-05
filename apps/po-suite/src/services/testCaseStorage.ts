@@ -11,7 +11,11 @@ function loadPlans(): StoredTestPlan[] {
 }
 
 function savePlans(plans: StoredTestPlan[]): void {
-  localStorage.setItem(TCG_PLANS_KEY, JSON.stringify(plans));
+  try {
+    localStorage.setItem(TCG_PLANS_KEY, JSON.stringify(plans));
+  } catch {
+    throw new Error('Speicher voll. Bitte alte Testpläne löschen und erneut versuchen.');
+  }
 }
 
 export function getTestPlans(q?: string): TestPlansResponse {

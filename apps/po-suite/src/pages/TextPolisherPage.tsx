@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePolishText } from '../hooks/useTextPolisher';
 import { useSessionState } from '../hooks/useSessionState';
 import type { UseCase, Tone } from '../types';
 import { TextPolisherInputPanel } from '../components/text-polisher/TextPolisherInputPanel';
 import { TextPolisherOutputPanel } from '../components/text-polisher/TextPolisherOutputPanel';
-import { CoachPanel } from '../shared/components';
+import { CoachPanel, ConfirmDialog } from '../shared/components';
 import { useCoachVisibility } from '../shared/hooks/useCoachVisibility';
 import { POLISH_COACH_CONFIG } from '../shared/config/coachConfig';
+
+type PendingConfirm = { title: string; message: string; onConfirm: () => void } | null;
 
 /*
  * Layout: Split-View.
@@ -30,6 +32,8 @@ export function TextPolisherPage() {
   const wasLoading = useRef(false);
   const { isVisible: coachVisible, showCoach, dismiss: dismissCoach, dismissForever } = useCoachVisibility();
   const [toggledSteps, setToggledSteps] = useState<Set<string>>(new Set());
+  const [confirm, setConfirm] = useState<PendingConfirm>(null);
+  const dismissConfirm = useCallback(() => setConfirm(null), []);
 
   const hasOutput = !!output;
   const isLoading = polishMutation.isPending;
@@ -52,18 +56,24 @@ export function TextPolisherPage() {
 
   const handleUseCaseChange = (newCase: UseCase) => {
     if (newCase === useCase) return;
-    if (
-      hasOutput &&
-      !window.confirm(
-        'Beim Wechsel des Use Cases wird der aktuelle Output gelöscht. Fortfahren?',
-      )
-    ) {
+    if (!hasOutput) {
+      polishMutation.reset();
+      setUseCase(newCase);
+      setTone('formell');
+      setOutput(undefined);
       return;
     }
-    polishMutation.reset();
-    setUseCase(newCase);
-    setTone('formell');
-    setOutput(undefined);
+    setConfirm({
+      title: 'Use Case wechseln?',
+      message: 'Beim Wechsel des Use Cases wird der aktuelle Output gelöscht.',
+      onConfirm: () => {
+        polishMutation.reset();
+        setUseCase(newCase);
+        setTone('formell');
+        setOutput(undefined);
+        setConfirm(null);
+      },
+    });
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -89,6 +99,13 @@ export function TextPolisherPage() {
       id="main-content"
       className="flex-1 overflow-auto lg:overflow-hidden flex flex-col lg:flex-row bg-canvas"
     >
+      <ConfirmDialog
+        open={confirm !== null}
+        title={confirm?.title ?? ''}
+        message={confirm?.message ?? ''}
+        onConfirm={confirm?.onConfirm ?? dismissConfirm}
+        onCancel={dismissConfirm}
+      />
       <div className="flex flex-col lg:flex-1 lg:overflow-y-auto border-b lg:border-b-0 lg:border-r border-edge">
         <TextPolisherInputPanel
           useCase={useCase}
