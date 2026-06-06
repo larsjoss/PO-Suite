@@ -261,6 +261,7 @@ const FeatureDocInputSchema = z.object({
   code: z.string().default(''),
   responsible: z.string().default(''),
   deploymentDate: z.string().default(''),
+  decisions: z.string().default(''),
 });
 
 const GenerateDocBody = z.discriminatedUnion('mode', [
