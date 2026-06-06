@@ -2,8 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as storage from '../services/storage';
 import { fetchApiGet, fetchApiDelete } from '../shared/services/httpClient';
 import type { StoriesResponse } from '../types';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 export function useStories(q: string) {
   return useQuery({

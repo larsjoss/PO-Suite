@@ -2,21 +2,18 @@ import { getApiClient, extractTextContent } from '../shared/services/apiClient';
 import { withTimeout } from '../shared/services/withTimeout';
 import { buildSystemPrompt } from '../shared/services/promptUtils';
 import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts/story';
+import type { ConversationMessage, HintAnswer } from '@po-suite/api-types';
+export type { ConversationMessage, HintAnswer };
 
-export interface ConversationMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface HintAnswer {
-  hint: string;
-  answer: string;
-}
-
-// Visual formatting applied at render time — stored data is never mutated.
-// 1. Standalone bold headers **Foo** → **Foo:**
-// 2. Title line  **Titel** — text → **Titel:** — text
-// 3. AK list items  - AK-1: text → - **AK-1:** text
+/**
+ * Applies visual Markdown formatting to story output at render time.
+ * The stored rawStory is never mutated — formatting is purely cosmetic.
+ *
+ * Transforms:
+ * 1. Standalone bold headers `**Foo**` → `**Foo:**`
+ * 2. Title line `**Titel** — text` → `**Titel:** — text`
+ * 3. AK list items `- AK-1: text` → `- **AK-1:** text`
+ */
 export function formatStoryMarkdown(raw: string): string {
   return raw
     .replace(/^(\*\*[^*\n]+?)\*\*(\s*—)/gm, '$1:**$2')
@@ -24,6 +21,12 @@ export function formatStoryMarkdown(raw: string): string {
     .replace(/^([ \t]*[-*][ \t]+)(AK-\d+):/gm, '$1**$2:**');
 }
 
+/**
+ * Splits the raw API response into story body and refinement hints.
+ * The model appends a `**Refinement Hinweise**` section at the end — this function
+ * separates it so story and hints can be stored and displayed independently.
+ * Returns empty hints string if no section is present.
+ */
 export function parseOutput(text: string): { generatedStory: string; refinementHints: string } {
   const parts = text.split(/^\*\*Refinement Hinweise\*\*/m);
   if (parts.length >= 2) {
@@ -81,6 +84,34 @@ export async function refineStoryWithHints(
     }),
   );
   return parseOutput(extractTextContent(response.content));
+}
+
+/**
+ * Reconstructs the full conversation history for a story refinement turn.
+ * Produces an alternating user/assistant sequence that the model sees as a continuation
+ * of the original generation session, enabling coherent in-context refinements.
+ *
+ * Structure: [original input → original story] → [refinement 1 → result 1] → … → [instruction]
+ * An empty story (rawInput = '') still produces a valid 3-message history so the caller
+ * never needs to check for edge cases.
+ */
+export function buildStoryConversationHistory(
+  story: { rawInput: string; generatedStory: string; refinementHints: string },
+  refinements: Array<{ instruction: string; resultStory: string }>,
+  instruction: string,
+): ConversationMessage[] {
+  const assistantContent =
+    story.generatedStory +
+    (story.refinementHints ? '\n\n**Refinement Hinweise**\n' + story.refinementHints : '');
+  return [
+    { role: 'user', content: story.rawInput },
+    { role: 'assistant', content: assistantContent },
+    ...refinements.flatMap((r) => [
+      { role: 'user' as const, content: r.instruction },
+      { role: 'assistant' as const, content: r.resultStory },
+    ]),
+    { role: 'user', content: instruction },
+  ];
 }
 
 export async function refineStory(

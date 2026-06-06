@@ -11,8 +11,7 @@ import { TestCaseOutputPanel } from '../components/test-case-generator/TestCaseO
 import { TestCasePlanSidebar } from '../components/test-case-generator/TestCasePlanSidebar';
 import { getHandoff, clearHandoff } from '../shared/services/handoffService';
 import { HandoffBanner } from '../shared/components';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 type TabId = 'verlauf' | 'inhalt';
 
@@ -105,7 +104,7 @@ export function TestCaseGeneratorPage() {
             onStepToggle={(id) =>
               setToggledSteps((prev) => {
                 const next = new Set(prev);
-                next.has(id) ? next.delete(id) : next.add(id);
+                if (next.has(id)) next.delete(id); else next.add(id);
                 return next;
               })
             }

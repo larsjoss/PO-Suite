@@ -1,5 +1,13 @@
 import { useState, useCallback } from 'react';
 
+/**
+ * Drop-in replacement for useState that persists state to sessionStorage.
+ * State survives page reloads within the same tab but is cleared when the tab closes.
+ *
+ * Quota errors on write are silently swallowed — in-memory state is still updated
+ * so the UI stays consistent even if persistence fails.
+ * Setting `undefined` removes the key from sessionStorage rather than writing "undefined".
+ */
 export function useSessionState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
     try {

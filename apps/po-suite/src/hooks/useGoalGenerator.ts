@@ -9,8 +9,7 @@ import type {
   RefineGoalParams,
   RefineGoalResult,
 } from '../types';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 function serializeGoalParams(params: GenerateGoalParams | RefineGoalParams) {
   if (params.mode === 'sprint-goal' && params.screenshot) {

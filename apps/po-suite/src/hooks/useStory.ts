@@ -6,8 +6,7 @@ import { fetchApi, fetchApiGet } from '../shared/services/httpClient';
 import { useTeamContext } from '../shared/hooks/useTeamContext';
 import { useWorkspace } from '../shared/context/WorkspaceContext';
 import type { Story, StoryDetailResponse } from '../types';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../shared/config/env';
 
 export function useStory(id: string | undefined) {
   return useQuery({
@@ -95,23 +94,9 @@ export function useRefineStory(id: string) {
         const cached = queryClient.getQueryData<StoryDetailResponse>(['story', id]);
         const story = cached?.story;
         const refinements = cached?.refinements ?? [];
-
-        const conversationHistory: claude.ConversationMessage[] = story
-          ? [
-              { role: 'user', content: story.rawInput },
-              {
-                role: 'assistant',
-                content:
-                  story.generatedStory +
-                  (story.refinementHints ? '\n\n**Refinement Hinweise**\n' + story.refinementHints : ''),
-              },
-              ...refinements.flatMap((r) => [
-                { role: 'user' as const, content: r.instruction },
-                { role: 'assistant' as const, content: r.resultStory },
-              ]),
-              { role: 'user', content: instruction },
-            ]
-          : [{ role: 'user', content: instruction }];
+        const conversationHistory = story
+          ? claude.buildStoryConversationHistory(story, refinements, instruction)
+          : [{ role: 'user' as const, content: instruction }];
 
         return fetchApi<Story>('/api/tools/story/refine', {
           conversationHistory,
@@ -121,20 +106,7 @@ export function useRefineStory(id: string) {
       }
 
       const { story, refinements } = storage.getStory(id);
-      const conversationHistory: claude.ConversationMessage[] = [
-        { role: 'user', content: story.rawInput },
-        {
-          role: 'assistant',
-          content:
-            story.generatedStory +
-            (story.refinementHints ? '\n\n**Refinement Hinweise**\n' + story.refinementHints : ''),
-        },
-        ...refinements.flatMap((r) => [
-          { role: 'user' as const, content: r.instruction },
-          { role: 'assistant' as const, content: r.resultStory },
-        ]),
-        { role: 'user', content: instruction },
-      ];
+      const conversationHistory = claude.buildStoryConversationHistory(story, refinements, instruction);
 
       const { generatedStory, refinementHints } = await claude.refineStory(
         conversationHistory,

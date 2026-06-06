@@ -2,8 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Button, InlineError, RevealButton } from '../../shared/components';
-
-const IS_ENTERPRISE = import.meta.env.VITE_TARGET === 'enterprise';
+import { IS_ENTERPRISE } from '../../shared/config/env';
 
 export function LoginForm() {
   const { login } = useAuth();

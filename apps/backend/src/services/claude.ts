@@ -1,15 +1,6 @@
 import { getApiClient, extractTextContent } from '../shared/apiClient';
 import { STORY_GENERATOR_SYSTEM_PROMPT as SYSTEM_PROMPT } from './prompts';
-
-export interface ConversationMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface HintAnswer {
-  hint: string;
-  answer: string;
-}
+export type { ConversationMessage, HintAnswer } from '@po-suite/api-types';
 
 export function parseOutput(text: string): { generatedStory: string; refinementHints: string } {
   const parts = text.split(/^\*\*Refinement Hinweise\*\*/m);

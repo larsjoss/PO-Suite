@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CoachPanel } from '../shared/components';
+import { CoachPanel, ConfirmDialog } from '../shared/components';
 import { useCoachVisibility } from '../shared/hooks/useCoachVisibility';
 import { GOAL_COACH_CONFIG } from '../shared/config/coachConfig';
 import type {
@@ -55,6 +55,10 @@ export function GoalGeneratorPage() {
   const { isVisible: coachVisible, showCoach, dismiss: dismissCoach, dismissForever } = useCoachVisibility();
   const [toggledSteps, setToggledSteps] = useState<Set<string>>(new Set());
 
+  type PendingConfirm = { title: string; message: string; onConfirm: () => void } | null;
+  const [confirm, setConfirm] = useState<PendingConfirm>(null);
+  const dismissConfirm = useCallback(() => setConfirm(null), []);
+
   // WCAG 2.4.3: Fokus auf Output-Bereich nach Screen-Transition
   useEffect(() => {
     if (screen === 'output') outputRef.current?.focus();
@@ -81,18 +85,24 @@ export function GoalGeneratorPage() {
   function handleTabChange(newTab: GoalMode) {
     if (newTab === tab) return;
     const hasAny = hasContent() || screen === 'output';
-    if (hasAny && !window.confirm('Beim Wechsel des Tabs gehen Eingaben und Output verloren. Fortfahren?')) {
-      return;
-    }
-    setTab(newTab);
-    setScreen('input');
-    setSprintInput(EMPTY_SPRINT);
-    setScreenshot(null);
-    setPiInput(EMPTY_PI);
-    setVariants([]);
-    setRawInitialResponse('');
-    resetRefinementState();
-    generateMutation.reset();
+    const doSwitch = () => {
+      setTab(newTab);
+      setScreen('input');
+      setSprintInput(EMPTY_SPRINT);
+      setScreenshot(null);
+      setPiInput(EMPTY_PI);
+      setVariants([]);
+      setRawInitialResponse('');
+      resetRefinementState();
+      generateMutation.reset();
+      setConfirm(null);
+    };
+    if (!hasAny) { doSwitch(); return; }
+    setConfirm({
+      title: 'Tab wechseln?',
+      message: 'Beim Wechsel des Tabs gehen Eingaben und Output verloren.',
+      onConfirm: doSwitch,
+    });
   }
 
   // ── Generierung ───────────────────────────────────────────────────────────
@@ -131,15 +141,21 @@ export function GoalGeneratorPage() {
   }
 
   function handleReset() {
-    if (!window.confirm('Formular und Output zurücksetzen?')) return;
-    setScreen('input');
-    setSprintInput(EMPTY_SPRINT);
-    setScreenshot(null);
-    setPiInput(EMPTY_PI);
-    setVariants([]);
-    setRawInitialResponse('');
-    resetRefinementState();
-    generateMutation.reset();
+    setConfirm({
+      title: 'Zurücksetzen?',
+      message: 'Formular und Output werden zurückgesetzt.',
+      onConfirm: () => {
+        setScreen('input');
+        setSprintInput(EMPTY_SPRINT);
+        setScreenshot(null);
+        setPiInput(EMPTY_PI);
+        setVariants([]);
+        setRawInitialResponse('');
+        resetRefinementState();
+        generateMutation.reset();
+        setConfirm(null);
+      },
+    });
   }
 
   // ── Refinement ────────────────────────────────────────────────────────────
@@ -183,9 +199,20 @@ export function GoalGeneratorPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  const confirmDialog = (
+    <ConfirmDialog
+      open={confirm !== null}
+      title={confirm?.title ?? ''}
+      message={confirm?.message ?? ''}
+      onConfirm={confirm?.onConfirm ?? dismissConfirm}
+      onCancel={dismissConfirm}
+    />
+  );
+
   if (screen === 'output') {
     return (
       <main id="main-content" className="flex-1 overflow-auto bg-canvas">
+        {confirmDialog}
         <GoalGeneratorOutputPanel
           mode={tab}
           variants={variants}
@@ -215,7 +242,7 @@ export function GoalGeneratorPage() {
               onStepToggle={(id) =>
                 setToggledSteps((prev) => {
                   const next = new Set(prev);
-                  next.has(id) ? next.delete(id) : next.add(id);
+                  if (next.has(id)) next.delete(id); else next.add(id);
                   return next;
                 })
               }
@@ -229,6 +256,7 @@ export function GoalGeneratorPage() {
 
   return (
     <main id="main-content" className="flex-1 overflow-auto bg-canvas">
+      {confirmDialog}
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
         <div>
           <h1 className="font-serif text-2xl font-semibold text-ink mb-1">Goal Generator</h1>

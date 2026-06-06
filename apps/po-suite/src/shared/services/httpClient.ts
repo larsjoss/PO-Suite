@@ -1,6 +1,5 @@
 import { ENTERPRISE_JWT_KEY } from './storageKeys';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+import { API_BASE } from '../config/env';
 const DEFAULT_TIMEOUT_MS = 60_000;
 
 function getJwt(): string | null {
