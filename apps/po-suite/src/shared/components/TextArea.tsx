@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 
 interface TextAreaProps {
   id: string;
@@ -11,6 +11,7 @@ interface TextAreaProps {
   disabled?: boolean;
   autoGrow?: boolean;
   className?: string;
+  inputRef?: RefObject<HTMLTextAreaElement>;
 }
 
 export function TextArea({
@@ -24,8 +25,10 @@ export function TextArea({
   disabled,
   autoGrow = false,
   className = '',
+  inputRef,
 }: TextAreaProps) {
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const internalRef = useRef<HTMLTextAreaElement>(null);
+  const ref = inputRef ?? internalRef;
 
   useEffect(() => {
     if (!autoGrow || !ref.current) return;

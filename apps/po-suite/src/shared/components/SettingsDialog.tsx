@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTeamContext } from '../hooks/useTeamContext';
+import { Alert } from './Alert';
 import { Button } from './Button';
+import { FormField } from './FormField';
+import { Input } from './Input';
 import { RevealButton } from './RevealButton';
+import { TextArea } from './TextArea';
 import { Toggle } from './Toggle';
 import { COACH_DISMISSED_KEY } from '../services/storageKeys';
 
@@ -75,58 +79,58 @@ export function SettingsDialog({ open, onClose }: Props) {
       aria-labelledby="settings-dialog-title"
       className="m-auto rounded-xl shadow-xl border border-edge bg-surface p-0 w-full max-w-md backdrop:bg-ink/40"
     >
-      <div className="p-5">
-        <h2 id="settings-dialog-title" className="font-serif text-base font-semibold text-ink mb-4">
-          API-Key ändern
+      <div className="p-5 space-y-5">
+        <h2 id="settings-dialog-title" className="font-serif text-base font-semibold text-ink">
+          Einstellungen
         </h2>
 
-        <div>
-          <label htmlFor="settings-apikey" className="block text-sm font-medium text-ink mb-1">
-            Anthropic API-Key
-          </label>
-          <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
-            <input
-              ref={inputRef}
-              id="settings-apikey"
-              type={showKey ? 'text' : 'password'}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="sk-ant-…"
-              autoComplete="off"
-              className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none"
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-            />
-            <RevealButton
-              show={showKey}
-              onToggle={() => setShowKey((v) => !v)}
-              label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
-            />
-          </div>
-        </div>
+        <FormField htmlFor="settings-apikey" label="Anthropic API-Key">
+          <Input
+            id="settings-apikey"
+            label="Anthropic API-Key"
+            hideLabel
+            type={showKey ? 'text' : 'password'}
+            value={value}
+            onChange={setValue}
+            placeholder="sk-ant-…"
+            autoComplete="off"
+            inputRef={inputRef}
+            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+            suffix={
+              <RevealButton
+                show={showKey}
+                onToggle={() => setShowKey((v) => !v)}
+                label={showKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
+              />
+            }
+          />
+          <Alert variant="info">
+            Dein API-Key verlässt diesen Tab nicht — er wird beim Schliessen des Browser-Tabs automatisch gelöscht.
+          </Alert>
+        </FormField>
 
-        <div className="mt-4">
-          <label htmlFor="settings-teamcontext" className="block text-sm font-medium text-ink mb-1">
-            Team-Kontext (optional)
-          </label>
-          <textarea
+        <FormField
+          htmlFor="settings-teamcontext"
+          label="Team-Kontext (optional)"
+          description={
+            <span className="flex justify-between gap-2">
+              <span>Wird automatisch bei jedem Tool-Aufruf mitgegeben — einmal eintippen, nie wieder.</span>
+              <span className="whitespace-nowrap shrink-0">{contextValue.length} / 800</span>
+            </span>
+          }
+        >
+          <TextArea
             id="settings-teamcontext"
+            label="Team-Kontext"
+            hideLabel
             value={contextValue}
-            onChange={(e) => setContextValue(e.target.value.slice(0, 800))}
+            onChange={(v) => setContextValue(v.slice(0, 800))}
             placeholder="z.B. Grosse Schweizer Versicherung, B2C Self-Service, Mobile-First, WCAG 2.1 AA, Datenschutz nach DSG/DSGVO. Kürzel: AK = Akzeptanzkriterium."
             rows={4}
-            className="w-full border border-edge rounded-lg bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent resize-none"
           />
-          <div className="flex justify-between items-start mt-1 gap-2">
-            <p className="text-xs text-ink-secondary">
-              Dieser Kontext wird automatisch bei jedem Tool-Aufruf mitgegeben — du musst ihn nie wieder eintippen.
-            </p>
-            <span className="text-xs text-ink-secondary whitespace-nowrap">
-              {contextValue.length} / 800
-            </span>
-          </div>
-        </div>
+        </FormField>
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-ink">PO-Coach anzeigen</span>
           <Toggle
             checked={coachEnabled}
@@ -135,7 +139,7 @@ export function SettingsDialog({ open, onClose }: Props) {
           />
         </div>
 
-        <div className="flex gap-2 mt-5">
+        <div className="flex gap-2 pt-1">
           <Button onClick={handleSave} disabled={!value.trim()} className="flex-1">
             Speichern
           </Button>

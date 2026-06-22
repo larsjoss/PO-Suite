@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Button, InlineError, RevealButton } from '../../shared/components';
+import { Alert, Button, FormField, Input, InlineError, RevealButton } from '../../shared/components';
 import { IS_ENTERPRISE } from '../../shared/config/env';
 
 export function LoginForm() {
@@ -29,68 +29,69 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label htmlFor="login-email" className="block text-sm font-medium text-ink mb-1.5">
-          E-Mail
-        </label>
-        <input
+      <FormField htmlFor="login-email" label="E-Mail" required>
+        <Input
           id="login-email"
+          label="E-Mail"
+          hideLabel
           type="email"
-          required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-edge rounded-lg px-3.5 py-2.5 text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-ink-tertiary"
+          onChange={setEmail}
           placeholder="name@beispiel.de"
           autoComplete="email"
+          required
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label htmlFor="login-password" className="block text-sm font-medium text-ink mb-1.5">
-          Passwort
-        </label>
-        <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
-          <input
-            id="login-password"
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
-            placeholder="Passwort eingeben"
-            autoComplete="current-password"
-          />
-          <RevealButton
-            show={showPassword}
-            onToggle={() => setShowPassword((v) => !v)}
-            label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
-          />
-        </div>
-      </div>
+      <FormField htmlFor="login-password" label="Passwort" required>
+        <Input
+          id="login-password"
+          label="Passwort"
+          hideLabel
+          type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={setPassword}
+          placeholder="Passwort eingeben"
+          autoComplete="current-password"
+          required
+          suffix={
+            <RevealButton
+              show={showPassword}
+              onToggle={() => setShowPassword((v) => !v)}
+              label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+            />
+          }
+        />
+      </FormField>
 
       {!IS_ENTERPRISE && (
-        <div>
-          <label htmlFor="login-apikey" className="block text-sm font-medium text-ink mb-1.5">
-            Anthropic API-Key{' '}
-            <span className="text-xs font-normal text-ink-tertiary">(optional)</span>
-          </label>
-          <div className="flex items-center border border-edge rounded-lg bg-surface focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
-            <input
-              id="login-apikey"
-              type={showApiKey ? 'text' : 'password'}
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm text-ink focus:outline-none placeholder:text-ink-tertiary"
-              placeholder="sk-ant-…"
-              autoComplete="off"
-            />
-            <RevealButton
-              show={showApiKey}
-              onToggle={() => setShowApiKey((v) => !v)}
-              label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
-            />
-          </div>
-        </div>
+        <FormField
+          htmlFor="login-apikey"
+          label="Anthropic API-Key"
+          description={
+            <Alert variant="info" className="mt-1">
+              Dein API-Key wird nur für diese Browser-Sitzung gespeichert und beim Schliessen des Tabs automatisch gelöscht.
+            </Alert>
+          }
+        >
+          <Input
+            id="login-apikey"
+            label="Anthropic API-Key"
+            hideLabel
+            type={showApiKey ? 'text' : 'password'}
+            value={apiKey}
+            onChange={setApiKey}
+            placeholder="sk-ant-…"
+            autoComplete="off"
+            suffix={
+              <RevealButton
+                show={showApiKey}
+                onToggle={() => setShowApiKey((v) => !v)}
+                label={showApiKey ? 'API-Key verbergen' : 'API-Key anzeigen'}
+              />
+            }
+          />
+        </FormField>
       )}
 
       {error && <InlineError message={error} />}

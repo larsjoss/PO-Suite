@@ -1,7 +1,7 @@
 import { useMemo, useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { TestCase, TestCaseType, TestLevel, TestPlan } from '../../types';
-import { Button } from '../../shared/components';
+import { Button, EmptyState } from '../../shared/components';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { buildJiraMarkdown, getAvailableTypes } from '../../services/testCaseGenerator';
 import { setHandoff } from '../../shared/services/handoffService';
@@ -131,9 +131,14 @@ export function TestCaseOutputPanel({ testPlan, onReset, contentRef }: Props) {
             ))}
           </ol>
         ) : (
-          <div className="text-center py-10 text-sm text-ink-tertiary">
-            Keine Testcases entsprechen dem aktuellen Filter.
-          </div>
+          <EmptyState
+            icon={
+              <svg className="w-5 h-5 text-ink-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+              </svg>
+            }
+            description="Keine Testcases entsprechen dem aktuellen Filter."
+          />
         )}
 
         {/* "Alles kopieren" — vollbreiter Primary-Button am Ende des scrollbaren Outputs */}

@@ -1,7 +1,7 @@
 import type { FormEvent, RefObject } from 'react';
 import { useEffect, useRef } from 'react';
 import type { GoalMode, GoalVariant } from '../../types';
-import { Button, InlineError, LoadingSkeleton, PanelHeader } from '../../shared/components';
+import { Button, InlineError, LoadingSkeleton, PanelHeader, TextArea } from '../../shared/components';
 import { GoalVariantCard } from './GoalVariantCard';
 import { SaveToWorkspaceButton } from '../workspace/SaveToWorkspaceButton';
 
@@ -152,21 +152,16 @@ export function GoalGeneratorOutputPanel({
 
             {/* Refinement-Formular */}
             <form onSubmit={onRefineSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="gg-refine-hint" className="block text-sm font-medium text-ink mb-1">
-                  Verfeinerungshinweis
-                </label>
-                <textarea
-                  id="gg-refine-hint"
-                  ref={refineInputRef}
-                  value={refinementHint}
-                  onChange={(e) => onRefinementHintChange(e.target.value)}
-                  placeholder={REFINE_PLACEHOLDER[mode]}
-                  rows={3}
-                  disabled={isRefining}
-                  className="w-full rounded-lg border border-edge bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
+              <TextArea
+                id="gg-refine-hint"
+                label="Verfeinerungshinweis"
+                value={refinementHint}
+                onChange={onRefinementHintChange}
+                placeholder={REFINE_PLACEHOLDER[mode]}
+                rows={3}
+                disabled={isRefining}
+                inputRef={refineInputRef}
+              />
 
               {refineError && <InlineError message={refineError.message} />}
 
