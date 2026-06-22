@@ -37,7 +37,7 @@ Die vollständige Entwickler-Dokumentation liegt hier:
 ```bash
 npm install                              # Root-Install (alle Workspaces)
 npm run dev                              # http://localhost:5173
-npm run test                             # 457 Tests, alle grün
+npm run test                             # 634 Tests, alle grün
 npm run build                            # Production-Build (tsc + Vite)
 # oder direkt im Workspace:
 cd apps/po-suite
@@ -55,7 +55,7 @@ cd apps/po-suite && npm run test:enterprise  # 15 Enterprise-Pfad-Tests
 ### Konventionen (Kurzfassung)
 
 - Modell überall: `claude-sonnet-4-5`, max_tokens je nach Tool (2048 / 4000 / 6000)
-- System-Prompts zentral in `src/services/prompts.ts` (Frontend) bzw. `apps/backend/src/services/prompts.ts` (Backend)
+- System-Prompts zentral in `src/services/prompts/[tool].ts` (Frontend) bzw. `apps/backend/src/services/prompts.ts` (Backend)
 - Neues Tool: Prompt → Service → Hook → Komponenten → Page → `App.tsx` Route (lazy) → `constants/tools.tsx` → Backend-Endpunkt in `apps/backend/src/routes/tools.ts`
 - State-Machine-Pattern: `'input' | 'output'`
 - API-Calls Frontend: nur via `getApiClient()` aus `src/shared/services/apiClient.ts` (GitHub-Pfad) bzw. `fetchApi()` aus `src/shared/services/httpClient.ts` (Enterprise-Pfad)
@@ -85,4 +85,4 @@ cd apps/po-suite && npm run test:enterprise  # 15 Enterprise-Pfad-Tests
 
 - [README.md](README.md) — Projektüberblick, Tech Stack, Schnellstart (Frontend + Enterprise)
 - [ARCHITECTURE.md](ARCHITECTURE.md) — High-Level-Architektur, Datenfluss, Tool-Kontrakt, Roadmap
-- [UI-UX-Design.md](UI-UX-Design.md) — Farbpalette, Design-Tokens, Komponenten-Bibliothek, WCAG
+- [docs/UI_UX.md](docs/UI_UX.md) — Farbpalette, Design-Tokens, Komponenten-Bibliothek, WCAG

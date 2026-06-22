@@ -40,7 +40,7 @@ React 18 + TypeScript + Vite SPA. Fünf KI-gestützte Tools für Product Owner i
 # Root-Ebene (empfohlen)
 npm install                          # Root-Install (alle Workspaces)
 npm run dev                          # Dev-Server: http://localhost:5173
-npm run test                         # 585 Vitest-Tests (GitHub-Pfad)
+npm run test                         # 634 Vitest-Tests (GitHub-Pfad)
 npm run build                        # tsc + Vite, muss 0 Errors haben
 npm run lint                         # ESLint für Frontend + Backend
 
@@ -139,7 +139,17 @@ apps/po-suite/
 │   │   ├── hooks/
 │   │   │   ├── useSessionState.ts   useState-kompatibler sessionStorage-Wrapper
 │   │   │   └── useTeamContext.ts    Team-Kontext aus sessionStorage
-│   │   └── components/              Alle Shared-UI-Komponenten (siehe unten)
+│   │   └── components/              Alle Shared-UI-Komponenten:
+│   │                                    Button, TextArea, Input, Select, Toggle,
+│   │                                    Checkbox, RadioGroup, SegmentedControl,
+│   │                                    FormField, Alert, Card/CardHeader/CardContent/CardFooter,
+│   │                                    TabBar, Separator, EmptyState,
+│   │                                    InlineError, LoadingSkeleton, ProgressBar,
+│   │                                    Snackbar, ConfirmDialog, SettingsDialog,
+│   │                                    PanelHeader, Accordion, Tooltip,
+│   │                                    CoachPanel, HandoffBanner,
+│   │                                    CopyButton, RevealButton, MarkdownOutput,
+│   │                                    ScreenshotUpload, Badge, Chip, ThemeToggle
 │   ├── services/
 │   │   ├── prompts/                 System-Prompts pro Tool (story, goal, test, doc, text)
 │   │   ├── claude.ts                Story Generator API-Calls
@@ -206,7 +216,7 @@ const makeWrapper = () => ({ children }) =>
 // ConfirmDialog: screen.getByRole('alertdialog') — NICHT 'dialog'
 ```
 
-**Coverage-Status (2026-06-05):** 585 Tests, 78.6 % Statements, 64.8 % Branch. Ziel: ≥ 80 % Branch für kritische Services.
+**Coverage-Status (2026-06-22):** 634 Tests. Ziel: ≥ 80 % Branch für kritische Services.
 
 ---
 
@@ -284,7 +294,12 @@ Vollständige UI/UX-Dokumentation: [`docs/UI_UX.md`](../../docs/UI_UX.md).
 | Neues Tool | Prompt → Service → Hook → Komponenten → Page → `App.tsx` (lazy) → `constants/tools.tsx` |
 | State-Pattern | `'input' \| 'output'` State-Machine (Vorbild TCG/DocGen) |
 | Validierung | Submit-Button `disabled`, kein Toast/Alert |
-| Fehler | `InlineError` im Input-Screen und im Output-Panel bei Regenerierung |
+| Felder | Immer `FormField` + `Input`/`TextArea` — nie rohes `<input>` oder `<textarea>` |
+| Fehler (Feld) | `FormField error=`-Prop für feldgebundene Validierungsmeldungen |
+| Fehler (Inline) | `InlineError` im Input-Screen und im Output-Panel bei Regenerierung |
+| Fehler (kontextuell) | `Alert variant="error"` für nicht-feldgebundene Fehlerhinweise |
+| Tabs / Panel-Navigation | `TabBar` (Arrow-Key-Navigation, ARIA-konform) |
+| Kompakte Auswahl (≤4 Optionen) | `SegmentedControl` (kein Panel-Wechsel) |
 | Dialoge | `ConfirmDialog` aus `shared/components` — kein `window.confirm()` |
 
 ---

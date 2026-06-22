@@ -42,7 +42,7 @@ Enterprise-Variante:
 | Styling | Tailwind CSS | 3 | Eigene Design-Tokens, keine UI-Library |
 | KI | @anthropic-ai/sdk | 0.90 | GitHub-Variante: Browser-fähig (`dangerouslyAllowBrowser: true`) |
 | Markdown | react-markdown + rehype-sanitize | 9 / 6 | Default-Schema blockt `<script>`/`<iframe>` |
-| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 457 Tests, 43 Dateien |
+| Tests | Vitest + @testing-library/react + jsdom | 4 / 16 / — | 634 Tests, 50+ Dateien |
 | E2E | Playwright | 1.59 | Smoke + Auth + Tool-Happy-Paths, Chromium-only |
 
 ### Backend (Enterprise-Variante)
@@ -256,7 +256,7 @@ Konventionen pro Schicht:
 ### GitHub-Pages-Build
 
 ```bash
-cd frontend
+cd apps/po-suite
 VITE_TARGET=github npm run build  # oder ohne Flag (Default)
 ```
 
@@ -280,7 +280,7 @@ docker compose up
 
 # Einzelne Images bauen
 docker build -t po-suite-backend ./apps/backend
-docker build -f apps/po-suite/Dockerfile.production -t po-suite-frontend ./frontend
+docker build -f apps/po-suite/Dockerfile.production -t po-suite-frontend ./apps/po-suite
 ```
 
 **Docker-Images:**
@@ -313,7 +313,7 @@ push → main
 | Integration | @testing-library/react | Page-Flows (Submit → Output) | ✅ Auth, DocGen, TextPolisher, TCG, GoalGen |
 | E2E | Playwright | Smoke + Auth + Tool-Flows | ✅ Login-Flow, Logout, Story Generator-Routing, Form-Validation |
 
-**Stand:** 457 Vitest-Tests in 43 Dateien + 18 Backend-Tests + 10 Playwright-E2E-Tests.
+**Stand:** 634 Vitest-Tests + 18 Backend-Tests + 10 Playwright-E2E-Tests.
 
 **Enterprise-Tests:** `vitest.enterprise.config.ts` setzt `VITE_TARGET=enterprise`, damit `IS_ENTERPRISE`-Branches abgedeckt sind.
 
@@ -344,7 +344,7 @@ npm run e2e
 | Dual-Build (`VITE_TARGET`) | ✅ Erledigt | GitHub-Build unverändert, Enterprise-Build via Adapter |
 | E2E-Tests (Playwright) | ✅ Erledigt | 10 Tests: Smoke, Auth-Flow, Story Generator |
 | Backend-Tests (Vitest + Supertest) | ✅ Erledigt | health (4) + auth (14) — Tool/Story-Routen ausstehend |
-| Design System + Dark Mode | ✅ Erledigt | CSS-Custom-Property-Token-System, 11 neue Shared Components, ThemeToggle in TopNav |
+| Design System + Dark Mode | ✅ Erledigt | CSS-Custom-Property-Token-System, 18+ Shared Components (inkl. Input, FormField, Alert, Card, TabBar, Separator, EmptyState), ThemeToggle in TopNav |
 | Keycloak/OIDC | Optional | JWT-Middleware v2-Upgrade-Pfad |
 | Internationalisierung | Nicht geplant | Aktuell DE-CH only |
 | Re-Render-Optimierung | Bedarf-getrieben | useMemo/useCallback nur nach Profiler-Befund |
@@ -371,4 +371,4 @@ npm run e2e
 
 - [README.md](README.md) — Projektübersicht, Tech Stack, Schnellstart
 - [apps/po-suite/CLAUDE.md](apps/po-suite/CLAUDE.md) — Detaillierte Entwicklerdoku, Datei-Baum
-- [UI-UX-Design.md](UI-UX-Design.md) — Design-Tokens, Komponentenbibliothek, WCAG
+- [docs/UI_UX.md](docs/UI_UX.md) — Design-Tokens, Komponentenbibliothek, WCAG

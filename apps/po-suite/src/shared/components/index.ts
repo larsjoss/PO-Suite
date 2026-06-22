@@ -1,5 +1,12 @@
 export { Button } from './Button';
+export { Input } from './Input';
 export { TextArea } from './TextArea';
+export { FormField } from './FormField';
+export { Alert } from './Alert';
+export { Card, CardHeader, CardContent, CardFooter } from './Card';
+export { Separator } from './Separator';
+export { EmptyState } from './EmptyState';
+export { TabBar } from './TabBar';
 export { CopyButton } from './CopyButton';
 export { LoadingSkeleton } from './LoadingSkeleton';
 export { InlineError } from './InlineError';

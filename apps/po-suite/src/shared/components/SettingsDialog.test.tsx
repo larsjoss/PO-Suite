@@ -38,7 +38,7 @@ beforeEach(() => {
 describe('SettingsDialog — open/close', () => {
   it('rendert Dialog mit aria-labelledby', () => {
     render(<SettingsDialog open={true} onClose={() => {}} />);
-    expect(screen.getByRole('heading', { name: /API-Key ändern/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Einstellungen/i })).toBeInTheDocument();
   });
 
   it('rendert geschlossen ohne open-Prop sichtbar', () => {
