@@ -97,11 +97,11 @@ Vollständige Entwickler-Dokumentation: [apps/po-suite/CLAUDE.md](apps/po-suite/
 ## Tests
 
 ```bash
-npm run test           # 585 Vitest-Unit/Integration-Tests
+npm run test           # 634 Vitest-Unit/Integration-Tests
 cd apps/po-suite && npm run e2e   # 10 Playwright-E2E-Tests
 ```
 
-Coverage (aktuell): 78.6 % Statements, 64.8 % Branch.
+Coverage: aktuell in `apps/po-suite` — `npm run test:coverage` für aktuellen Stand.
 
 ---
 

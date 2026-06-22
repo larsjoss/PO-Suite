@@ -65,7 +65,7 @@ Beide Schriften via Google Fonts geladen. System-Fallbacks: `system-ui, sans-ser
 ### 1.3 Spacing-System
 
 Tailwind-Standard (4px Base). Interne Konsistenz:
-- Zwischen Label und Input: `gap-1` (4px)
+- Zwischen Label und Input: `gap-1.5` (6px) — via `FormField`
 - Zwischen Form-Elementen: `gap-4` (16px)
 - Panel-Padding: `p-6` (24px)
 - Dialog-Padding: `p-6` (24px)
@@ -134,6 +134,28 @@ Kontrast brand auf surface ≈ 14:1 — WCAG 2.4.7 (Focus Visible, AA) und 2.4.1
 
 ---
 
+#### `Input`
+
+**Zweck:** Einzeiliges Texteingabefeld. Für API-Keys, Team-Kontext, Suchfelder und alle Short-Text-Eingaben.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|---|---|---|---|
+| `id` | `string` | — | Pflicht, für `<label>` |
+| `label` | `string` | — | Sichtbares Label |
+| `hideLabel` | `boolean` | `false` | Kein `<label>`-Element — wenn `FormField` das Label übernimmt |
+| `type` | `'text' \| 'email' \| 'password' \| 'search' \| 'url' \| 'tel'` | `'text'` | HTML input type |
+| `value` | `string` | — | Kontrollierter Wert |
+| `onChange` | `(value: string) => void` | — | Change-Handler |
+| `suffix` | `ReactNode` | — | Trailing-Element im Input-Border (z.B. `RevealButton`) |
+| `disabled` | `boolean` | `false` | Deaktiviert, 40% Opacity |
+
+**Wann:** Für alle einzeiligen Eingaben. Mit `hideLabel=true` innerhalb `FormField`. Mit `suffix` für Password-Reveal-Button.
+
+**Nicht:** Für mehrzeilige Eingaben — `TextArea` verwenden.
+
+---
+
 #### `TextArea`
 
 **Zweck:** Mehrzeiliges Texteingabefeld. Haupt-Input-Element aller Tools.
@@ -143,9 +165,10 @@ Kontrast brand auf surface ≈ 14:1 — WCAG 2.4.7 (Focus Visible, AA) und 2.4.1
 |---|---|---|---|
 | `id` | `string` | — | Pflicht, für `<label>` |
 | `label` | `string` | — | Sichtbares Label |
-| `hideLabel` | `boolean` | `false` | Label als `sr-only` |
+| `hideLabel` | `boolean` | `false` | Kein `<label>`-Element — wenn `FormField` das Label übernimmt |
 | `autoGrow` | `boolean` | — | Wächst mit Inhalt mit |
 | `rows` | `number` | — | Basis-Höhe |
+| `inputRef` | `RefObject<HTMLTextAreaElement>` | — | Externen Ref für Fokus-Management |
 
 **Wann:** Für alle längeren Texteingaben. `autoGrow` für Felder wo der Nutzer viel tippen wird.
 
@@ -200,13 +223,78 @@ Kontrast brand auf surface ≈ 14:1 — WCAG 2.4.7 (Focus Visible, AA) und 2.4.1
 
 #### `SegmentedControl`
 
-**Zweck:** Tab-ähnliche Selektion für 2–4 gleichwertige Optionen.
+**Zweck:** Kompakte Auswahl für 2–4 gleichwertige Optionen ohne Panel-Wechsel.
 
-**Wann:** Für Ansichtswechsel innerhalb desselben Kontexts (z.B. Sprint Goal / PI Objective). Unterschied zu Tabs: `SegmentedControl` wechselt Inhalt inline, Tabs wechseln Panel-Sektionen.
+**Wann:** Wenn eine Inline-Auswahl den Inhalt direkt beeinflusst, ohne dass ein separater Panel-Bereich ein- oder ausgeblendet wird (z.B. Ton-Auswahl, Filter-Umschalter).
+
+**Nicht:** Für Panel-Navigation — dafür `TabBar` verwenden.
+
+---
+
+#### `TabBar`
+
+**Zweck:** Tab-Leiste für Panel-Navigation. Vollständig keyboard-zugänglich (Arrow Keys, Home, End).
+
+**Props:**
+| Prop | Typ | Beschreibung |
+|---|---|---|
+| `tabs` | `{ id: T; label: string }[]` | Tab-Definitionen |
+| `value` | `T` | Aktiver Tab |
+| `onChange` | `(id: T) => void` | Change-Handler |
+| `idPrefix` | `string` | Präfix für generierte ARIA-IDs (`{prefix}-tab-{id}`, `{prefix}-panel-{id}`) |
+| `aria-label` | `string` | Beschriftung der `role="tablist"`-Gruppe |
+| `disabled` | `boolean` | Alle Tabs deaktivieren |
+
+**Wann:** Für Navigations-Tabs die Panel-Inhalte umschalten (AppShell-Mobile, GoalTabSelector). Generiert korrekte `role="tab"` + `role="tabpanel"`-IDs für ARIA-Verknüpfung.
+
+**Nicht:** Für kompakte Inline-Auswahl ohne Panel-Semantik — dafür `SegmentedControl`.
+
+---
+
+### Formular-Wrapper
+
+---
+
+#### `FormField`
+
+**Zweck:** Einheitlicher Wrapper für jedes Formularfeld: Label + Control + optionale Beschreibung + optionale Fehlermeldung.
+
+**Props:**
+| Prop | Typ | Beschreibung |
+|---|---|---|
+| `htmlFor` | `string` | Muss mit der `id` des Kind-Inputs übereinstimmen |
+| `label` | `string` | Sichtbares Label |
+| `hideLabel` | `boolean` | Label als `sr-only` (visuell versteckt, für Screen-Reader sichtbar) |
+| `required` | `boolean` | Zeigt `*` als Geschwister-Element neben dem Label (nicht innerhalb) |
+| `description` | `ReactNode` | Helper-Text unter dem Control (z.B. Char-Counter, Hinweistext) |
+| `error` | `string` | Feldgebundene Fehlermeldung mit `role="alert"` und Icon |
+
+**Wann:** Immer — jedes `Input` oder `TextArea` sollte in einem `FormField` sein. Auch wenn `hideLabel=true`: `FormField` übernimmt das Label für Screen-Reader.
+
+**Konvention:** Das `required`-Sternchen sitzt als `aria-hidden` Span *neben* dem `<label>` (nicht darin), damit `getByLabelText` den exakten Label-Text ohne `*` findet.
 
 ---
 
 ### Feedback-Komponenten
+
+---
+
+#### `Alert`
+
+**Zweck:** Inline-Hinweisblock für kontextuelle Meldungen (Info, Warnung, Erfolg, Fehler).
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|---|---|---|---|
+| `variant` | `'info' \| 'warning' \| 'success' \| 'error'` | `'info'` | Visueller Stil und ARIA-Rolle |
+| `title` | `string` | — | Optionaler Titel (bold) |
+| `children` | `ReactNode` | — | Meldungstext |
+
+**ARIA:** `role="alert"` bei `error`/`warning`, `role="status"` bei `info`/`success`.
+
+**Wann:** Für kontextuelle Hinweise die nicht feldgebunden sind (z.B. "API-Key verlässt nur diesen Tab", Warnungen in Karten). Für feldgebundene Fehler: `FormField error=`-Prop. Für API-Fehler nach Aktionen: `InlineError`.
+
+**Nicht:** Ersetzt nicht `InlineError` (der bleibt für Submit-Fehler). Kein Toast — bleibt sichtbar bis der Kontext sich ändert.
 
 ---
 
@@ -278,7 +366,48 @@ Kontrast brand auf surface ≈ 14:1 — WCAG 2.4.7 (Focus Visible, AA) und 2.4.1
 
 ---
 
-### Layout-Komponenten
+### Layout- und Struktur-Komponenten
+
+---
+
+#### `Card` / `CardHeader` / `CardContent` / `CardFooter`
+
+**Zweck:** Strukturierter Inhaltsbehälter für Karten-artige Darstellungen (Goal-Varianten, Test Cases, Workspace-Karten).
+
+**Props `Card`:**
+| Prop | Typ | Default | Beschreibung |
+|---|---|---|---|
+| `as` | `'div' \| 'article' \| 'li'` | `'div'` | Semantisches HTML-Element |
+| `className` | `string` | — | Zusätzliche Klassen |
+
+**Defaults:** `bg-surface border border-edge rounded-xl`. `CardFooter` fügt `border-t border-edge` hinzu.
+
+**Wann:** Überall wo bisher manuell `border border-edge rounded-lg p-4` verwendet wurde. `as="article"` für semantisch eigenständige Inhalte (Goal-Varianten), `as="li"` für Listen-Elemente (Test Cases).
+
+---
+
+#### `Separator`
+
+**Zweck:** Trennlinie (horizontal oder vertikal). Verhindert Copy-Paste von `<div className="w-px bg-edge ...">`.
+
+**Props:** `orientation?: 'horizontal' | 'vertical'`, `className?`
+
+**Defaults:** Horizontal: `<hr>` mit `border-edge`. Vertikal: `<div>` mit `bg-edge w-px`.
+
+---
+
+#### `EmptyState`
+
+**Zweck:** Einheitlicher Leerstand für alle Output-Panels.
+
+**Props:**
+| Prop | Typ | Beschreibung |
+|---|---|---|
+| `icon` | `ReactNode` | SVG-Icon, wird in `w-10 h-10 bg-edge-2 rounded-xl` Container gerendert |
+| `title` | `string` | Optionaler Titel |
+| `description` | `string` | Beschreibungstext |
+
+**Wann:** In allen Output-Panels wenn noch kein Inhalt generiert wurde. Auch für Filter-Leerstand (keine Treffer). Zentrierte Darstellung in `text-ink-secondary`.
 
 ---
 
@@ -361,9 +490,9 @@ Kontrast brand auf surface ≈ 14:1 — WCAG 2.4.7 (Focus Visible, AA) und 2.4.1
 
 #### `SettingsDialog`
 
-**Zweck:** Modal für API-Key und Team-Kontext-Einstellungen.
+**Zweck:** Modal für API-Key und Team-Kontext-Einstellungen. Titel: "Einstellungen".
 
-**Enthält:** API-Key-Feld (masked), Team-Kontext-Textarea, Dark-Mode-Toggle, Coaching-Reset.
+**Enthält:** `FormField` + `Input` (type=password, mit `RevealButton` als suffix) für API-Key mit `Alert variant="info"` als Beschreibung. `FormField` + `TextArea` mit Char-Counter für Team-Kontext. Dark-Mode-Toggle, Coaching-Reset.
 
 ---
 
